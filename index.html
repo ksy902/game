@@ -2,6 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
+    <!-- 加入 viewport-fit=cover 解決 iPad/iPhone 底部遮擋 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>言靈爭霸 - 漫畫硬核版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -31,27 +32,25 @@
             margin: 0; padding: 0; background-color: var(--c-white); color: var(--c-black);
             background-image: radial-gradient(var(--c-black) 5%, transparent 6%), radial-gradient(var(--c-black) 5%, transparent 6%);
             background-size: 20px 20px; background-position: 0 0, 10px 10px;
-            height: 100vh; 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            /* iPad 高度補償 */
             height: -webkit-fill-available;
-            display: flex; flex-direction: column; overflow: hidden;
-            transition: background-color 0.3s;
         }
 
-        /* 危機晃動動畫：0.5秒特效 */
+        /* --- 新增：危機晃動特效 --- */
         @keyframes crisisShake {
-            0% { transform: translate(0,0) rotate(0deg); }
-            10% { transform: translate(8px, 8px) rotate(1deg); }
-            20% { transform: translate(-8px, -8px) rotate(-1deg); }
-            30% { transform: translate(8px, -8px) rotate(1deg); }
-            40% { transform: translate(-8px, 8px) rotate(-1deg); }
-            50% { transform: translate(0,0) rotate(0deg); }
-            100% { transform: translate(0,0) rotate(0deg); }
+            0% { transform: translate(0,0); }
+            25% { transform: translate(10px, 10px); }
+            50% { transform: translate(-10px, -10px); }
+            75% { transform: translate(10px, -10px); }
+            100% { transform: translate(0,0); }
         }
-        .crisis-shake-active { 
-            animation: crisisShake 0.15s ease-in-out infinite;
+        .crisis-active { 
+            animation: crisisShake 0.1s infinite; 
             background-color: rgba(230, 32, 58, 0.1) !important;
         }
 
+        /* SVG Icons */
         .svg-icon { width: 18px; height: 18px; fill: currentColor; }
 
         /* UI 組件 */
@@ -59,26 +58,34 @@
             background: var(--c-yellow); border: var(--stroke); box-shadow: 4px 4px 0 var(--c-black);
             font-weight: 900; font-size: 0.95rem; padding: 8px 14px; cursor: pointer;
             display: inline-flex; align-items: center; gap: 6px; transition: 0.1s; transform: skew(-5deg);
+            font-family: "Noto Serif TC", sans-serif;
         }
         .btn:active { transform: skew(-5deg) translate(4px, 4px); box-shadow: 0 0 0 var(--c-black); }
-        .btn:disabled { background: #bbb; cursor: not-allowed; color: #555;}
+        .btn:disabled { background: #bbb; cursor: not-allowed; box-shadow: 4px 4px 0 var(--c-black); color: #555;}
         .btn-red { background: var(--c-red); color: white; }
+        .btn-cyan { background: var(--c-cyan); }
+        .btn-white { background: var(--c-white); }
+        .btn-purple { background: var(--c-purple); color: white; }
 
+        /* 狀態列 */
         .bar {
             background: var(--c-white); border-bottom: var(--stroke); padding: 10px 20px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 10;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10; flex-wrap: wrap; gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
+        /* 底部欄增加 safe-area 填充，防止 iPad 底部條遮擋文字 */
         .bar.bottom { 
-            border-bottom: none; border-top: var(--stroke); 
+            border-bottom: none; border-top: var(--stroke); box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
             padding-bottom: calc(10px + env(safe-area-inset-bottom));
         }
-
         .player-info { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.1rem; }
         .avatar { width: 36px; height: 36px; border: 2px solid var(--c-black); border-radius: 50%; padding: 4px; background: var(--c-gray); }
-        .hp-badge { background: var(--c-black); color: var(--c-white); padding: 2px 10px; border-radius: 20px; }
+        .hp-badge { background: var(--c-black); color: var(--c-white); padding: 2px 10px; border-radius: 20px; font-size: 1rem;}
         
+        /* 雙方標籤分色設計 */
         .char-label { font-size: 0.85rem; padding: 3px 8px; border: 2px solid var(--c-black); margin-left: 5px; font-weight: 900;}
-        .player-label { background: var(--c-cyan); }
+        .player-label { background: var(--c-cyan); color: var(--c-black); }
+        .ai-label { background: var(--c-orange); color: var(--c-black); display: inline-flex; align-items: center; gap: 2px;}
 
         /* 場上字詞區 */
         .field {
@@ -91,91 +98,195 @@
             border: 4px solid var(--c-white); outline: 4px solid var(--c-black);
             box-shadow: var(--shadow-solid); padding: 15px 10px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s; transform: skew(-2deg);
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, outline-color 0.2s; position: relative; transform: skew(-2deg);
             touch-action: none; 
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
-        .t-word { font-size: 4rem; font-weight: 900; line-height: 1; margin-bottom: 15px; text-shadow: 3px 3px 0 #555; }
+        .target-card:hover { transform: translateY(-5px) skew(-2deg); box-shadow: 10px 10px 0 var(--c-cyan); outline-color: var(--c-cyan); }
+        
+        .t-word { 
+            font-size: 4rem; 
+            font-weight: 900; 
+            line-height: 1; 
+            color: var(--c-white); 
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 0 #555;
+        }
         
         .diamond-container { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-        .diamond { width: 14px; height: 14px; border: 2px solid #555; transform: rotate(45deg); transition: 0.3s; }
-        .diamond.on { background: var(--c-green); border-color: var(--c-white); box-shadow: 0 0 10px var(--c-green); }
+        .diamond {
+            width: 14px; height: 14px; border: 2px solid #555; transform: rotate(45deg);
+            background: transparent; transition: 0.3s;
+        }
+        .diamond.on {
+            background: var(--c-green); border-color: var(--c-white);
+            box-shadow: 0 0 10px var(--c-green);
+        }
+        .hint-text { position: absolute; bottom: 8px; font-size: 0.7rem; color: #aaa; font-weight: bold; }
 
-        /* 手牌區：iPad 高度適配 */
+        /* 手牌區 - iPad 適配：使用 vh 單位 */
         .hand-area {
-            height: 26vh; min-height: 180px;
+            height: 26vh; 
+            min-height: 180px;
             background: repeating-linear-gradient(45deg, #eee 0, #eee 2px, transparent 2px, transparent 8px);
-            border-top: var(--stroke); display: flex; justify-content: center; align-items: flex-end; padding: 10px 20px; gap: 10px; overflow-x: auto;
+            border-top: var(--stroke); display: flex; justify(content: center; align-items: flex-end; padding: 10px 20px 20px; gap: 10px; overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
 
         .play-card {
-            width: 110px; height: 90%; background: var(--c-white); border: var(--stroke); box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
-            padding: 10px; cursor: pointer; transition: 0.2s; 
+            width: 120px; 
+            height: 90%; 
+            background: var(--c-white); border: var(--stroke); box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+            padding: 10px; cursor: pointer; transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             display: flex; flex-direction: column; flex-shrink: 0; position: relative;
         }
-        .play-card.selected { transform: translateY(-20px); border-color: var(--c-cyan); box-shadow: 0 0 0 4px var(--c-cyan), 8px 8px 0 var(--c-black); z-index: 30; }
-        .play-card.is-func { background-color: var(--c-purple); color: var(--c-white); }
-        .c-tag { font-size: 0.75rem; font-weight: 900; background: var(--c-black); color: var(--c-white); padding: 2px 6px; align-self: flex-start; margin-bottom: 5px; border: 1px solid var(--c-white);}
-        .c-text { font-size: 1.1rem; font-weight: 900; text-align: center; display: flex; align-items: center; justify-content: center; flex: 1; word-break: break-all;}
-
-        /* Modal & SFX */
-        #detail-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: none; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: var(--c-white); border: 6px solid var(--c-black); box-shadow: 15px 15px 0 var(--c-cyan); width: 100%; max-width: 400px; padding: 25px; transform: skew(-2deg); }
-        .sfx-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 999; display: flex; justify-content: center; align-items: center; }
-        .sfx-box { background: var(--c-white); border: 6px solid var(--c-black); padding: 20px 40px; font-size: 2.5rem; font-weight: 900; transform: scale(0); opacity: 0; box-shadow: 15px 15px 0 var(--c-black); }
+        .play-card:hover { transform: translateY(-15px); z-index: 20; box-shadow: 8px 8px 0 var(--c-black); }
+        .play-card.selected { transform: translateY(-30px); border-color: var(--c-cyan); box-shadow: 0 0 0 4px var(--c-cyan), 8px 8px 0 var(--c-black); z-index: 30; }
         
+        .play-card.is-func { 
+            background-color: var(--c-purple); 
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 3px, transparent 3px, transparent 10px);
+            color: var(--c-white); 
+            border-color: var(--c-black); 
+        }
+        
+        .c-tag { font-size: 0.8rem; font-weight: 900; background: var(--c-black); color: var(--c-white); padding: 4px 8px; align-self: flex-start; margin-bottom: 10px; border: 1px solid var(--c-white);}
+        .play-card.is-func .c-tag { background: var(--c-yellow); color: var(--c-black); border: 2px solid var(--c-black); }
+        
+        .c-text { font-size: 1.15rem; font-weight: 900; text-align: center; display: flex; align-items: center; justify-content: center; flex: 1; word-break: break-all;}
+
+        /* 長按詳情 Modal */
+        #detail-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85); z-index: 500; display: none;
+            justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content {
+            background: var(--c-white); border: 6px solid var(--c-black); box-shadow: 15px 15px 0 var(--c-cyan);
+            width: 100%; max-width: 400px; padding: 25px; transform: skew(-2deg);
+        }
+        .m-word { font-size: 3rem; font-weight: 900; border-bottom: 4px solid var(--c-black); margin-bottom: 15px; color: var(--c-black); }
+        .m-slot { background: var(--c-gray); border: 2px solid var(--c-black); padding: 12px; margin-bottom: 12px; font-size: 1.1rem; font-weight: 700; display: flex; flex-direction: column;}
+        .m-slot.unlocked { background: var(--c-yellow); font-weight: 900; box-shadow: 4px 4px 0 var(--c-black); transform: translateX(-4px); }
+        .m-example { font-size: 0.9rem; color: #444; margin-top: 8px; border-top: 1px dashed #777; padding-top: 8px; font-weight: 400;}
+
+        /* 漫畫特效廣播框 */
+        .sfx-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .sfx-box {
+            background: var(--c-white); border: 6px solid var(--c-black); color: var(--black);
+            padding: 20px 40px; font-size: 2.5rem; font-weight: 900;
+            text-align: center; transform: skew(-5deg) scale(0); opacity: 0;
+            box-shadow: 15px 15px 0 var(--c-black);
+        }
+        .sfx-player { border-color: var(--c-cyan); box-shadow: 15px 15px 0 var(--c-cyan); }
+        .sfx-ai { border-color: var(--c-orange); box-shadow: 15px 15px 0 var(--c-orange); }
+        .sfx-correct { border-color: var(--c-green); box-shadow: 15px 15px 0 var(--c-green); color: var(--c-green); }
+        .sfx-error { border-color: var(--c-red); box-shadow: 15px 15px 0 var(--c-red); color: var(--c-red); }
+
+        /* 大廳 / 選角介面 */
+        #lobby-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--c-black); z-index: 2000; display: flex;
+            justify-content: center; align-items: center; padding: 20px;
+            background-image: radial-gradient(#333 5%, transparent 6%), radial-gradient(#333 5%, transparent 6%);
+            background-size: 20px 20px; background-position: 0 0, 10px 10px;
+        }
+        .lobby-content {
+            background: var(--c-white); border: 6px solid var(--c-white); outline: 6px solid var(--c-black);
+            box-shadow: 20px 20px 0 var(--c-cyan); width: 100%; max-width: 700px; 
+            padding: 30px; display: flex; flex-direction: column; gap: 20px; transform: skew(-1deg);
+        }
+        .lobby-title { font-size: 2.5rem; font-weight: 900; border-bottom: 4px solid var(--c-black); padding-bottom: 10px; text-align: center;}
+        
+        .grid-select { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .select-card {
+            border: 3px solid var(--c-black); background: var(--c-gray); padding: 10px;
+            cursor: pointer; font-weight: bold; text-align: center; width: 120px; transition: 0.1s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .select-card:hover { transform: translateY(-3px); }
+        .select-card.char-card.active { background: var(--c-yellow); box-shadow: 4px 4px 0 var(--c-black); transform: translate(-2px, -2px); border-color: var(--c-red);}
+        .select-card.diff-card.active { background: var(--c-orange); color: var(--c-black); box-shadow: 4px 4px 0 var(--c-black); transform: translate(-2px, -2px); border-color: var(--c-black); }
+        
+        .diff-stars { display: flex; justify-content: center; gap: 4px; margin-bottom: 8px;}
+        .skill-desc { font-size: 0.75rem; font-weight: normal; margin-top: 5px; border-top: 1px dotted #000; padding-top: 5px; width: 100%;}
+        
+        /* 動畫區 */
         @keyframes popInStay {
             0% { transform: scale(0) skew(-5deg); opacity: 0; }
             10% { transform: scale(1.1) skew(-5deg); opacity: 1; }
+            15% { transform: scale(1) skew(-5deg); opacity: 1; }
             85% { transform: scale(1) skew(-5deg); opacity: 1; }
             100% { transform: scale(0.8) skew(-5deg); opacity: 0; }
         }
+        
+        @keyframes shakeAction {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-15px); }
+            40%, 80% { transform: translateX(15px); }
+        }
+        .shake-effect { animation: shakeAction 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
-        #lobby-modal { position: fixed; inset: 0; background: var(--c-black); z-index: 2000; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .lobby-content { background: var(--c-white); border: 6px solid var(--c-black); box-shadow: 20px 20px 0 var(--c-cyan); width: 100%; max-width: 600px; padding: 30px; transform: skew(-1deg); }
-
-        .grid-select { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 15px 0; }
-        .select-card { border: 3px solid var(--c-black); background: var(--c-gray); padding: 10px; cursor: pointer; width: 110px; text-align: center; font-weight: bold;}
-        .select-card.active { background: var(--c-yellow); border-color: var(--c-red); box-shadow: 4px 4px 0 var(--c-black); }
+        .actions-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
         @media (max-width: 768px) {
-            .t-word { font-size: 3rem; }
             .target-card { width: 110px; height: 150px; }
-            .play-card { width: 95px; }
+            .t-word { font-size: 3rem; }
+            .play-card { width: 95px; height: 140px; }
+            .c-text { font-size: 1rem; }
+            .btn { font-size: 0.85rem; padding: 8px 10px; }
+            .sfx-box { font-size: 1.8rem; padding: 15px 20px; }
+            .hand-area { height: 190px; }
+            .lobby-title { font-size: 1.8rem; }
+            .select-card { width: 45%; }
         }
     </style>
 </head>
 <body>
 
-<!-- 音訊資源 -->
+<!-- 新增：音訊資源 -->
 <audio id="bgm" loop src="https://cdn.pixabay.com/audio/2022/03/10/audio_784d0b1352.mp3"></audio> 
 <audio id="sfx-draw" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
-<audio id="sfx-correct" src="https://assets.mixkit.co/active_storage/sfx/2068/2068-preview.mp3"></audio>
-<audio id="sfx-error" src="https://assets.mixkit.co/active_storage/sfx/2648/2648-preview.mp3"></audio>
+<audio id="sfx-match" src="https://assets.mixkit.co/active_storage/sfx/2068/2068-preview.mp3"></audio>
+<audio id="sfx-fail" src="https://assets.mixkit.co/active_storage/sfx/2648/2648-preview.mp3"></audio>
 
+<!-- SVG Icons -->
 <svg style="display: none;">
     <symbol id="icon-player" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></symbol>
-    <symbol id="icon-ai" viewBox="0 0 24 24"><path d="M21 9h-2V7c0-1.1-.9-2-2-2h-3.5l-1-2h-5l-1 2H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2zm-9 9c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></symbol>
-    <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1z"/></symbol>
+    <symbol id="icon-ai" viewBox="0 0 24 24"><path d="M21 9h-2V7c0-1.1-.9-2-2-2h-3.5l-1-2h-5l-1 2H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2zm-9 9c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/><rect x="10" y="11" width="4" height="4"/></symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></symbol>
+    <symbol id="icon-magic" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></symbol>
+    <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></symbol>
+    <symbol id="icon-skip" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm4-8H8v-2h8v2z"/></symbol>
+    <symbol id="icon-star-filled" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
+    <symbol id="icon-star-empty" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></symbol>
+    <!-- 新增音量圖標 -->
+    <symbol id="icon-vol-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
+    <symbol id="icon-vol-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3z"/></symbol>
 </svg>
 
 <div id="lobby-modal">
     <div class="lobby-content">
-        <h2 style="text-align:center; font-size:2rem; border-bottom:4px solid #000;">言靈爭霸 - 戰前備案</h2>
-        <p>選擇挑戰者職階：</p>
+        <div class="lobby-title">言靈爭霸 - 戰前備案</div>
+        <div style="font-weight: 900; font-size: 1.2rem;">選擇挑戰者職階：</div>
         <div class="grid-select" id="char-select-group">
-            <div class="select-card active" onclick="selectChar('seer', this)">【天機】</div>
-            <div class="select-card" onclick="selectChar('knight', this)">【墨俠】</div>
-            <div class="select-card" onclick="selectChar('trickster', this)">【詭道】</div>
-            <div class="select-card" onclick="selectChar('rock', this)">【磐石】</div>
-            <div class="select-card" onclick="selectChar('berserker', this)">【狂草】</div>
+            <div class="select-card char-card active" onclick="selectChar('seer', this)">【天機】<div class="skill-desc">開局初始手牌僅需 4 張</div></div>
+            <div class="select-card char-card" onclick="selectChar('knight', this)">【墨俠】<div class="skill-desc">捨棄手牌時，僅罰抽 1 張</div></div>
+            <div class="select-card char-card" onclick="selectChar('trickster', this)">【詭道】<div class="skill-desc">戰術重鑄後不結束回合</div></div>
+            <div class="select-card char-card" onclick="selectChar('rock', this)">【磐石】<div class="skill-desc">PASS 放棄回合不罰抽</div></div>
+            <div class="select-card char-card" onclick="selectChar('berserker', this)">【狂草】<div class="skill-desc">發動言靈，敵罰抽 3 張</div></div>
         </div>
-        <p>設定敵方難度：</p>
-        <div class="grid-select">
-            <div class="select-card active" onclick="selectDiff('normal', this)">普通記憶</div>
-            <div class="select-card" onclick="selectDiff('hard', this)">絕對記憶</div>
+        <div style="font-weight: 900; font-size: 1.2rem; margin-top: 10px;">設定敵方難度等級：</div>
+        <div class="grid-select" id="diff-select-group">
+            <div class="select-card diff-card" onclick="selectDiff('easy', this)"><div class="diff-stars"><svg class="svg-icon"><use href="#icon-star-filled"></use></svg><svg class="svg-icon"><use href="#icon-star-empty"></use></svg><svg class="svg-icon"><use href="#icon-star-empty"></use></svg></div><div class="skill-desc">有機率錯失配對機會</div></div>
+            <div class="select-card diff-card active" onclick="selectDiff('normal', this)"><div class="diff-stars"><svg class="svg-icon"><use href="#icon-star-filled"></use></svg><svg class="svg-icon"><use href="#icon-star-filled"></use></svg><svg class="svg-icon"><use href="#icon-star-empty"></use></svg></div><div class="skill-desc">擁有絕對記憶零失誤</div></div>
+            <div class="select-card diff-card" onclick="selectDiff('hard', this)"><div class="diff-stars"><svg class="svg-icon"><use href="#icon-star-filled"></use></svg><svg class="svg-icon"><use href="#icon-star-filled"></use></svg><svg class="svg-icon"><use href="#icon-star-filled"></use></svg></div><div class="skill-desc">初始手牌僅 3 張，且零失誤</div></div>
         </div>
-        <button class="btn btn-red" style="width:100%; padding:15px; font-size:1.5rem; margin-top:20px;" onclick="startGame()">確認出戰 (開啟音樂)</button>
+        <button class="btn btn-red" style="width:100%; font-size: 1.5rem; justify-content: center; padding: 15px; margin-top: 10px;" onclick="startGame()">確認出戰 (音效開啟)</button>
     </div>
 </div>
 
@@ -185,10 +296,17 @@
 <div class="bar">
     <div class="player-info">
         <svg class="avatar"><use href="#icon-ai"></use></svg>
-        <div>AI 對手</div>
+        <div>絕對記憶 AI</div>
+        <div class="char-label ai-label" id="ai-diff-label"></div>
         <div class="hp-badge" id="ai-hand-count">5 張</div>
     </div>
-    <div id="turn-display" style="padding: 5px 15px; font-weight: 900; background: var(--c-cyan);">等待中</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <div class="panel" style="padding: 6px 18px; font-weight: 900; background: var(--c-cyan); border: 2px solid #000;" id="turn-display">準備中</div>
+        <!-- 新增音樂開關按鈕 -->
+        <button class="btn btn-white" id="music-toggle-btn" onclick="toggleMusic()" style="padding: 5px;">
+            <svg class="svg-icon" id="vol-icon"><use href="#icon-vol-on"></use></svg>
+        </button>
+    </div>
 </div>
 
 <div class="field" id="field-area"></div>
@@ -196,135 +314,194 @@
 <div class="bar bottom">
     <div class="player-info">
         <svg class="avatar"><use href="#icon-player"></use></svg>
-        <div class="char-label player-label" id="player-label-text">天機</div>
+        <div>挑戰者</div>
+        <div class="char-label player-label" id="player-char-label">天機</div>
         <div class="hp-badge" id="player-hand-count">5 張</div>
     </div>
-    <div style="display:flex; gap:8px;">
-        <button class="btn btn-white" id="pass-btn" onclick="passTurn()" disabled>PASS</button>
-        <button class="btn btn-red" id="discard-btn" onclick="discardSelected()" disabled>捨棄</button>
+    <div class="actions-group">
+        <button class="btn btn-cyan" id="recast-btn" onclick="recastHand()" disabled><svg class="svg-icon"><use href="#icon-refresh"></use></svg> 重鑄</button>
+        <button class="btn btn-white" id="pass-btn" onclick="passTurn()" disabled><svg class="svg-icon"><use href="#icon-skip"></use></svg> PASS</button>
+        <button class="btn btn-red" id="discard-btn" onclick="discardSelected()" disabled><svg class="svg-icon"><use href="#icon-trash"></use></svg> 捨棄</button>
+        <button class="btn btn-purple" id="func-btn" onclick="useFunctionCard()" style="display: none;"><svg class="svg-icon"><use href="#icon-magic"></use></svg> 發動言靈</button>
     </div>
 </div>
 
 <div class="hand-area" id="hand-area"></div>
 
 <script>
+/** 保留所有原始字詞數據 **/
 const allRawData = [
-  {"字詞":"拔","字義":["抽出","提拔","攻取"]}, {"字詞":"汲","字義":["從井裡打水","引導"]},
-  {"字詞":"抵","字義":["推擠","抵達"]}, {"字詞":"受","字義":["給予","接受","教授"]},
-  {"字詞":"奉","字義":["雙手恭敬捧著","獻送","貫徹執行"]}, {"字詞":"予","字義":["給予","讚許"]},
-  {"字詞":"微","字義":["美麗","藏匿","偷偷","若不是"]}, {"字詞":"易","字義":["賜與","交換","替代","整治"]},
-  {"字詞":"敝","字義":["破舊衣服","損害","丟棄","失敗","疲憊"]}, {"字詞":"服","字義":["降服、使服從","從事","致力","任用"]},
-  {"字詞":"舉","字義":["雙手托物","推薦","施行","攻克"]}, {"字詞":"使","字義":["差遣","使臣"]},
-  {"字詞":"具","字義":["備辦","完備、詳盡","有"]}, {"字詞":"假","字義":["借用","憑藉","暫且"]},
-  {"字詞":"謝","字義":["辭職","辭別","推辭","道歉"]}, {"字詞":"顧","字義":["回頭看","觀看","拜訪"]},
-  {"字詞":"竟","字義":["完畢","全部"]}, {"字詞":"悉","字義":["詳盡","了解","全部"]},
-  {"字詞":"臨","字義":["俯視","來到","管理"]}
+  {"字詞":"拔","字義":["抽出","提拔","攻取"],"用例":[{"用例字義":"提拔","句子":"「是以先帝簡拔以遺陛下。」"},{"用例字義":"攻取","句子":"「已拔趙。」"}]},
+  {"字詞":"汲","字義":["從井裡打水","引導"],"用例":[{"用例字義":"從井裡打水","句子":"「有泉可汲。」"},{"用例字義":"引導","句子":"「汲鄭伯。」"}]},
+  {"字詞":"抵","字義":["推擠","抵達"],"用例":[{"用例字義":"抵達","句子":"「抵九原。」"}]},
+  {"字詞":"受","字義":["給予","接受","教授"],"用例":[{"用例字義":"給予","句子":"「因能而受官。」"},{"用例字義":"教授","句子":"「師者，所以傳道、受業、解惑也。」"}]},
+  {"字詞":"奉","字義":["雙手恭敬捧著","獻送","貫徹執行"],"用例":[{"用例字義":"雙手恭敬捧著","句子":"「沛公奉卮酒為壽。」"}]},
+  {"字詞":"予","字義":["給予","讚許"],"用例":[{"用例字義":"讚許","句子":"「眾必予之。」"}]},
+  {"字詞":"微","字義":["美麗","藏匿","偷偷","若不是"],"用例":[{"用例字義":"藏匿","句子":"「其徒微之。」"}]},
+  {"字詞":"易","字義":["賜與","交換","替代","整治"],"用例":[{"用例字義":"交換","句子":"「寡人欲以百里之地易安陵。」"}]},
+  {"字詞":"敝","字義":["破舊衣服","損害","丟棄","失敗","疲憊"],"用例":[{"用例字義":"損害","句子":"「因人之力而敝之，不仁。」"}]},
+  {"字詞":"服","字義":["降服、使服從","從事","致力","任用"],"用例":[{"用例字義":"致力","句子":"「有事，弟子服其勞。」"}]},
+  {"字詞":"舉","字義":["雙手托物","推薦","施行","攻克"],"用例":[{"用例字義":"推薦","句子":"「君子不以言舉人。」"}]},
+  {"字詞":"使","字義":["差遣","使臣"],"用例":[{"用例字義":"差遣","句子":"「懷王使屈原造為憲令。」"}]},
+  {"字詞":"具","字義":["備辦","完備、詳盡","有"],"用例":[{"用例字義":"完備、詳盡","句子":"「此人一一为具言所聞。」"}]},
+  {"字詞":"假","字義":["借用","憑藉","暫且"],"用例":[{"用例字義":"憑藉","句子":"「善假於物也。」"}]},
+  {"字詞":"謝","字義":["辭職","辭別","推辭","道歉"],"用例":[{"用例字義":"道歉","句子":"「旦日不可不蚤自來謝項王。」"}]},
+  {"字詞":"顧","字義":["回頭看","觀看","拜訪"],"用例":[{"用例字義":"拜訪","句子":"「將軍宜屈駕顧之。」"}]},
+  {"字詞":"竟","字義":["完畢","全部"],"用例":[{"用例字義":"完畢","句子":"「語竟。」"}]},
+  {"字詞":"悉","字義":["詳盡","了解","全部"],"用例":[{"用例字義":"了解","句子":"「丞相亮其悉朕意。」"}]},
+  {"字詞":"臨","字義":["俯視","來到","管理"],"用例":[{"用例字義":"來到","句子":"「東臨碣石，以觀滄海。」"}]}
 ];
 
-let deck = [], discardPile = [], playerHand = [], aiHand = [], activeField = [];
-let turn = 'player', selectedIndex = null, playerChar = 'seer', aiDiff = 'normal';
-let isAiWarningActive = false;
+let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
+let playerHand = [], aiHand = [], activeField = [];
+let turn = 'player', selectedIndex = null, playerChar = 'seer', aiDifficulty = 'normal', skipNextAi = false;
+let isAudioEnabled = true, isAiWarningTriggered = false;
 
+// 音訊控制器
 const bgm = document.getElementById('bgm');
 const sfxDraw = document.getElementById('sfx-draw');
-const sfxCorrect = document.getElementById('sfx-correct');
-const sfxError = document.getElementById('sfx-error');
+const sfxMatch = document.getElementById('sfx-match');
+const sfxFail = document.getElementById('sfx-fail');
+
+function toggleMusic() {
+    isAudioEnabled = !isAudioEnabled;
+    const icon = document.getElementById('vol-icon');
+    if(isAudioEnabled) {
+        icon.innerHTML = '<use href="#icon-vol-on"></use>';
+        if(document.getElementById('lobby-modal').style.display === 'none') bgm.play();
+    } else {
+        icon.innerHTML = '<use href="#icon-vol-off"></use>';
+        bgm.pause();
+    }
+}
 
 function selectChar(c, el) {
     playerChar = c;
-    document.querySelectorAll('#char-select-group .select-card').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('#char-select-group .select-card').forEach(node => node.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('player-label-text').innerText = el.innerText;
 }
-
 function selectDiff(d, el) {
-    aiDiff = d;
-    el.parentElement.querySelectorAll('.select-card').forEach(n => n.classList.remove('active'));
+    aiDifficulty = d;
+    document.querySelectorAll('#diff-select-group .select-card').forEach(node => node.classList.remove('active'));
     el.classList.add('active');
 }
 
 function startGame() {
-    bgm.volume = 0.3;
-    bgm.play().catch(() => console.log("Audio play blocked"));
+    if(isAudioEnabled) { bgm.volume = 0.3; bgm.play().catch(()=>{}); }
     document.getElementById('lobby-modal').style.display = 'none';
+    const charMap = { 'seer':'天機', 'knight':'墨俠', 'trickster':'詭道', 'rock':'磐石', 'berserker':'狂草' };
+    const diffStarsHTML = {
+        'easy': '<svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-empty"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-empty"></use></svg>',
+        'normal': '<svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-empty"></use></svg>',
+        'hard': '<svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg>'
+    };
+    document.getElementById('player-char-label').innerText = charMap[playerChar];
+    document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
+    document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? '<svg class="svg-icon"><use href="#icon-skip"></use></svg> PASS(無罰)' : '<svg class="svg-icon"><use href="#icon-skip"></use></svg> PASS(罰1)';
+    document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '<svg class="svg-icon"><use href="#icon-trash"></use></svg> 捨棄(罰1)' : '<svg class="svg-icon"><use href="#icon-trash"></use></svg> 捨棄(罰2)';
     initGame();
 }
 
 function initGame() {
-    let shuffled = [...allRawData].sort(() => 0.5 - Math.random());
-    let pool = shuffled.slice(0, 18);
-    deck = [];
-    pool.forEach(item => item.字義.forEach(m => deck.push({ type: 'meaning', parentWord: item.字詞, text: m })));
-    for(let i=0; i<4; i++) deck.push({ type: 'func', action: 'attack', text: '令敵方罰抽牌' });
-    shuffle(deck);
-
-    let unspawned = [...pool];
-    for(let i=0; i<3; i++) {
-        let item = unspawned.splice(Math.floor(Math.random()*unspawned.length), 1)[0];
-        activeField.push({ word: item.字詞, meanings: item.字義.map(m => ({ text: m, unlocked: false })) });
-    }
-
+    let shuffledRaw = [...allRawData].sort(() => 0.5 - Math.random());
+    gameDataPool = shuffledRaw.slice(0, 18); 
+    unspawnedWords = [...gameDataPool];
+    buildDeck();
+    spawnFieldTargets(3);
     let pCount = (playerChar === 'seer') ? 4 : 5;
-    let aCount = (aiDiff === 'hard') ? 3 : 5;
+    let aCount = (aiDifficulty === 'hard') ? 3 : 5;
     for(let i=0; i<pCount; i++) playerHand.push(drawCard(false));
     for(let i=0; i<aCount; i++) aiHand.push(drawCard(false));
-    
     updateUI();
-    playSfx("戰場展開！", "player");
+    playSfx("言靈之戰，開始！", "player");
 }
 
-function shuffle(arr) { arr.sort(() => 0.5 - Math.random()); }
+function buildDeck() {
+    deck = [];
+    gameDataPool.forEach(item => {
+        item.字義.forEach(mean => deck.push({ type: 'meaning', parentWord: item.字詞, text: mean }));
+    });
+    for(let i=0; i<2; i++) {
+        deck.push({ type: 'func', action: 'attack', text: '令敵方罰抽牌' }); 
+        deck.push({ type: 'func', action: 'skip', text: '封印敵方一回合' });
+        deck.push({ type: 'func', action: 'reset', text: '捨棄手牌並重抽' });
+    }
+    shuffle(deck);
+}
 
-function drawCard(playSfxOn = true) {
-    if (deck.length === 0) { deck = [...discardPile]; discardPile = []; shuffle(deck); }
-    if (playSfxOn) { sfxDraw.currentTime = 0; sfxDraw.play(); }
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
+function drawCard(playSfx = true) {
+    if (deck.length === 0) {
+        if (discardPile.length === 0) return null;
+        deck = [...discardPile]; discardPile = []; shuffle(deck);
+        playSfx && playSfxAction("牌庫重置", "info");
+    }
+    if(playSfx && isAudioEnabled) { sfxDraw.currentTime = 0; sfxDraw.play(); }
     return deck.pop();
+}
+
+function spawnFieldTargets(count) {
+    for(let i=0; i<count; i++) {
+        if(unspawnedWords.length === 0) break;
+        let item = unspawnedWords.splice(Math.floor(Math.random() * unspawnedWords.length), 1)[0];
+        let meaningsData = item.字義.map(m => {
+            let exObj = item.用例 ? item.用例.find(e => e.用例字義.includes(m) || m.includes(e.用例字義)) : null;
+            return { text: m, example: exObj ? exObj.句子 : null, unlocked: false };
+        });
+        activeField.push({ word: item.字詞, meanings: meaningsData });
+    }
 }
 
 function updateUI() {
     document.getElementById('player-hand-count').innerText = playerHand.length + " 張";
     document.getElementById('ai-hand-count').innerText = aiHand.length + " 張";
     
-    // --- 核心修改：危機警示系統 ---
+    // --- 新增：核心危機系統邏輯 ---
     if (aiHand.length <= 2 && aiHand.length > 0) {
-        if (!isAiWarningActive) {
-            isAiWarningActive = true;
-            // 裝置震動 1 秒
-            if ("vibrate" in navigator) navigator.vibrate(1000);
-            
-            // 畫面晃動 0.5 秒後移除
-            document.body.classList.add('crisis-shake-active');
-            setTimeout(() => {
-                document.body.classList.remove('crisis-shake-active');
-            }, 500);
-
+        if (!isAiWarningTriggered) {
+            isAiWarningTriggered = true;
+            if ("vibrate" in navigator) navigator.vibrate(1000); // 震動1秒
+            document.body.classList.add('crisis-active');
+            setTimeout(() => document.body.classList.remove('crisis-active'), 500); // 晃動0.5秒
             playSfx("警告：敵方言靈將盡！", "error");
         }
     } else {
-        isAiWarningActive = false;
-        document.body.classList.remove('crisis-shake-active');
+        isAiWarningTriggered = false;
     }
 
     const turnDisp = document.getElementById('turn-display');
-    turnDisp.innerText = turn === 'player' ? '你的回合' : '敵方回合';
-    turnDisp.style.background = turn === 'player' ? 'var(--c-cyan)' : 'var(--c-red)';
+    if (turn === 'player') {
+        turnDisp.innerText = '你的回合'; turnDisp.style.background = 'var(--c-cyan)'; turnDisp.style.color = 'var(--c-black)';
+    } else {
+        turnDisp.innerText = '敵方回合'; turnDisp.style.background = 'var(--c-red)'; turnDisp.style.color = 'var(--c-white)';
+    }
 
-    document.getElementById('pass-btn').disabled = (turn !== 'player');
     document.getElementById('discard-btn').disabled = (turn !== 'player' || selectedIndex === null);
+    document.getElementById('recast-btn').disabled = (turn !== 'player');
+    document.getElementById('pass-btn').disabled = (turn !== 'player');
+    const funcBtn = document.getElementById('func-btn');
+    funcBtn.style.display = (selectedIndex !== null && playerHand[selectedIndex]?.type === 'func' && turn === 'player') ? 'inline-flex' : 'none';
 
     const fieldDOM = document.getElementById('field-area');
     fieldDOM.innerHTML = '';
     activeField.forEach((target, tIdx) => {
         const tCard = document.createElement('div');
         tCard.className = 'target-card';
-        tCard.onpointerdown = (e) => { this.pressTimer = setTimeout(() => showModal(tIdx), 500); };
-        tCard.onpointerup = (e) => {
-            clearTimeout(this.pressTimer);
-            if (document.getElementById('detail-modal').style.display !== 'flex') tryMatch(tIdx);
-            else hideModal();
+        tCard.onpointerdown = (e) => { this.pTime = setTimeout(()=>showModal(tIdx), 400); };
+        tCard.onpointerup = (e) => { 
+            clearTimeout(this.pTime); 
+            if(document.getElementById('detail-modal').style.display === 'flex') hideModal();
+            else tryMatch(tIdx);
         };
-        tCard.innerHTML = `<div class="t-word">${target.word}</div><div class="diamond-container">
-            ${target.meanings.map(m => `<div class="diamond ${m.unlocked?'on':''}"></div>`).join('')}</div>`;
+        tCard.onpointerleave = () => clearTimeout(this.pTime);
+        let diamondsHTML = target.meanings.map(m => `<div class="diamond ${m.unlocked ? 'on' : ''}"></div>`).join('');
+        tCard.innerHTML = `<div class="t-word">${target.word}</div><div class="diamond-container">${diamondsHTML}</div><div class="hint-text">長按探查</div>`;
         fieldDOM.appendChild(tCard);
     });
 
@@ -332,9 +509,9 @@ function updateUI() {
     handDOM.innerHTML = '';
     playerHand.forEach((card, idx) => {
         const cDiv = document.createElement('div');
-        cDiv.className = `play-card ${card.type==='func'?'is-func':''} ${idx===selectedIndex?'selected':''}`;
-        cDiv.innerHTML = `<div class="c-tag">${card.type==='func'?'言靈':'字義'}</div><div class="c-text">${card.text}</div>`;
-        cDiv.onclick = () => { if(turn==='player') { selectedIndex = (selectedIndex===idx)?null:idx; updateUI(); }};
+        cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''} ${idx === selectedIndex ? 'selected' : ''}`;
+        cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text">${card.text}</div>`;
+        cDiv.onclick = () => { if(turn === 'player') { selectedIndex = selectedIndex === idx ? null : idx; updateUI(); } }
         handDOM.appendChild(cDiv);
     });
     checkWin();
@@ -343,91 +520,139 @@ function updateUI() {
 function tryMatch(tIdx) {
     if(turn !== 'player' || selectedIndex === null) return;
     let card = playerHand[selectedIndex];
-    if(card.type === 'func') {
-        discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
-        playSfx("言靈：狂襲敵方！", "player");
-        aiHand.push(drawCard()); aiHand.push(drawCard());
-        selectedIndex = null; updateUI(); setTimeout(endTurn, 1000);
-        return;
-    }
-
+    if(card.type === 'func') return;
     let target = activeField[tIdx];
-    let match = target.meanings.find(m => m.text === card.text && !m.unlocked);
+    let mObj = target.meanings.find(m => m.text === card.text && !m.unlocked);
 
-    if (match) {
-        sfxCorrect.play();
-        match.unlocked = true;
+    if (mObj) {
+        if(isAudioEnabled) sfxMatch.play();
+        mObj.unlocked = true;
         discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
+        selectedIndex = null;
         if(target.meanings.every(m => m.unlocked)) {
-            playSfx("完全解構！", "correct");
-            for(let i=0; i<target.meanings.length; i++) aiHand.push(drawCard());
-            activeField.splice(tIdx, 1);
+            triggerBurst(tIdx, 'player', target.meanings.length);
+        } else {
+            playSfx("破譯成功！", "correct"); updateUI(); setTimeout(endTurn, 1000);
         }
-        selectedIndex = null; updateUI(); setTimeout(endTurn, 800);
     } else {
-        sfxError.play();
-        playSfx("配對失敗！罰抽", "error");
-        playerHand.push(drawCard()); playerHand.push(drawCard());
-        selectedIndex = null; updateUI(); setTimeout(endTurn, 1000);
+        if(isAudioEnabled) sfxFail.play();
+        triggerShake(); playSfx("配對錯誤！罰抽2張", "error");
+        playerHand.push(drawCard(false)); playerHand.push(drawCard(false));
+        selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
     }
 }
 
-function endTurn() {
-    turn = (turn === 'player') ? 'ai' : 'player';
-    updateUI();
-    if(turn === 'ai') setTimeout(aiAction, 1200);
+function triggerBurst(tIdx, who, dmg) {
+    if(who === 'player') {
+        playSfx(`擊破！對手罰抽${dmg}張`, "correct");
+        for(let i=0; i<dmg; i++) aiHand.push(drawCard(false));
+    } else {
+        triggerShake(); playSfx(`崩潰！罰抽${dmg}張`, "error");
+        for(let i=0; i<dmg; i++) playerHand.push(drawCard(false));
+    }
+    activeField.splice(tIdx, 1); updateUI(); setTimeout(endTurn, 2000);
 }
 
-function aiAction() {
-    let matched = false;
-    for(let i=0; i<aiHand.length; i++) {
-        let card = aiHand[i];
-        for(let t=0; t<activeField.length; t++) {
-            let m = activeField[t].meanings.find(mm => mm.text === card.text && !mm.unlocked);
-            if(m) {
-                m.unlocked = true;
-                aiHand.splice(i, 1);
-                matched = true;
-                if(activeField[t].meanings.every(mm => mm.unlocked)) activeField.splice(t, 1);
-                break;
-            }
-        }
-        if(matched) break;
-    }
-    if(!matched) aiHand.push(drawCard());
-    updateUI(); setTimeout(endTurn, 1000);
+function recastHand() {
+    let count = playerHand.length;
+    deck.push(...playerHand); shuffle(deck); playerHand = [];
+    for(let i=0; i<count+1; i++) playerHand.push(drawCard(false));
+    selectedIndex = null; updateUI();
+    if(playerChar === 'trickster') playSfx("重鑄！可繼續行動", "player");
+    else { playSfx("重鑄！結束回合", "player"); setTimeout(endTurn, 1500); }
 }
 
 function passTurn() {
-    if(playerChar !== 'rock') playerHand.push(drawCard());
-    endTurn();
+    if(playerChar !== 'rock') playerHand.push(drawCard(false));
+    else playSfx("磐石守護！不罰抽", "player");
+    selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
 }
 
 function discardSelected() {
     discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
-    playerHand.push(drawCard());
-    if(playerChar !== 'knight') playerHand.push(drawCard());
-    selectedIndex = null; endTurn();
+    let pen = (playerChar === 'knight') ? 1 : 2;
+    for(let i=0; i<pen; i++) playerHand.push(drawCard(false));
+    playSfx(`捨棄！罰抽${pen}張`, "player");
+    selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
+}
+
+function useFunctionCard() {
+    let card = playerHand[selectedIndex];
+    discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
+    if(card.action === 'attack') {
+        let d = playerChar === 'berserker' ? 3 : 2;
+        playSfx(`言靈：襲擊${d}張`, "player");
+        for(let i=0; i<d; i++) aiHand.push(drawCard(false));
+    } else if(card.action === 'skip') {
+        playSfx("言靈：時空封印！", "player"); skipNextAi = true;
+    } else {
+        playSfx("言靈：重構手牌！", "player");
+        playerHand = []; for(let i=0; i<5; i++) playerHand.push(drawCard(false));
+    }
+    selectedIndex = null; updateUI(); setTimeout(() => { if(skipNextAi){skipNextAi=false; spawnFieldTargets(1); updateUI();} else endTurn(); }, 1500);
+}
+
+function endTurn() {
+    turn = turn === 'player' ? 'ai' : 'player';
+    if(turn === 'player') spawnFieldTargets(1);
+    updateUI();
+    if(turn === 'ai') setTimeout(aiAction, 1500);
+}
+
+function aiAction() {
+    let fIdx = aiHand.findIndex(c => c.type === 'func');
+    if(fIdx > -1) {
+        let c = aiHand.splice(fIdx, 1)[0]; discardPile.push(c);
+        if(c.action === 'attack') {
+            triggerShake(); playSfx("敵方襲擊！你罰抽", "ai");
+            playerHand.push(drawCard(false)); playerHand.push(drawCard(false));
+        } else if(c.action === 'skip') {
+            playSfx("敵方封印你的回合！", "ai"); updateUI(); setTimeout(aiAction, 1500); return;
+        } else {
+            playSfx("敵方重構手牌", "ai");
+            aiHand = []; for(let i=0; i<5; i++) aiHand.push(drawCard(false));
+        }
+        updateUI(); setTimeout(endTurn, 1500); return;
+    }
+    let matched = false;
+    if(!(aiDifficulty === 'easy' && Math.random() < 0.4)) {
+        for(let i=0; i<aiHand.length; i++) {
+            let card = aiHand[i]; if(card.type !== 'meaning') continue;
+            for(let t=0; t<activeField.length; t++) {
+                let m = activeField[t].meanings.find(mm => mm.text === card.text && !mm.unlocked);
+                if(m) {
+                    m.unlocked = true; discardPile.push(aiHand.splice(i, 1)[0]); matched = true;
+                    if(activeField[t].meanings.every(mm => mm.unlocked)) triggerBurst(t, 'ai', activeField[t].meanings.length);
+                    else { playSfx("敵方破譯成功！", "ai"); updateUI(); setTimeout(endTurn, 1500); }
+                    break;
+                }
+            }
+            if(matched) break;
+        }
+    }
+    if(!matched) {
+        discardPile.push(aiHand.pop()); aiHand.push(drawCard(false)); aiHand.push(drawCard(false));
+        playSfx("敵方陷入瓶頸，罰抽", "ai"); updateUI(); setTimeout(endTurn, 1500);
+    }
 }
 
 function showModal(tIdx) {
-    const t = activeField[tIdx];
-    document.getElementById('detail-content').innerHTML = `<h3 style="font-size:2.5rem; margin:0;">${t.word}</h3>` + 
-        t.meanings.map(m => `<div style="padding:10px; border-bottom:1px solid #ccc;">${m.unlocked?m.text:'[ 未解鎖 ]'}</div>`).join('');
+    let target = activeField[tIdx];
+    let content = document.getElementById('detail-content');
+    content.innerHTML = `<div class="m-word">${target.word}</div>` + 
+        target.meanings.map(m => `<div class="m-slot ${m.unlocked?'unlocked':''}"><span>${m.unlocked?'[ 破譯 ] '+m.text:'[ 鎖定 ] 未知'}</span></div>`).join('');
     document.getElementById('detail-modal').style.display = 'flex';
 }
 function hideModal() { document.getElementById('detail-modal').style.display = 'none'; }
-
-function playSfx(txt, type) {
-    const s = document.getElementById('sfx-layer');
-    s.innerText = txt;
-    s.style.animation = 'none'; void s.offsetWidth;
-    s.style.animation = 'popInStay 2s forwards';
+function triggerShake() { document.body.classList.remove('shake-effect'); void document.body.offsetWidth; document.body.classList.add('shake-effect'); }
+function playSfx(text, type) {
+    const sfx = document.getElementById('sfx-layer');
+    sfx.innerText = text; sfx.className = `sfx-box sfx-${type}`;
+    sfx.style.animation = 'none'; void sfx.offsetWidth; sfx.style.animation = 'popInStay 2.5s forwards';
 }
-
 function checkWin() {
-    if(playerHand.length === 0) { alert("你贏了！"); location.reload(); }
-    if(aiHand.length === 0) { alert("你輸了..."); location.reload(); }
+    if(playerHand.length === 0) { setTimeout(() => { alert("勝利！言靈臣服於你！"); location.reload(); }, 500); }
+    else if(aiHand.length === 0) { setTimeout(() => { alert("敗北... 敵方意念更強。"); location.reload(); }, 500); }
 }
 </script>
 </body>
