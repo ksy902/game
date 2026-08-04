@@ -349,7 +349,7 @@
 </head>
 <body>
 
-<!-- SVG Icons (保留必要的，已移除頭像引用) -->
+<!-- SVG 圖標庫 (僅保留功能性圖標，已刪除頭像引用) -->
 <svg style="display: none;">
     <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></symbol>
     <symbol id="icon-magic" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></symbol>
@@ -359,10 +359,11 @@
     <symbol id="icon-vol-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
 </svg>
 
-<!-- 遊戲大廳設定 (保持不變) -->
+<!-- 遊戲大廳：選角介面 -->
 <div id="lobby-modal">
     <div class="lobby-content">
         <div class="lobby-title">言靈爭霸 - 戰前備案</div>
+        
         <div style="font-weight: 900; font-size: 1.2rem;">選擇挑戰者職階：</div>
         <div class="grid-select" id="char-select-group">
             <div class="select-card char-card active" style="background-image: url('https://raw.githubusercontent.com/ksy902/game/main/%E5%A4%A9%E6%A9%9F.jpeg');" onclick="selectChar('seer', this)">
@@ -381,55 +382,76 @@
                 【狂草】<div class="skill-desc">發動言靈，敵罰抽 3 張</div>
             </div>
         </div>
-        <!-- 難度選擇區 -->
+
         <div style="font-weight: 900; font-size: 1.2rem; margin-top: 10px;">設定敵方難度等級：</div>
         <div class="grid-select" id="diff-select-group">
             <div class="select-card diff-card" onclick="selectDiff('easy', this)">⭐ 容易</div>
             <div class="select-card diff-card active" onclick="selectDiff('normal', this)">⭐⭐ 普通</div>
             <div class="select-card diff-card" onclick="selectDiff('hard', this)">⭐⭐⭐ 困難</div>
         </div>
-        <button class="btn btn-red" style="font-size: 1.5rem; justify-content: center; padding: 15px; margin-top: 10px;" onclick="startGame()">確認出戰</button>
+
+        <button class="btn btn-red" style="font-size: 1.5rem; justify-content: center; padding: 15px; margin-top: 10px;" onclick="startGame()">
+            確認出戰
+        </button>
     </div>
 </div>
 
 <div class="sfx-overlay"><div id="sfx-layer" class="sfx-box"></div></div>
-<div id="detail-modal"><div class="modal-content" id="detail-content"></div></div>
 
-<!-- 頂部狀態 (AI側) -->
+<!-- 長按詳情 Modal -->
+<div id="detail-modal">
+    <div class="modal-content" id="detail-content"></div>
+</div>
+
+<!-- 頂部狀態 (敵方 AI) -->
 <div class="bar">
     <div class="player-info">
-        <div style="font-size: 1.2rem;">絕對記憶 AI</div>
+        <div>絕對記憶 AI</div>
         <div class="char-label ai-label" id="ai-diff-label">⭐⭐</div>
         <div class="hp-badge" id="ai-hand-count">5 張</div>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
-        <div class="panel" style="padding: 6px 18px; font-weight: 900; background: var(--c-cyan); color: var(--c-black); border: 2px solid var(--c-black);" id="turn-display">等待開局</div>
-        <div class="audio-toggle" onclick="toggleAudio()"><svg class="svg-icon" id="vol-icon"><use href="#icon-vol-on"></use></svg></div>
+        <div class="panel" style="padding: 6px 18px; font-weight: 900; background: var(--c-cyan); color: var(--c-black); border: 2px solid var(--c-black);" id="turn-display">
+            等待開局
+        </div>
+        <div class="audio-toggle" onclick="toggleAudio()">
+            <svg class="svg-icon" id="vol-icon"><use href="#icon-vol-on"></use></svg>
+        </div>
     </div>
 </div>
 
-<!-- 場上區域 (中間) -->
+<!-- 場上區域 -->
 <div class="field" id="field-area"></div>
 
-<!-- 底部操作條 (玩家側) - 已移除頭像與嵌入立繪 -->
+<!-- 底部操作列 (玩家) -->
 <div class="bar bottom">
     <div class="player-info">
-        <div style="font-size: 1.1rem; font-weight: 900;">挑戰者</div>
+        <div style="font-weight: 900;">挑戰者</div>
         <div class="char-label player-label" id="player-char-label">天機</div>
-        <div class="hp-badge" id="player-hand-count">0 張</div>
+        <div class="hp-badge" id="player-hand-count">5 張</div>
     </div>
-
     <div class="actions-group">
-        <button class="btn btn-cyan" id="recast-btn" onclick="recastHand()" disabled><svg class="svg-icon"><use href="#icon-refresh"></use></svg> 重鑄</button>
-        <button class="btn btn-white" id="pass-btn" onclick="passTurn()" disabled><svg class="svg-icon"><use href="#icon-skip"></use></svg> PASS</button>
-        <button class="btn btn-red" id="discard-btn" onclick="discardSelected()" disabled><svg class="svg-icon"><use href="#icon-trash"></use></svg> 捨棄</button>
-        <button class="btn btn-purple" id="func-btn" onclick="useFunctionCard()" style="display: none;"><svg class="svg-icon"><use href="#icon-magic"></use></svg> 發動言靈</button>
+        <button class="btn btn-cyan" id="recast-btn" onclick="recastHand()" disabled>
+            <svg class="svg-icon"><use href="#icon-refresh"></use></svg> 重鑄
+        </button>
+        <button class="btn btn-white" id="pass-btn" onclick="passTurn()" disabled>
+            <svg class="svg-icon"><use href="#icon-skip"></use></svg> PASS
+        </button>
+        <button class="btn btn-red" id="discard-btn" onclick="discardSelected()" disabled>
+            <svg class="svg-icon"><use href="#icon-trash"></use></svg> 捨棄
+        </button>
+        <button class="btn btn-purple" id="func-btn" onclick="useFunctionCard()" style="display: none;">
+            <svg class="svg-icon"><use href="#icon-magic"></use></svg> 發動言靈
+        </button>
     </div>
 </div>
 
-<!-- 手牌區域 -->
+<!-- 手牌區域 (JavaScript 會在這裡插入角色卡與普通手牌) -->
 <div class="hand-area" id="hand-area"></div>
+
+<!-- 腳本部分開始 (請確保你的 updateUI 函數已更新以支持左側角色牌) -->
 <script>
+    // ... 後接 JavaScript 代碼
 /** 1. 原始數據庫 **/
 const allRawData = [
   {"字詞":"拔","字義":["抽出","提拔","攻取"],"用例":[{"用例字義":"提拔","句子":"「是以先帝簡拔以遺陛下。」"},{"用例字義":"攻取","句子":"「已拔趙。」"}]},
