@@ -612,7 +612,7 @@ function spawnFieldTargets(count) {
 }
 
 function updateUI() {
-    // 更新頂部與底部狀態文字
+    // 1. 更新文字與標籤
     document.getElementById('player-hand-count').innerText = playerHand.length + " 張";
     document.getElementById('ai-hand-count').innerText = aiHand.length + " 張";
     const turnDisp = document.getElementById('turn-display');
@@ -622,7 +622,7 @@ function updateUI() {
         turnDisp.innerText = '敵方回合'; turnDisp.style.background = 'var(--c-red)'; turnDisp.style.color = 'var(--c-white)';
     }
 
-    // 按鈕狀態控制
+    // 2. 按鈕狀態控制
     document.getElementById('discard-btn').disabled = (turn !== 'player' || selectedIndex === null);
     document.getElementById('recast-btn').disabled = (turn !== 'player');
     document.getElementById('pass-btn').disabled = (turn !== 'player');
@@ -634,7 +634,7 @@ function updateUI() {
         funcBtn.style.display = 'none';
     }
 
-    // 渲染場上目標 (保持不變)
+    // 3. 渲染場上字詞 (保持不變)
     const fieldDOM = document.getElementById('field-area');
     fieldDOM.innerHTML = '';
     activeField.forEach((target, tIdx) => {
@@ -646,15 +646,14 @@ function updateUI() {
         fieldDOM.appendChild(tCard);
     });
 
-    // --- 渲染手牌區域 ---
+    // 4. 【重點】渲染手牌區域
     const handDOM = document.getElementById('hand-area');
-    handDOM.innerHTML = '';
+    handDOM.innerHTML = ''; // 清空所有內容，防止重複
 
-    // A. 首先插入【固定角色卡】
+    // 【第一步：在最左側插入角色固定卡】
     if (gameStarted) {
         const charStaticCard = document.createElement('div');
         charStaticCard.className = 'play-card static-char-card';
-        // 設置背景圖片為選擇的角色
         charStaticCard.style.backgroundImage = `url('${IMG_BASE_URL + charImgMap[playerChar]}')`;
         charStaticCard.innerHTML = `
             <div class="c-tag">挑戰者職階</div>
@@ -663,7 +662,7 @@ function updateUI() {
         handDOM.appendChild(charStaticCard);
     }
 
-    // B. 然後循環渲染【玩家手牌】
+    // 【第二步：插入實際的手牌】
     playerHand.forEach((card, idx) => {
         const cDiv = document.createElement('div');
         cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''}`;
@@ -685,7 +684,7 @@ function updateUI() {
 
     checkWin();
 }
-
+    
 function showModal(tIdx) {
     let target = activeField[tIdx];
     let modal = document.getElementById('detail-modal');
