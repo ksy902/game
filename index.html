@@ -373,7 +373,7 @@
 <div class="hand-area" id="hand-area"></div>
 
 <script>
-/** 原始數據庫保持不變 */
+/** 1. 原始數據庫 **/
 const allRawData = [
   {"字詞":"拔","字義":["抽出","提拔","攻取"],"用例":[{"用例字義":"提拔","句子":"「是以先帝簡拔以遺陛下。」"},{"用例字義":"攻取","句子":"「已拔趙。」"}]},
   {"字詞":"汲","字義":["從井裡打水","引導"],"用例":[{"用例字義":"從井裡打水","句子":"「有泉可汲。」"},{"用例字義":"引導","句子":"「汲鄭伯。」"}]},
@@ -396,7 +396,16 @@ const allRawData = [
   {"字詞":"臨","字義":["俯視","來到","管理"],"用例":[{"用例字義":"來到","句子":"「東臨碣石，以觀滄海。」"}]}
 ];
 
-// 音效系統
+/** 2. 圖片與音效設定 **/
+const IMG_BASE_URL = "https://raw.githubusercontent.com/ksy902/game/main/";
+const charImgMap = {
+    'seer': '%E5%A4%A9%E6%A9%9F.jpeg',
+    'knight': '%E5%A2%A8%E4%BF%A0.jpeg',
+    'trickster': '%E8%A9%AD%E9%81%93.jpeg',
+    'rock': '%E7%A3%90%E7%9F%B3.jpeg',
+    'berserker': '%E7%8B%82%E8%8D%89.jpeg'
+};
+
 const audio = {
     bgm: new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a73484.mp3'),
     correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
@@ -406,6 +415,20 @@ const audio = {
 };
 audio.bgm.loop = true; audio.bgm.volume = 0.3;
 
+/** 3. 遊戲狀態變數 **/
+let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
+let playerHand = [], aiHand = [], activeField = []; 
+let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
+let playerChar = 'seer', aiDifficulty = 'normal', pressTimer = null, pressStartTime = 0;
+
+const charMap = { 'seer':'天機', 'knight':'墨俠', 'trickster':'詭道', 'rock':'磐石', 'berserker':'狂草' };
+const diffStarsHTML = {
+    'easy': '⭐',
+    'normal': '⭐⭐',
+    'hard': '⭐⭐⭐'
+};
+
+/** 4. 基礎控制函數 **/
 function toggleAudio() {
     audio.enabled = !audio.enabled;
     const volIcon = document.getElementById('vol-icon');
@@ -425,48 +448,19 @@ function playSfxAudio(type) {
     if (type === 'draw') { audio.draw.currentTime = 0; audio.draw.play(); }
 }
 
-   // --- 2A: 圖片路徑與角色對應表 ---
-const IMG_BASE_URL = "https://raw.githubusercontent.com/ksy902/game/main/";
-
-const charImgMap = {
-    'seer': '%E5%A4%A9%E6%A9%9F.jpeg',
-    'knight': '%E5%A2%A8%E4%BF%A0.jpeg',
-    'trickster': '%E8%A9%AD%E9%81%93.jpeg',
-    'rock': '%E7%A3%90%E7%9F%B3.jpeg',
-    'berserker': '%E7%8B%82%E8%8D%89.jpeg'
-};
-
-const charImgMap = {
-    'seer': '%E5%A4%A9%E6%A9%9F.jpeg',
-    'knight': '%E5%A2%A8%E4%BF%A0.jpeg',
-    'trickster': '%E8%A9%AD%E9%81%93.jpeg',
-    'rock': '%E7%A3%90%E7%9F%B3.jpeg',
-    'berserker': '%E7%8B%82%E8%8D%89.jpeg'
-};
-    
-let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
-let playerHand = [], aiHand = [], activeField = []; 
-let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
-let playerChar = 'seer', aiDifficulty = 'normal', pressTimer = null, pressStartTime = 0;
-
-const charMap = { 'seer':'天機', 'knight':'墨俠', 'trickster':'詭道', 'rock':'磐石', 'berserker':'狂草' };
-const diffStarsHTML = {
-    'easy': '<svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-empty"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-empty"></use></svg>',
-    'normal': '<svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-empty"></use></svg>',
-    'hard': '<svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg><svg class="svg-icon" style="width:14px;height:14px;"><use href="#icon-star-filled"></use></svg>'
-};
-
 function selectChar(c, el) {
     playerChar = c;
     document.querySelectorAll('#char-select-group .select-card').forEach(node => node.classList.remove('active'));
     el.classList.add('active');
 }
+
 function selectDiff(d, el) {
     aiDifficulty = d;
     document.querySelectorAll('#diff-select-group .select-card').forEach(node => node.classList.remove('active'));
     el.classList.add('active');
 }
 
+/** 5. 核心啟動函數 **/
 function startGame() {
     gameStarted = true;
     if (audio.enabled) audio.bgm.play().catch(()=>{});
@@ -475,13 +469,11 @@ function startGame() {
     document.getElementById('player-char-label').innerText = charMap[playerChar];
     document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
     
-    // 同步更新底部狀態列的玩家頭像
+    // 更新左下角玩家頭像
     const playerAvatar = document.querySelector('.bar.bottom .avatar');
     if (playerAvatar) {
-        playerAvatar.innerHTML = `<img src="${IMG_BASE_URL + charImgMap[playerChar]}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" alt="Player">`;
+        playerAvatar.innerHTML = `<img src="${IMG_BASE_URL + charImgMap[playerChar]}" class="avatar-img" alt="Player">`;
         playerAvatar.style.padding = "0";
-        playerAvatar.style.overflow = "hidden";
-        playerAvatar.style.border = "2px solid var(--c-black)";
     }
 
     document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
