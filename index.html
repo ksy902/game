@@ -502,28 +502,36 @@ function selectDiff(d, el) {
 
 /** 5. 核心啟動函數 **/
 function startGame() {
-    gameStarted = true;
-    if (audio.enabled) audio.bgm.play().catch(()=>{});
-    document.getElementById('lobby-modal').style.display = 'none';
-    
-    // 更新文字標籤
-    document.getElementById('player-char-label').innerText = charMap[playerChar];
-    document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
-    
-    // 【更新】更新嵌入在底部條左側的角色立繪
-    const cutinContainer = document.getElementById('char-cutin');
-    const cutinImg = document.getElementById('cutin-img');
-    if (cutinContainer && cutinImg) {
-        // 使用與卡牌相同的圖片
-        cutinImg.src = IMG_BASE_URL + charImgMap[playerChar];
-        cutinContainer.style.display = 'block';
-    }
+    try {
+        gameStarted = true;
+        if (audio.enabled) audio.bgm.play().catch(()=>{});
+        
+        // 1. 隱藏大廳
+        document.getElementById('lobby-modal').style.display = 'none';
+        
+        // 2. 更新標籤文字
+        document.getElementById('player-char-label').innerText = charMap[playerChar];
+        document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
+        
+        // 3. 更新左下角嵌入式立繪
+        const cutinContainer = document.getElementById('char-cutin');
+        const cutinImg = document.getElementById('cutin-img');
+        if (cutinContainer && cutinImg) {
+            cutinImg.src = IMG_BASE_URL + charImgMap[playerChar];
+            cutinContainer.style.display = 'block';
+        }
 
-    // 更新按鈕文字
-    document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
-    document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
-    
-    initGame();
+        // 4. 更新按鈕文字
+        document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
+        document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
+        
+        // 5. 啟動遊戲 UI 渲染與邏輯
+        initGame();
+        
+    } catch (err) {
+        console.error("啟動出錯:", err);
+        initGame(); // 萬一上面的代碼出錯，也要保證能進入遊戲
+    }
 }
     
 function initGame() {
