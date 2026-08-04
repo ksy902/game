@@ -37,58 +37,67 @@
     box-shadow: 8px 8px 0 var(--c-black);
 }
 
-/* 2. 角色固定卡基礎設定：大小與字義卡一致，但固定不動 */
+/* 2. 角色固定卡基礎設定：看到整張圖片 */
 .static-char-card {
-    height: 90%;
+    height: 95%; /* 稍微增加高度，確保露出更多細節 */
     aspect-ratio: 2 / 2.8;
-    background-size: cover;
-    background-position: center;
+    
+    /* 【核心修改】確保圖片整張顯現 */
+    background-size: contain;      /* 讓整張圖片縮放到卡片框內，不裁切 */
+    background-repeat: no-repeat;  /* 防止圖片重複 */
+    background-position: center bottom; /* 角色立足於卡片底部 */
+    background-color: #222;        /* 增加深色背景，若立繪較窄則兩側留黑更有質感 */
+    
     border: 4px solid var(--c-black) !important;
     box-shadow: 6px 6px 0 var(--c-black) !important;
-    cursor: default !important; /* 箭頭游標，表示不可點擊 */
-    transform: none !important; /* 強制禁止旋轉或位移 */
+    cursor: default !important; 
+    transform: none !important; 
     position: relative;
-    z-index: 5;
-    flex-shrink: 0; /* 防止被擠壓變形 */
+    z-index: 10;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 8px !important;
-    filter: brightness(1.1); /* 稍微提亮，讓立繪更清晰 */
 }
 
 /* 3. 固定卡上方的標籤 (職階) */
 .static-char-card .c-tag {
     background: var(--c-red) !important;
     color: white !important;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     border: 2px solid var(--c-black);
     padding: 2px 6px;
     align-self: flex-start;
+    z-index: 2; /* 確保在圖片上方 */
 }
 
 /* 4. 固定卡下方的文字 (角色名稱) */
 .static-char-card .c-text {
     color: white !important;
-    /* 使用強烈描邊確保在複雜背景下也能看清名字 */
+    /* 強化字體陰影，確保在各種顏色立繪下都清晰 */
     text-shadow: 
         2px 2px 0 #000, 
-       -2px -2px 0 #000, 
-        2px -2px 0 #000, 
-       -2px 2px 0 #000,
-        0px 2px 10px rgba(0,0,0,0.8);
+       -1px -1px 0 #000, 
+        1px -1px 0 #000, 
+       -1px 1px 0 #000,
+        0 0 10px rgba(0,0,0,1);
     font-size: 1.3rem !important;
     font-weight: 900;
-    align-items: flex-end; /* 文字沉到底部 */
+    align-items: flex-end; 
     justify-content: center;
     padding-bottom: 5px;
-    background: linear-gradient(transparent, rgba(0,0,0,0.5)); /* 底部陰影遮罩 */
-    width: 100%;
+    z-index: 2;
+    /* 增加底部黑邊漸層，讓名字更好讀 */
+    background: linear-gradient(transparent 0%, rgba(0,0,0,0.8) 100%);
+    width: calc(100% + 16px); /* 補回 padding */
+    margin: 0 -8px -8px -8px;
 }
 
-/* 5. 隱藏原本嵌入在白色橫條內的立繪容器 (避免重複顯示) */
-#char-cutin {
-    display: none !important;
+/* 5. 確保手牌區域不會切掉卡片頂部 */
+.hand-area {
+    overflow-y: visible !important; /* 允許卡片頂部突出 */
+    padding-top: 20px;
 }
         .avatar { display: none; } 
         .svg-icon { width: 18px; height: 18px; fill: currentColor; }
