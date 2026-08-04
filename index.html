@@ -31,14 +31,25 @@
 body {
     margin: 0; padding: 0; 
     background-color: var(--c-white); color: var(--c-black);
-    /* 這裡替換為背景圖片 */
-    background-image: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)), url('背景.jpeg'); 
+    /* 加入 GitHub 上的背景圖 */
+    background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('https://raw.githubusercontent.com/ksy902/game/main/背景.jpeg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     height: 100vh; display: flex; flex-direction: column; overflow: hidden;
 }
-
+        /* 大廳選角框圖片樣式 */
+.char-card {
+    background-size: cover !important;
+    background-position: center !important;
+    height: 140px !important;
+    justify-content: flex-end !important;
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    transition: 0.2s;
+}
+.char-card .skill-desc { background: rgba(0,0,0,0.6); margin-top: 0; }
+        
 /* 2. 新增角色圖片專用樣式 (放在 </style> 之前) */
 .avatar-img {
     width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
