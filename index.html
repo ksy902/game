@@ -6,151 +6,76 @@
     <title>言靈爭霸 - 漫畫硬核版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --c-black: #0f0f0f;
-            --c-white: #fdfdfd;
-            --c-red: #e6203a;
-            --c-green: #00b35a;
-            --c-cyan: #00e5ff;
-            --c-yellow: #ffdb00;
-            --c-purple: #7a1fd1; 
-            --c-orange: #ff6600;
-            --c-gray: #dddddd;
-            --stroke: 3px solid var(--c-black);
-            --shadow-solid: 6px 6px 0 var(--c-black);
+       :root {
+            --c-black: #0f0f0f; --c-white: #fdfdfd; --c-red: #e6203a;
+            --c-green: #00b35a; --c-cyan: #00e5ff; --c-yellow: #ffdb00;
+            --c-purple: #7a1fd1; --c-orange: #ff6600; --c-gray: #dddddd;
+            --stroke: 3px solid var(--c-black); --shadow-solid: 6px 6px 0 var(--c-black);
         }
 
-        * { 
-            box-sizing: border-box; 
-            font-family: "Noto Serif TC", "BiauKai", "Kaiti TC", "DFKai-SB", "PMingLiU", serif; 
-            user-select: none; 
-            -webkit-tap-highlight-color: transparent;
+        * { box-sizing: border-box; font-family: "Noto Serif TC", serif; user-select: none; }
+        
+        body {
+            margin: 0; padding: 0; 
+            background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('https://raw.githubusercontent.com/ksy902/game/main/%E8%83%8C%E6%99%AF.jpeg');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
-        
-        
-body {
-    margin: 0; padding: 0; 
-    background-color: var(--c-white); color: var(--c-black);
-    /* 背景圖：加上 0.5 透明度的白色遮罩，讓遊戲文字更清晰 */
-    background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('https://raw.githubusercontent.com/ksy902/game/main/%E8%83%8C%E6%99%AF.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-}
 
-      
-.char-card {
-    background-size: cover !important;
-    background-position: center !important;
-    height: 140px !important;
-    justify-content: flex-end !important;
-    color: white !important;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    transition: 0.2s;
-}
-.char-card .skill-desc { background: rgba(0,0,0,0.6); margin-top: 0; }
-        
-/* 2. 新增角色圖片專用樣式 (放在 </style> 之前) */
-.avatar-img {
-    width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
-}
+        /* 角色卡片樣式 - 大廳專用 */
+        .char-card {
+            background-size: cover !important; background-position: center !important;
+            height: 150px !important; justify-content: flex-end !important;
+            color: white !important; text-shadow: 2px 2px 4px rgba(0,0,0,1);
+            border: 3px solid var(--c-black) !important; transition: 0.2s;
+        }
+        .char-card .skill-desc { background: rgba(0,0,0,0.7); padding: 5px; width: 100%; font-size: 0.75rem; }
+        .char-card.active { outline: 4px solid var(--c-red); transform: scale(1.05); background-color: var(--c-yellow) !important;}
 
-.char-card {
-    position: relative;
-    overflow: hidden;
-    height: 160px !important; /* 增加高度以顯示圖片 */
-    justify-content: flex-end !important;
-    background-size: cover !important;
-    background-position: center !important;
-    color: white !important;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    border: 4px solid var(--c-black) !important;
-}
-
-.char-card .skill-desc {
-    background: rgba(0,0,0,0.6);
-    padding: 4px;
-    margin-top: 0;
-}
-
-/* 響應式優化：手機端縮小高度 */
-@media (max-width: 768px) {
-    .char-card { height: 120px !important; }
-}
-
-        /* SVG Icons */
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .svg-icon { width: 18px; height: 18px; fill: currentColor; }
-
-        /* UI 組件 */
-        .btn {
-            background: var(--c-yellow); border: var(--stroke); box-shadow: 4px 4px 0 var(--c-black);
-            font-weight: 900; font-size: 0.95rem; padding: 8px 14px; cursor: pointer;
-            display: inline-flex; align-items: center; gap: 6px; transition: 0.1s; transform: skew(-5deg);
-            font-family: "Noto Serif TC", sans-serif;
-        }
-        .btn:active { transform: skew(-5deg) translate(4px, 4px); box-shadow: 0 0 0 var(--c-black); }
-        .btn:disabled { background: #bbb; cursor: not-allowed; box-shadow: 4px 4px 0 var(--c-black); color: #555;}
+        .btn { background: var(--c-yellow); border: var(--stroke); box-shadow: 4px 4px 0 var(--c-black); font-weight: 900; padding: 8px 14px; cursor: pointer; transform: skew(-5deg); }
+        .btn:active { transform: skew(-5deg) translate(4px, 4px); box-shadow: 0 0 0; }
         .btn-red { background: var(--c-red); color: white; }
         .btn-cyan { background: var(--c-cyan); }
-        .btn-white { background: var(--c-white); }
         .btn-purple { background: var(--c-purple); color: white; }
 
-        /* 狀態列 */
-        .bar {
-            background: var(--c-white); border-bottom: var(--stroke); padding: 10px 20px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 10; flex-wrap: wrap; gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .bar.bottom { 
-            border-bottom: none; border-top: var(--stroke); 
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-            /* iPad 安全區域：防小白條 */
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        }
-        .player-info { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.1rem; }
-        .avatar { width: 36px; height: 36px; border: 2px solid var(--c-black); border-radius: 50%; padding: 4px; background: var(--c-gray); }
-        .hp-badge { background: var(--c-black); color: var(--c-white); padding: 2px 10px; border-radius: 20px; font-size: 1rem;}
-        
-        /* 音效開關按鈕 */
-        .audio-toggle {
-            width: 40px; height: 40px; background: var(--c-white); border: var(--stroke);
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: 3px 3px 0 var(--c-black); transition: 0.1s;
-        }
-        .audio-toggle:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--c-black); }
+        .bar { background: var(--c-white); border-bottom: var(--stroke); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .bar.bottom { border-bottom: none; border-top: var(--stroke); padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+        .player-info { display: flex; align-items: center; gap: 10px; font-weight: 900; }
+        .avatar { width: 40px; height: 40px; border: 2px solid var(--c-black); border-radius: 50%; background: var(--c-gray); overflow: hidden; }
+        .hp-badge { background: var(--c-black); color: var(--c-white); padding: 2px 10px; border-radius: 20px; }
 
-        /* 雙方標籤分色設計 */
-        .char-label { font-size: 0.85rem; padding: 3px 8px; border: 2px solid var(--c-black); margin-left: 5px; font-weight: 900;}
-        .player-label { background: var(--c-cyan); color: var(--c-black); }
-        .ai-label { background: var(--c-orange); color: var(--c-black); display: inline-flex; align-items: center; gap: 2px;}
+        .field { flex: 1; display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 30px; overflow-y: auto; flex-wrap: wrap; }
+        .target-card { width: 140px; height: 180px; background: var(--c-black); color: var(--c-white); border: 4px solid var(--c-white); box-shadow: var(--shadow-solid); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transform: skew(-2deg); }
+        .t-word { font-size: 4rem; font-weight: 900; text-shadow: 3px 3px 0 #555; }
+        .diamond-container { display: flex; gap: 8px; }
+        .diamond { width: 14px; height: 14px; border: 2px solid #555; transform: rotate(45deg); }
+        .diamond.on { background: var(--c-green); border-color: var(--c-white); }
 
-        /* 場上字詞區 */
-        .field {
-            flex: 1; display: flex; justify-content: center; align-items: flex-start; gap: 20px;
-            padding: 30px 20px; overflow-y: auto; flex-wrap: wrap; align-content: flex-start;
-        }
+        .hand-area { height: 25vh; background: rgba(238, 238, 238, 0.8); border-top: var(--stroke); display: flex; justify-content: center; align-items: flex-end; padding: 10px; gap: 12px; overflow-x: auto; }
+        .play-card { height: 90%; aspect-ratio: 2/2.8; background: var(--c-white); border: var(--stroke); padding: 10px; cursor: pointer; display: flex; flex-direction: column; flex-shrink: 0; }
+        .play-card.selected { transform: translateY(-20px); border-color: var(--c-cyan); box-shadow: 0 0 15px var(--c-cyan); }
+        .play-card.is-func { background-color: var(--c-purple); color: white; }
+        .c-tag { font-size: 0.7rem; background: var(--c-black); color: white; padding: 2px 5px; align-self: flex-start; }
+        .c-text { font-size: 1rem; font-weight: 900; text-align: center; flex: 1; display: flex; align-items: center; }
+
+        #lobby-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+        .lobby-content { background: var(--c-white); border: 6px solid var(--c-black); padding: 30px; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 15px; }
+        .lobby-title { font-size: 2rem; font-weight: 900; text-align: center; border-bottom: 4px solid #000; }
+        .grid-select { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .select-card { width: 100px; padding: 5px; cursor: pointer; border: 2px solid #000; }
         
-        .target-card {
-            width: 140px; height: 180px; background: var(--c-black); color: var(--c-white);
-            border: 4px solid var(--c-white); outline: 4px solid var(--c-black);
-            box-shadow: var(--shadow-solid); padding: 15px 10px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, outline-color 0.2s; position: relative; transform: skew(-2deg);
-            /* 觸控優化核心 */
-            touch-action: none; 
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-        }
-        .target-card:hover { transform: translateY(-5px) skew(-2deg); box-shadow: 10px 10px 0 var(--c-cyan); outline-color: var(--c-cyan); }
-        
-        .t-word { 
-            font-size: 4rem; 
-            font-weight: 900; 
-            line-height: 1; 
-            color: var(--c-white); 
-            margin-bottom: 15px;
-            text-shadow: 3px 3px 0 #555;
+        #detail-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 500; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: var(--c-white); border: 6px solid var(--c-black); padding: 20px; width: 90%; max-width: 400px; }
+        .sfx-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 999; display: flex; justify-content: center; align-items: center; }
+        .sfx-box { background: white; border: 6px solid black; padding: 20px; font-size: 2rem; font-weight: 900; transform: scale(0); opacity: 0; }
+
+        @keyframes popInStay {
+            0% { transform: scale(0); opacity: 0; }
+            10% { transform: scale(1.1); opacity: 1; }
+            90% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
         }
         
         /* 菱形紅燈 */
@@ -504,14 +429,12 @@ function playSfxAudio(type) {
 const IMG_BASE_URL = "https://raw.githubusercontent.com/ksy902/game/main/";
 
 const charImgMap = {
-    'seer': '天機.jpeg',
-    'knight': '墨俠.jpeg',
-    'trickster': '詭道.jpeg',
-    'rock': '磐石.jpeg',
-    'berserker': '狂草.jpeg'
+    'seer': '%E5%A4%A9%E6%A9%9F.jpeg',
+    'knight': '%E5%A2%A8%E4%BF%A0.jpeg',
+    'trickster': '%E8%A9%AD%E9%81%93.jpeg',
+    'rock': '%E7%A3%90%E7%9F%B3.jpeg',
+    'berserker': '%E7%8B%82%E8%8D%89.jpeg'
 };
-    
-const IMG_BASE_URL = "https://raw.githubusercontent.com/ksy902/game/main/";
 
 const charImgMap = {
     'seer': '%E5%A4%A9%E6%A9%9F.jpeg',
