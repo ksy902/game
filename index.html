@@ -469,6 +469,17 @@ function playSfxAudio(type) {
     if (type === 'draw') { audio.draw.currentTime = 0; audio.draw.play(); }
 }
 
+    // 請在此輸入你的 GitHub 原始檔案路徑前綴，例如：https://raw.githubusercontent.com/用戶名/項目名/分支/
+const IMG_BASE_URL = ""; 
+
+const charImgMap = {
+    'seer': '天機.jpeg',
+    'knight': '墨俠.jpeg',
+    'trickster': '詭道.jpeg',
+    'rock': '磐石.jpeg',
+    'berserker': '狂草.jpeg'
+};
+    
 // 遊戲變數
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
 let playerHand = [], aiHand = [], activeField = []; 
