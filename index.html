@@ -508,9 +508,18 @@ function startGame() {
     gameStarted = true;
     if (audio.enabled) audio.bgm.play().catch(()=>{});
     document.getElementById('lobby-modal').style.display = 'none';
+    
     document.getElementById('player-char-label').innerText = charMap[playerChar];
     document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
     
+    // 動態切換底部玩家頭像為圖片
+    const playerAvatar = document.querySelector('.bar.bottom .avatar');
+    if (playerAvatar) {
+        playerAvatar.innerHTML = `<img src="${IMG_BASE_URL + charImgMap[playerChar]}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" alt="Player">`;
+        playerAvatar.style.padding = "0";
+        playerAvatar.style.overflow = "hidden";
+    }
+
     document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
     document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
     initGame();
