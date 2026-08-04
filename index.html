@@ -511,7 +511,16 @@ const charImgMap = {
     'berserker': '狂草.jpeg'
 };
     
-// 遊戲變數
+const IMG_BASE_URL = "https://raw.githubusercontent.com/ksy902/game/main/";
+
+const charImgMap = {
+    'seer': '%E5%A4%A9%E6%A9%9F.jpeg',
+    'knight': '%E5%A2%A8%E4%BF%A0.jpeg',
+    'trickster': '%E8%A9%AD%E9%81%93.jpeg',
+    'rock': '%E7%A3%90%E7%9F%B3.jpeg',
+    'berserker': '%E7%8B%82%E8%8D%89.jpeg'
+};
+    
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
 let playerHand = [], aiHand = [], activeField = []; 
 let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
@@ -543,19 +552,21 @@ function startGame() {
     document.getElementById('player-char-label').innerText = charMap[playerChar];
     document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
     
-    // 動態切換底部玩家頭像為圖片
+    // 同步更新底部狀態列的玩家頭像
     const playerAvatar = document.querySelector('.bar.bottom .avatar');
     if (playerAvatar) {
         playerAvatar.innerHTML = `<img src="${IMG_BASE_URL + charImgMap[playerChar]}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" alt="Player">`;
         playerAvatar.style.padding = "0";
         playerAvatar.style.overflow = "hidden";
+        playerAvatar.style.border = "2px solid var(--c-black)";
     }
 
     document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
     document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
+    
     initGame();
 }
-
+    
 function initGame() {
     let shuffledRaw = [...allRawData].sort(() => 0.5 - Math.random());
     gameDataPool = shuffledRaw.slice(0, 18); 
