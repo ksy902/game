@@ -27,18 +27,19 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* 1. 修改背景圖 (替換原本的 body 樣式) */
+        
 body {
     margin: 0; padding: 0; 
     background-color: var(--c-white); color: var(--c-black);
-    /* 加入 GitHub 上的背景圖 */
-    background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('https://raw.githubusercontent.com/ksy902/game/main/背景.jpeg');
+    /* 背景圖：加上 0.5 透明度的白色遮罩，讓遊戲文字更清晰 */
+    background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('https://raw.githubusercontent.com/ksy902/game/main/%E8%83%8C%E6%99%AF.jpeg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     height: 100vh; display: flex; flex-direction: column; overflow: hidden;
 }
-        /* 大廳選角框圖片樣式 */
+
+      
 .char-card {
     background-size: cover !important;
     background-position: center !important;
@@ -294,6 +295,25 @@ body {
             .select-card { width: 45%; }
             .hand-area { height: 22vh; }
         }
+    .char-card {
+    background-size: cover !important;
+    background-position: center !important;
+    height: 150px !important; /* 增加高度以展示立繪 */
+    justify-content: flex-end !important; /* 文字靠下 */
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,1); /* 增強文字辨識度 */
+    border: 3px solid var(--c-black) !important;
+}
+.char-card .skill-desc { 
+    background: rgba(0,0,0,0.7); 
+    padding: 5px; 
+    margin-top: 0; 
+    width: 100%;
+}
+.char-card.active {
+    outline: 4px solid var(--c-red);
+    transform: scale(1.05);
+}
     </style>
 </head>
 <body>
@@ -319,19 +339,19 @@ body {
         
         <div style="font-weight: 900; font-size: 1.2rem;">選擇挑戰者職階：</div>
         <div class="grid-select" id="char-select-group">
-            <div class="select-card char-card active" onclick="selectChar('seer', this)">
+            <div class="select-card char-card active" style="background-image: url('https://raw.githubusercontent.com/ksy902/game/main/%E5%A4%A9%E6%A9%9F.jpeg');" onclick="selectChar('seer', this)">
                 【天機】<div class="skill-desc">開局初始手牌僅需 4 張</div>
             </div>
-            <div class="select-card char-card" onclick="selectChar('knight', this)">
+            <div class="select-card char-card" style="background-image: url('https://raw.githubusercontent.com/ksy902/game/main/%E5%A2%A8%E4%BF%A0.jpeg');" onclick="selectChar('knight', this)">
                 【墨俠】<div class="skill-desc">捨棄手牌時，僅罰抽 1 張</div>
             </div>
-            <div class="select-card char-card" onclick="selectChar('trickster', this)">
+            <div class="select-card char-card" style="background-image: url('https://raw.githubusercontent.com/ksy902/game/main/%E8%A9%AD%E9%81%93.jpeg');" onclick="selectChar('trickster', this)">
                 【詭道】<div class="skill-desc">戰術重鑄後不結束回合</div>
             </div>
-            <div class="select-card char-card" onclick="selectChar('rock', this)">
+            <div class="select-card char-card" style="background-image: url('https://raw.githubusercontent.com/ksy902/game/main/%E7%A3%90%E7%9F%B3.jpeg');" onclick="selectChar('rock', this)">
                 【磐石】<div class="skill-desc">PASS 放棄回合不罰抽</div>
             </div>
-            <div class="select-card char-card" onclick="selectChar('berserker', this)">
+            <div class="select-card char-card" style="background-image: url('https://raw.githubusercontent.com/ksy902/game/main/%E7%8B%82%E8%8D%89.jpeg');" onclick="selectChar('berserker', this)">
                 【狂草】<div class="skill-desc">發動言靈，敵罰抽 3 張</div>
             </div>
         </div>
