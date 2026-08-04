@@ -32,7 +32,7 @@
         .char-card .skill-desc { background: rgba(0,0,0,0.7); padding: 5px; width: 100%; font-size: 0.75rem; }
         .char-card.active { outline: 4px solid var(--c-red); transform: scale(1.05); background-color: var(--c-yellow) !important;}
 
-        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .avatar { display: none; } 
         .svg-icon { width: 18px; height: 18px; fill: currentColor; }
         .btn { background: var(--c-yellow); border: var(--stroke); box-shadow: 4px 4px 0 var(--c-black); font-weight: 900; padding: 8px 14px; cursor: pointer; transform: skew(-5deg); }
         .btn:active { transform: skew(-5deg) translate(4px, 4px); box-shadow: 0 0 0; }
@@ -41,9 +41,16 @@
         .btn-purple { background: var(--c-purple); color: white; }
 
         .bar { background: var(--c-white); border-bottom: var(--stroke); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        .bar.bottom { border-bottom: none; border-top: var(--stroke); padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
-        .player-info { display: flex; align-items: center; gap: 10px; font-weight: 900; }
-        .avatar { width: 40px; height: 40px; border: 2px solid var(--c-black); border-radius: 50%; background: var(--c-gray); overflow: hidden; }
+        .bar.bottom {
+    min-height: 70px;
+    background: var(--c-white);
+    display: flex;
+    align-items: center;
+}
+        .player-info {
+    margin-left: 10px;
+}
+        .avatar { display: none; } 
         .hp-badge { background: var(--c-black); color: var(--c-white); padding: 2px 10px; border-radius: 20px; }
 
         .field { flex: 1; display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 30px; overflow-y: auto; flex-wrap: wrap; }
@@ -499,24 +506,20 @@ function startGame() {
     if (audio.enabled) audio.bgm.play().catch(()=>{});
     document.getElementById('lobby-modal').style.display = 'none';
     
+    // 更新文字標籤
     document.getElementById('player-char-label').innerText = charMap[playerChar];
     document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
     
-    // 1. 更新左下角圓圈小頭像
-    const playerAvatar = document.querySelector('.bar.bottom .avatar');
-    if (playerAvatar) {
-        playerAvatar.innerHTML = `<img src="${IMG_BASE_URL + charImgMap[playerChar]}" class="avatar-img" alt="Player">`;
-        playerAvatar.style.padding = "0";
-    }
-
-    // 2. 【新增】更新右下角大立繪
+    // 【更新】更新嵌入在底部條左側的角色立繪
     const cutinContainer = document.getElementById('char-cutin');
     const cutinImg = document.getElementById('cutin-img');
     if (cutinContainer && cutinImg) {
+        // 使用與卡牌相同的圖片
         cutinImg.src = IMG_BASE_URL + charImgMap[playerChar];
-        cutinContainer.style.display = 'block'; // 顯示立繪
+        cutinContainer.style.display = 'block';
     }
 
+    // 更新按鈕文字
     document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
     document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
     
