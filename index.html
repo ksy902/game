@@ -344,22 +344,15 @@
 <!-- 場上區域 (中間) -->
 <div class="field" id="field-area"></div>
 
-<!-- 底部操作 (玩家側) - 角色立繪嵌入在此 -->
-<div class="bar bottom" style="position: relative; overflow: hidden; height: 80px;">
-    <!-- 左下角嵌入立繪 -->
-    <div id="char-cutin" style="position: absolute; left: 0; bottom: 0; height: 100%; pointer-events: none; z-index: 0; display: none;">
-        <img id="cutin-img" src="" style="height: 100%; width: auto; opacity: 0.8; object-fit: contain;">
-    </div>
-    
-    <!-- 玩家資訊 (置於立繪上方) -->
-    <div class="player-info" style="position: relative; z-index: 1; margin-left: 10px;">
-        <div>挑戰者</div>
+<!-- 底部操作條 (玩家側) - 已移除頭像與嵌入立繪 -->
+<div class="bar bottom">
+    <div class="player-info">
+        <div style="font-size: 1.1rem; font-weight: 900;">挑戰者</div>
         <div class="char-label player-label" id="player-char-label">天機</div>
-        <div class="hp-badge" id="player-hand-count">5 張</div>
+        <div class="hp-badge" id="player-hand-count">0 張</div>
     </div>
 
-    <!-- 按鈕群 (置於立繪上方) -->
-    <div class="actions-group" style="position: relative; z-index: 1;">
+    <div class="actions-group">
         <button class="btn btn-cyan" id="recast-btn" onclick="recastHand()" disabled><svg class="svg-icon"><use href="#icon-refresh"></use></svg> 重鑄</button>
         <button class="btn btn-white" id="pass-btn" onclick="passTurn()" disabled><svg class="svg-icon"><use href="#icon-skip"></use></svg> PASS</button>
         <button class="btn btn-red" id="discard-btn" onclick="discardSelected()" disabled><svg class="svg-icon"><use href="#icon-trash"></use></svg> 捨棄</button>
@@ -367,9 +360,8 @@
     </div>
 </div>
 
-<!-- 手牌區域 (最下方) -->
+<!-- 手牌區域 -->
 <div class="hand-area" id="hand-area"></div>
-
 <script>
 /** 1. 原始數據庫 **/
 const allRawData = [
