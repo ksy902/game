@@ -239,6 +239,38 @@
     outline: 4px solid var(--c-red);
     transform: scale(1.05);
 }
+#char-cutin {
+    position: fixed;
+    bottom: 0;
+    right: -20px; /* 稍微超出邊界，更有漫畫感 */
+    height: 50vh; /* 高度佔螢幕一半 */
+    z-index: 1;    /* 放在手牌背面 */
+    pointer-events: none; /* 讓滑鼠點擊穿透，不影響按鈕操作 */
+    display: none; /* 遊戲開始前隱藏 */
+    filter: drop-shadow(-10px 0 15px rgba(0,0,0,0.3));
+    opacity: 0.9;
+    /* 漫畫傾斜效果 */
+    transform: skew(-5deg);
+    border-left: 8px solid var(--c-black);
+}
+
+#cutin-img {
+    height: 100%;
+    width: auto;
+    display: block;
+    /* 漸層遮罩：讓立繪頂部平滑消失，底部與 UI 融合 */
+    mask-image: linear-gradient(to top, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);
+}
+
+/* 響應式優化：手機端縮小立繪，避免擋住動作按鈕 */
+@media (max-width: 768px) {
+    #char-cutin {
+        height: 35vh;
+        right: -10px;
+        opacity: 0.6; /* 手機端增加透明度，避免遮擋文字 */
+    }
+}        
     </style>
 </head>
 <body>
@@ -469,11 +501,19 @@ function startGame() {
     document.getElementById('player-char-label').innerText = charMap[playerChar];
     document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
     
-    // 更新左下角玩家頭像
+    // 1. 更新左下角圓圈小頭像
     const playerAvatar = document.querySelector('.bar.bottom .avatar');
     if (playerAvatar) {
         playerAvatar.innerHTML = `<img src="${IMG_BASE_URL + charImgMap[playerChar]}" class="avatar-img" alt="Player">`;
         playerAvatar.style.padding = "0";
+    }
+
+    // 2. 【新增】更新右下角大立繪
+    const cutinContainer = document.getElementById('char-cutin');
+    const cutinImg = document.getElementById('cutin-img');
+    if (cutinContainer && cutinImg) {
+        cutinImg.src = IMG_BASE_URL + charImgMap[playerChar];
+        cutinContainer.style.display = 'block'; // 顯示立繪
     }
 
     document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
@@ -715,5 +755,8 @@ function checkWin() {
     else if (aiHand.length === 0) { setTimeout(() => { alert("你輸了... 被AI擊潰。"); location.reload(); }, 500); }
 }
 </script>
+<div id="char-cutin">
+    <img id="cutin-img" src="" alt="character">
+</div>
 </body>
 </html>
