@@ -357,9 +357,9 @@
 </div>
 
 <!-- 頂部狀態 (敵方) -->
+<!-- 頂部狀態 (AI) - 已取消圓圈頭像 -->
 <div class="bar">
     <div class="player-info">
-        <svg class="avatar"><use href="#icon-ai"></use></svg>
         <div>絕對記憶 AI</div>
         <div class="char-label ai-label" id="ai-diff-label"></div>
         <div class="hp-badge" id="ai-hand-count">5 張</div>
@@ -374,18 +374,19 @@
     </div>
 </div>
 
-<!-- 場上區域 -->
-<div class="field" id="field-area"></div>
+<!-- 底部操作 (玩家) - 已取消圓圈頭像 + 嵌入立繪 -->
+<div class="bar bottom" style="position: relative; overflow: hidden;">
+    <!-- 新增：左下角角色立繪 (嵌入在條狀內) -->
+    <div id="char-cutin" style="position: absolute; left: 0; bottom: 0; height: 100%; pointer-events: none; z-index: 0; opacity: 0.8; display: none;">
+        <img id="cutin-img" src="" style="height: 100%; width: auto; object-fit: contain; filter: drop-shadow(2px 0 5px rgba(0,0,0,0.2));">
+    </div>
 
-<!-- 底部操作 (玩家) -->
-<div class="bar bottom">
-    <div class="player-info">
-        <svg class="avatar"><use href="#icon-player"></use></svg>
+    <div class="player-info" style="position: relative; z-index: 1;">
         <div>挑戰者</div>
         <div class="char-label player-label" id="player-char-label">天機</div>
         <div class="hp-badge" id="player-hand-count">5 張</div>
     </div>
-    <div class="actions-group">
+    <div class="actions-group" style="position: relative; z-index: 1;">
         <button class="btn btn-cyan" id="recast-btn" onclick="recastHand()" disabled>
             <svg class="svg-icon"><use href="#icon-refresh"></use></svg> 重鑄
         </button>
