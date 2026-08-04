@@ -27,12 +27,45 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        body {
-            margin: 0; padding: 0; background-color: var(--c-white); color: var(--c-black);
-            background-image: radial-gradient(var(--c-black) 5%, transparent 6%), radial-gradient(var(--c-black) 5%, transparent 6%);
-            background-size: 20px 20px; background-position: 0 0, 10px 10px;
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-        }
+        /* 1. 修改背景圖 (替換原本的 body 樣式) */
+body {
+    margin: 0; padding: 0; 
+    background-color: var(--c-white); color: var(--c-black);
+    /* 這裡替換為背景圖片 */
+    background-image: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)), url('背景.jpeg'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+}
+
+/* 2. 新增角色圖片專用樣式 (放在 </style> 之前) */
+.avatar-img {
+    width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+}
+
+.char-card {
+    position: relative;
+    overflow: hidden;
+    height: 160px !important; /* 增加高度以顯示圖片 */
+    justify-content: flex-end !important;
+    background-size: cover !important;
+    background-position: center !important;
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    border: 4px solid var(--c-black) !important;
+}
+
+.char-card .skill-desc {
+    background: rgba(0,0,0,0.6);
+    padding: 4px;
+    margin-top: 0;
+}
+
+/* 響應式優化：手機端縮小高度 */
+@media (max-width: 768px) {
+    .char-card { height: 120px !important; }
+}
 
         /* SVG Icons */
         .svg-icon { width: 18px; height: 18px; fill: currentColor; }
