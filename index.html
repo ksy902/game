@@ -545,6 +545,7 @@ function spawnFieldTargets(count) {
 }
 
 function updateUI() {
+    // 更新頂部與底部狀態文字
     document.getElementById('player-hand-count').innerText = playerHand.length + " 張";
     document.getElementById('ai-hand-count').innerText = aiHand.length + " 張";
     const turnDisp = document.getElementById('turn-display');
@@ -554,42 +555,67 @@ function updateUI() {
         turnDisp.innerText = '敵方回合'; turnDisp.style.background = 'var(--c-red)'; turnDisp.style.color = 'var(--c-white)';
     }
 
+    // 按鈕狀態控制
     document.getElementById('discard-btn').disabled = (turn !== 'player' || selectedIndex === null);
     document.getElementById('recast-btn').disabled = (turn !== 'player');
     document.getElementById('pass-btn').disabled = (turn !== 'player');
+    
     const funcBtn = document.getElementById('func-btn');
-    if (selectedIndex !== null && playerHand[selectedIndex] && playerHand[selectedIndex].type === 'func' && turn === 'player') funcBtn.style.display = 'inline-flex';
-    else funcBtn.style.display = 'none';
+    if (selectedIndex !== null && playerHand[selectedIndex] && playerHand[selectedIndex].type === 'func' && turn === 'player') {
+        funcBtn.style.display = 'inline-flex';
+    } else {
+        funcBtn.style.display = 'none';
+    }
 
+    // 渲染場上目標 (保持不變)
     const fieldDOM = document.getElementById('field-area');
     fieldDOM.innerHTML = '';
     activeField.forEach((target, tIdx) => {
         const tCard = document.createElement('div');
         tCard.className = 'target-card';
-        tCard.onpointerdown = (e) => { pressStartTime = Date.now(); pressTimer = setTimeout(() => showModal(tIdx), 400); };
-        tCard.onpointerup = (e) => { 
-            clearTimeout(pressTimer); 
-            if (document.getElementById('detail-modal').style.display === 'flex') hideModal();
-            else if(Date.now() - pressStartTime < 400) tryMatch(tIdx); 
-        };
-        tCard.onpointerleave = () => { clearTimeout(pressTimer); hideModal(); };
-        tCard.onpointercancel = () => { clearTimeout(pressTimer); hideModal(); };
-        
-        let diamondsHTML = target.meanings.map(m => `<div class="diamond ${m.unlocked ? 'on' : ''}"></div>`).join('');
-        tCard.innerHTML = `<div class="t-word">${target.word}</div><div class="diamond-container">${diamondsHTML}</div><div class="hint-text">長按探查</div>`;
+        tCard.innerHTML = `<div class="t-word">${target.word}</div><div class="diamond-container">${target.meanings.map(m => `<div class="diamond ${m.unlocked ? 'on' : ''}"></div>`).join('')}</div><div class="hint-text">長按探查</div>`;
+        tCard.onpointerdown = () => { pressStartTime = Date.now(); pressTimer = setTimeout(() => showModal(tIdx), 400); };
+        tCard.onpointerup = () => { clearTimeout(pressTimer); if (Date.now() - pressStartTime < 400) tryMatch(tIdx); };
         fieldDOM.appendChild(tCard);
     });
 
+    // --- 渲染手牌區域 ---
     const handDOM = document.getElementById('hand-area');
     handDOM.innerHTML = '';
+
+    // A. 首先插入【固定角色卡】
+    if (gameStarted) {
+        const charStaticCard = document.createElement('div');
+        charStaticCard.className = 'play-card static-char-card';
+        // 設置背景圖片為選擇的角色
+        charStaticCard.style.backgroundImage = `url('${IMG_BASE_URL + charImgMap[playerChar]}')`;
+        charStaticCard.innerHTML = `
+            <div class="c-tag">挑戰者職階</div>
+            <div class="c-text">${charMap[playerChar]}</div>
+        `;
+        handDOM.appendChild(charStaticCard);
+    }
+
+    // B. 然後循環渲染【玩家手牌】
     playerHand.forEach((card, idx) => {
         const cDiv = document.createElement('div');
         cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''}`;
         if(idx === selectedIndex) cDiv.classList.add('selected');
-        cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text">${card.text}</div>`;
-        cDiv.onclick = () => { if(turn === 'player') { selectedIndex = selectedIndex === idx ? null : idx; updateUI(); } }
+        
+        cDiv.innerHTML = `
+            <div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div>
+            <div class="c-text">${card.text}</div>
+        `;
+        
+        cDiv.onclick = () => { 
+            if(turn === 'player') { 
+                selectedIndex = selectedIndex === idx ? null : idx; 
+                updateUI(); 
+            } 
+        };
         handDOM.appendChild(cDiv);
     });
+
     checkWin();
 }
 
