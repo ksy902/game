@@ -408,9 +408,30 @@
 
         <div style="font-weight: 900; font-size: 1.2rem; margin-top: 10px;">設定敵方難度等級：</div>
         <div class="grid-select" id="diff-select-group">
-            <div class="select-card diff-card" onclick="selectDiff('easy', this)">⭐ 有機率錯失配對機會</div>
-            <div class="select-card diff-card active" onclick="selectDiff('normal', this)">⭐⭐ 擁有絕對記憶零失誤</div>
-            <div class="select-card diff-card" onclick="selectDiff('hard', this)">⭐⭐⭐ 初始手牌僅3張，且零失誤</div>
+            <div class="select-card diff-card" onclick="selectDiff('easy', this)">
+                <div class="diff-stars">
+                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+                    <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
+                    <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
+                </div>
+                <div class="skill-desc">有機率錯失配對機會</div>
+            </div>
+            <div class="select-card diff-card active" onclick="selectDiff('normal', this)">
+                <div class="diff-stars">
+                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+                    <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
+                </div>
+                <div class="skill-desc">擁有絕對記憶零失誤</div>
+            </div>
+            <div class="select-card diff-card" onclick="selectDiff('hard', this)">
+                <div class="diff-stars">
+                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+                </div>
+                <div class="skill-desc">初始手牌僅 3 張，且零失誤</div>
+            </div>
         </div>
 
         <button class="btn btn-red" style="font-size: 1.5rem; justify-content: center; padding: 15px; margin-top: 10px;" onclick="startGame()">
