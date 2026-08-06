@@ -547,7 +547,10 @@ const audio = {
     draw: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
     enabled: true
 };
-audio.bgm.loop = true; audio.bgm.volume = 0.3;
+// 確保這兩行一定要寫在 audio 對象定義之後
+audio.bgm.loop = true; 
+audio.bgm.volume = 0.3;
+audio.bgm.preload = 'auto';
 
 /** 3. 遊戲狀態變數 **/
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
@@ -568,13 +571,15 @@ function toggleAudio() {
     const volIcon = document.getElementById('vol-icon');
     if (audio.enabled) {
         volIcon.innerHTML = '<use href="#icon-vol-on"></use>';
+        // 如果開啟音效且遊戲已開始，立即播放 BGM
         if (gameStarted) audio.bgm.play().catch(()=>{});
     } else {
         volIcon.innerHTML = '<use href="#icon-vol-off"></use>';
+        // 如果關閉音效，立即暫停 BGM
         audio.bgm.pause();
     }
 }
-
+    
 function playSfxAudio(type) {
     if (!audio.enabled) return;
     if (type === 'correct') { audio.correct.currentTime = 0; audio.correct.play(); }
@@ -598,7 +603,11 @@ function selectDiff(d, el) {
 function startGame() {
     try {
         gameStarted = true;
-        if (audio.enabled) audio.bgm.play().catch(()=>{});
+        
+        // 這裡加上背景音樂播放邏輯
+        if (audio.enabled) {
+            audio.bgm.play().catch(e => console.log("等待交互播放"));
+        }
         
         // 1. 隱藏大廳
         document.getElementById('lobby-modal').style.display = 'none';
@@ -607,13 +616,11 @@ function startGame() {
         document.getElementById('player-char-label').innerText = charMap[playerChar];
         document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
         
-        // --- 這裡刪除了原本會讓右下角顯示圖片的 cutin 代碼 ---
-
         // 3. 更新按鈕文字
         document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
         document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
         
-        // 4. 啟動遊戲 UI 渲染 (這裡會自動在左邊生成固定卡)
+        // 4. 啟動遊戲 UI 渲染
         initGame();
         
     } catch (err) {
