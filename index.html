@@ -544,19 +544,19 @@ const charImgMap = {
 };
 
 const audio = {
-    bgm: document.getElementById('bgm-player'),
+    // 史詩級戰鼓曲：適合古風硬核對戰
+    bgm: new Audio('https://ia800605.us.archive.org/32/items/EpicBattleMusicTheFinalBattle/Epic%20Battle%20Music%20-%20The%20Final%20Battle.mp3'),
     correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
     error: new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3'),
     draw: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
     enabled: true
 };
 
-// 初始設定
-if (audio.bgm) {
-    audio.bgm.volume = 0.5;
-    // 解決部分瀏覽器預載問題
-    audio.bgm.load(); 
-}
+// 增加播放速度到 1.15 倍，讓古風鼓聲更刺激急促
+audio.bgm.loop = true; 
+audio.bgm.volume = 0.6;
+audio.bgm.playbackRate = 1.15; 
+audio.bgm.preload = 'auto';
     
 /** 3. 遊戲狀態變數 **/
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
