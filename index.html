@@ -541,18 +541,21 @@ const charImgMap = {
 };
 
 const audio = {
-    // 推薦這首：氣勢磅礡的古風戰鬥曲
-    bgm: new Audio('https://www.chosic.com/wp-content/uploads/2021/07/The-Grand-Final-Epic-Modern-Chinese-Music.mp3'),
+    // 換成這個穩定連結：古風戰鼓節奏 (Wikimedia 提供的資源，不限流量且不防盜連)
+    bgm: new Audio('https://upload.wikimedia.org/wikipedia/commons/5/5c/K_-_The_Siege.mp3'),
     correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
     error: new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3'),
     draw: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
     enabled: true
 };
 
-// 建議將戰鬥音樂音量稍微調高一點點 (0.5)，更有衝擊力
+// 初始設定
 audio.bgm.loop = true; 
-audio.bgm.volume = 0.5; 
+audio.bgm.volume = 0.4; 
 audio.bgm.preload = 'auto';
+
+// 如果這首歌加載失敗，會在瀏覽器控制台顯示錯誤，方便排查
+audio.bgm.onerror = () => console.log("音樂鏈接失效，請檢查網絡或更換鏈接");
 audio.bgm.load();
 
 /** 3. 遊戲狀態變數 **/
