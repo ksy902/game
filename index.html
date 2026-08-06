@@ -180,8 +180,42 @@
         .c-tag { font-size: 0.7rem; background: var(--c-black); color: white; padding: 2px 5px; align-self: flex-start; }
         .c-text { font-size: 1rem; font-weight: 900; text-align: center; flex: 1; display: flex; align-items: center; }
 
-        #lobby-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-        .lobby-content { background: var(--c-white); border: 6px solid var(--c-black); padding: 30px; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 15px; }
+        #lobby-modal {
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    justify-content: center;
+    overflow-y: auto; /* 允許視窗層級滾動 */
+    padding: 20px 10px;
+}
+        .lobby-content {
+    position: relative;
+    max-height: 90vh; /* 最大高度不超過螢幕 90% */
+    overflow-y: auto; /* 內容過長時出現內部捲軸 */
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    /* 增加底部內邊距，確保捲到最下面時按鈕不緊貼邊緣 */
+    padding-bottom: 30px; 
+}
+        #scope-select-group {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* 自動填充列 */
+    gap: 10px;
+    max-height: none !important; /* 移除之前的固定高度限制 */
+    overflow-y: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+        @media (max-width: 768px) {
+    .select-card {
+        width: auto !important; /* 取消固定寬度 */
+        min-height: 60px;
+        font-size: 0.9rem;
+    }
+    .lobby-title { font-size: 1.5rem; }
+}
         .lobby-title { font-size: 2rem; font-weight: 900; text-align: center; border-bottom: 4px solid #000; }
         .grid-select { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
         .select-card { width: 100px; padding: 5px; cursor: pointer; border: 2px solid #000; }
@@ -420,8 +454,7 @@
             </div>
         </div>
 
-     <div style="font-weight: 900; font-size: 1.2rem; margin-top: 10px;">設定敵方難度等級：</div>
-<div class="grid-select" id="diff-select-group">
+
     <div class="select-card diff-card" onclick="selectDiff('easy', this)">
         <div class="diff-stars">
             <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
@@ -709,15 +742,17 @@ function initLobby() {
     if(!scopeGroup) return;
     scopeGroup.innerHTML = '';
     
-    // 生成考查範圍按鈕
     Object.keys(fullWordDatabase).forEach(scope => {
         const card = document.createElement('div');
+        // 核心修改：使用 replace 移除「第x節：」或「第x節至x節：」字樣
+        const displayName = scope.replace(/^第.*?節[：:]\s*/, '').replace(/^第.*?節至.*?節[：:]\s*/, '');
+        
         card.className = `select-card ${scope === selectedScope ? 'active' : ''}`;
-        card.innerText = scope;
-        card.style.minWidth = "140px";
-        card.style.margin = "5px";
+        card.innerHTML = `<b>${displayName}</b>`; // 顯示純主題名稱
+        
+        // 修復點擊事件
         card.onclick = () => {
-            selectedScope = scope;
+            selectedScope = scope; // 後端邏輯仍使用原始 key (如 "第一節：手")
             document.querySelectorAll('#scope-select-group .select-card').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
         };
