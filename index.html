@@ -16,11 +16,18 @@
         * { box-sizing: border-box; font-family: "Noto Serif TC", serif; user-select: none; }
         
         body {
+    margin: 0; padding: 0;
+    /* 使用您的背景圖，取消遮罩 */
+    background-image: url('https://raw.githubusercontent.com/ksy902/game/main/%E8%83%8C%E6%99%AF.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* 防止整頁滾動 */
+    overflow: hidden;
 }
+
 
         /* 角色卡片樣式 - 大廳專用 */
         .char-card {
@@ -154,13 +161,17 @@
         .btn-purple { background: var(--c-purple); color: white; }
 
       .bar {
-    height: 70px;
-    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 2px solid #000;
+    padding: 10px 30px;
+    height: 80px;
 }
         .bar.bottom {
-    min-height: 70px;
-    background: var(--c-white);
+    min-height: 80px;
+    background: #fff;
+    border-top: 4px solid #000;
     display: flex;
+    justify-content: space-between;
     align-items: center;
 }
         .player-info {
@@ -170,24 +181,47 @@
         .hp-badge { background: var(--c-black); color: var(--c-white); padding: 2px 10px; border-radius: 20px; }
 
         .field {
-    flex: 1; /* 自動填滿中間 */
+    flex: 1;
+    background: transparent; /* 讓 body 背景透出來 */
     display: flex;
     justify-content: center;
-    align-items: center; /* 電腦版讓卡片居中 */
-    gap: 20px;
-    padding: 20px;
-    overflow-y: auto;
-    background: rgba(255,255,255,0.1);
+    align-items: center;
+    gap: 30px;
 }
-        .target-card { width: 140px; height: 180px; background: var(--c-black); color: var(--c-white); border: 4px solid var(--c-white); box-shadow: var(--shadow-solid); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transform: skew(-2deg); }
-        .t-word { font-size: 4rem; font-weight: 900; text-shadow: 3px 3px 0 #555; }
+        .target-card {
+    width: 140px;
+    height: 190px;
+    background: #1a1a1a !important; /* 深黑底 */
+    color: #fff !important;
+    border: 5px solid #000 !important;
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.2) !important;
+    transform: none !important;
+    position: relative;
+    padding-bottom: 20px;
+}
+        .t-word {
+    font-size: 3.5rem;
+    font-weight: 900;
+    text-shadow: none;
+}
         .diamond-container { display: flex; gap: 8px; }
         .diamond { width: 14px; height: 14px; border: 2px solid #555; transform: rotate(45deg); }
         .diamond.on { background: var(--c-green); border-color: var(--c-white); }
 
         .hand-area { height: 25vh; background: rgba(238, 238, 238, 0.8); border-top: var(--stroke); display: flex; justify-content: center; align-items: flex-end; padding: 10px; gap: 12px; overflow-x: auto; }
-        .play-card { height: 90%; aspect-ratio: 2/2.8; background: var(--c-white); border: var(--stroke); padding: 10px; cursor: pointer; display: flex; flex-direction: column; flex-shrink: 0; }
-        .play-card.selected { transform: translateY(-20px); border-color: var(--c-cyan); box-shadow: 0 0 15px var(--c-cyan); }
+        .play-card {
+    background: #fff !important;
+    border: 3px solid #000 !important;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.1) !important;
+    padding: 5px !important;
+    transform: none !important;
+}
+
+.play-card.selected {
+    border-color: var(--c-cyan) !important;
+    box-shadow: 0 0 15px var(--c-cyan) !important;
+    transform: translateY(-20px) !important;
+}
         .play-card.is-func { background-color: var(--c-purple); color: white; }
         .c-tag { font-size: 0.7rem; background: var(--c-black); color: white; padding: 2px 5px; align-self: flex-start; }
         .c-text { font-size: 1rem; font-weight: 900; text-align: center; flex: 1; display: flex; align-items: center; }
@@ -449,15 +483,29 @@
         .actions-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
         @media (max-width: 768px) {
-            .target-card { width: 110px; height: 150px; }
+            .target-card::after {
+    content: "長按探查";
+    position: absolute;
+    bottom: 10px;
+    font-size: 0.75rem;
+    color: #ccc;
+    width: 100%;
+    text-align: center;
+}
             .t-word { font-size: 3rem; }
             .c-text { font-size: 1rem; }
             .btn { font-size: 0.85rem; padding: 8px 10px; }
             .sfx-box { font-size: 1.8rem; padding: 15px 20px; }
             .lobby-title { font-size: 1.8rem; }
             .select-card { width: 45%; }
-            .hand-area { height: 22vh; }
-        }
+            .hand-area {
+    height: 24vh;
+    background: rgba(255, 255, 255, 0.5); /* 淡淡的透明感 */
+    background-image: repeating-linear-gradient(45deg, #eee 0, #eee 2px, transparent 2px, transparent 8px);
+    border-top: 2px solid #000;
+    padding: 10px 20px;
+    justify-content: center;
+}
     .char-card {
     background-size: cover !important;
     background-position: center !important;
@@ -1110,7 +1158,7 @@ function updateUI() {
         fieldDOM.appendChild(tCard);
     });
 
-    // 手牌區域
+    // 手牌區域 (保持您的邏輯，CSS 已處理外觀)
     const handDOM = document.getElementById('hand-area');
     handDOM.innerHTML = '';
 
@@ -1126,13 +1174,12 @@ function updateUI() {
         if(!card) return;
         const cDiv = document.createElement('div');
         cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''} ${idx === selectedIndex ? 'selected' : ''}`;
-        cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text">${card.text}</div>`;
+        cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text" style="font-weight:900;">${card.text}</div>`;
         cDiv.onclick = () => { if(turn === 'player') { selectedIndex = selectedIndex === idx ? null : idx; updateUI(); } };
         handDOM.appendChild(cDiv);
     });
     checkWin();
 }
-
 /** 6. 交互與戰鬥邏輯 **/
 function showModal(tIdx) {
     let target = activeField[tIdx];
