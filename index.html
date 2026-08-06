@@ -972,8 +972,8 @@ function triggerBurst(targetIndex, who, damage) {
 function recastHand() {
     let count = playerHand.length; deck.push(...playerHand); shuffle(deck); playerHand = [];
     for(let i=0; i < count + 1; i++) { let c = drawCard(); if(c) playerHand.push(c); }
-    if(playerChar === 'trickster') { playSfx("【詭道】重鑄不換人", "player"); updateUI(); }
-    else { playSfx("重鑄！換人", "player"); setTimeout(endTurn, 1000); }
+    if(playerChar === 'trickster') { playSfx("【詭道】戰術重鑄後不結束回合", "player"); updateUI(); }
+    else { playSfx("重鑄！結束回合", "player"); setTimeout(endTurn, 1000); }
 }
 
 function passTurn() {
