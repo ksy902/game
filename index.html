@@ -541,17 +541,19 @@ const charImgMap = {
 };
 
 const audio = {
-    // 替換下面這一行的網址
-    bgm: new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), 
+    // 推薦這首：氣勢磅礡的古風戰鬥曲
+    bgm: new Audio('https://www.chosic.com/wp-content/uploads/2021/07/The-Grand-Final-Epic-Modern-Chinese-Music.mp3'),
     correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
     error: new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3'),
     draw: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
     enabled: true
 };
-// 確保這兩行一定要寫在 audio 對象定義之後
+
+// 建議將戰鬥音樂音量稍微調高一點點 (0.5)，更有衝擊力
 audio.bgm.loop = true; 
-audio.bgm.volume = 0.3;
+audio.bgm.volume = 0.5; 
 audio.bgm.preload = 'auto';
+audio.bgm.load();
 
 /** 3. 遊戲狀態變數 **/
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
