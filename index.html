@@ -193,73 +193,121 @@
         .c-text { font-size: 1rem; font-weight: 900; text-align: center; flex: 1; display: flex; align-items: center; }
 
         #lobby-modal {
-    display: flex;
-    align-items: center; /* 垂直居中 */
-    justify-content: center;
-    overflow-y: auto; /* 允許視窗層級滾動 */
-    padding: 20px 10px;
-}
-      .lobby-content {
-    width: 90%;
-    max-width: 650px; /* 電腦版限制最大寬度，不會看起來鬆散 */
-    margin: auto;
-}
-       #scope-select-group {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* 自動填滿，最少130px */
-    gap: 12px;
-    padding: 15px !important;
-    max-height: none !important; /* 移除之前的 150px 限制 */
-    overflow: visible !important; /* 讓內容完全流出 */
-    background: rgba(0,0,0,0.05) !important;
-    border: 2px solid var(--c-black);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: flex; justify-content: center; align-items: flex-start; /* 改為從頂部開始排 */
+    padding: 20px; z-index: 3000; overflow-y: auto;
 }
 
-/* 適配手機端：每行顯示兩個範圍 */
-@media (max-width: 600px) {
-    #scope-select-group {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* 自動格線佈局 */
-    gap: 10px;
-    max-height: none !important; /* 核心：不要限制高度 */
-    overflow-y: visible !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-        .lobby-title { font-size: 2rem; font-weight: 900; text-align: center; border-bottom: 4px solid #000; }
-        .grid-select { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-        .select-card { width: 100px; padding: 5px; cursor: pointer; border: 2px solid #000; }
-        
-        #detail-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 500; display: none; justify-content: center; align-items: center; }
-        .modal-content { background: var(--c-white); border: 6px solid var(--c-black); padding: 20px; width: 90%; max-width: 400px; }
-        .sfx-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none; /* 讓點擊可以穿透 */
-    z-index: 9999; /* 最高的層級 */
+.lobby-content {
+    background: #fff;
+    border: 4px solid #000;
+    box-shadow: 12px 12px 0 #00e5ff; /* 截圖中的青色陰影 */
+    width: 100%;
+    max-width: 800px; /* 放寬寬度以容納多個按鈕 */
+    padding: 30px;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    gap: 20px;
 }
-        .sfx-box {
-    background: var(--c-white);
-    border: 6px solid var(--c-black);
-    color: var(--c-black);
-    padding: 30px 50px;
-    font-size: 3rem; /* 增大字體更有衝擊力 */
+
+.lobby-title {
+    font-size: 2.2rem;
     font-weight: 900;
     text-align: center;
-    transform: skew(-5deg) scale(0); /* 初始縮小 */
-    opacity: 0;
-    box-shadow: 15px 15px 0 var(--c-black);
-    /* 移除任何可能影響定位的 margin */
-    margin: 0; 
+    border-bottom: 4px solid #000;
+    margin-bottom: 10px;
 }
 
+/* 職階卡片排列 */
+#char-select-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    justify-content: center;
+}
+
+.select-card.char-card {
+    aspect-ratio: 2 / 2.8;
+    border: 3px solid #000;
+    background-size: cover !important;
+    background-position: center !important;
+    position: relative;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.select-card.char-card.active {
+    outline: 5px solid #e6203a;
+    transform: scale(1.05);
+    z-index: 5;
+}
+
+/* 難度塊排列 */
+#diff-select-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.diff-card {
+    flex: 1;
+    border: 3px solid #000;
+    background: #fff;
+    padding: 15px;
+    text-align: center;
+    min-width: 100px;
+}
+
+.diff-card.active {
+    background: #ff6600; /* 橙色選中 */
+    color: #000;
+}
+
+/* --- 核心修改：範圍選擇區排列 (完整顯示 10 個範圍) --- */
+#scope-select-group {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+    gap: 10px;
+    padding: 15px;
+    background: #e0e0e0; /* 截圖中的灰色背景 */
+    border: 3px solid #000;
+    max-height: none !important; 
+    overflow: visible !important;
+}
+
+#scope-select-group .select-card {
+    background: #fff;
+    border: 2px solid #000;
+    padding: 10px 5px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    width: 100%;
+}
+
+#scope-select-group .select-card.active {
+    background: #ffdb00;
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 #000;
+}
+
+/* 確認出戰大按鈕 */
+.btn-start {
+    background: #e6203a;
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 900;
+    padding: 15px;
+    border: 4px solid #000;
+    cursor: pointer;
+    transform: skewX(-10deg); /* 斜切效果 */
+    margin-top: 10px;
+    transition: 0.1s;
+}
+
+.btn-start:active {
+    transform: skewX(-10deg) translate(4px, 4px);
+    box-shadow: none;
+}
         @keyframes popInStay {
     0% { transform: scale(0) skew(-5deg); opacity: 0; }
     10% { transform: scale(1.2) skew(-5deg); opacity: 1; }
