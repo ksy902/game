@@ -541,7 +541,7 @@ const charImgMap = {
 };
 
 const audio = {
-    // 換成這個穩定連結：古風戰鼓節奏 (Wikimedia 提供的資源，不限流量且不防盜連)
+    // 換成這個網址：這是一首極其穩定的古風戰鼓曲 (Wikimedia 資源)
     bgm: new Audio('https://upload.wikimedia.org/wikipedia/commons/5/5c/K_-_The_Siege.mp3'),
     correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
     error: new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3'),
@@ -551,13 +551,14 @@ const audio = {
 
 // 初始設定
 audio.bgm.loop = true; 
-audio.bgm.volume = 0.4; 
+audio.bgm.volume = 0.5; // 調高音量增強戰鬥感
 audio.bgm.preload = 'auto';
 
-// 如果這首歌加載失敗，會在瀏覽器控制台顯示錯誤，方便排查
-audio.bgm.onerror = () => console.log("音樂鏈接失效，請檢查網絡或更換鏈接");
-audio.bgm.load();
-
+// 診斷監聽：如果還是沒聲音，這會在控制台告訴我們原因
+audio.bgm.addEventListener('error', function(e) {
+    console.error("音樂加載失敗，錯誤代碼:", audio.bgm.error.code);
+});
+    
 /** 3. 遊戲狀態變數 **/
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
 let playerHand = [], aiHand = [], activeField = []; 
@@ -610,12 +611,18 @@ function startGame() {
     try {
         gameStarted = true;
         
-        // 這裡加上背景音樂播放邏輯
+        // 加上這一段
         if (audio.enabled) {
-            audio.bgm.play().catch(e => console.log("等待交互播放"));
+            audio.bgm.currentTime = 0; // 確保從頭開始
+            let playPromise = audio.bgm.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("自動播放被攔截，這通常是因為音樂文件還沒下載完。請再試一次或檢查網路。");
+                });
+            }
         }
         
-        // 1. 隱藏大廳
         document.getElementById('lobby-modal').style.display = 'none';
         
         // 2. 更新標籤文字
