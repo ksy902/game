@@ -371,7 +371,9 @@
     </style>
 </head>
 <body>
-
+<audio id="bgm-player" loop preload="auto">
+    <source src="https://assets.mixkit.co/music/preview/mixkit-glitchy-epic-drums-and-percussion-544.mp3" type="audio/mpeg">
+</audio>
 <!-- SVG 圖標庫 (僅保留功能性圖標，已刪除頭像引用) -->
 <svg style="display: none;">
     <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></symbol>
@@ -541,23 +543,16 @@ const charImgMap = {
 };
 
 const audio = {
-    // 換成這個網址：這是一首極其穩定的古風戰鼓曲 (Wikimedia 資源)
-    bgm: new Audio('https://upload.wikimedia.org/wikipedia/commons/5/5c/K_-_The_Siege.mp3'),
+    // 連結到 HTML 的播放器
+    bgm: document.getElementById('bgm-player'),
     correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
     error: new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3'),
     draw: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
     enabled: true
 };
 
-// 初始設定
-audio.bgm.loop = true; 
-audio.bgm.volume = 0.5; // 調高音量增強戰鬥感
-audio.bgm.preload = 'auto';
-
-// 診斷監聽：如果還是沒聲音，這會在控制台告訴我們原因
-audio.bgm.addEventListener('error', function(e) {
-    console.error("音樂加載失敗，錯誤代碼:", audio.bgm.error.code);
-});
+// 初始化設定
+audio.bgm.volume = 0.6; // 戰鼓聲調高一點才有氣勢
     
 /** 3. 遊戲狀態變數 **/
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
@@ -611,18 +606,17 @@ function startGame() {
     try {
         gameStarted = true;
         
-        // 加上這一段
+        // 播放背景音樂
         if (audio.enabled) {
-            audio.bgm.currentTime = 0; // 確保從頭開始
-            let playPromise = audio.bgm.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("自動播放被攔截，這通常是因為音樂文件還沒下載完。請再試一次或檢查網路。");
-                });
-            }
+            // 由於已經在 HTML 預載，這裡直接 play 成功率最高
+            audio.bgm.play().then(() => {
+                console.log("BGM 成功播放");
+            }).catch(e => {
+                console.warn("播放失敗，嘗試手動解鎖", e);
+            });
         }
         
+        // 隱藏大廳
         document.getElementById('lobby-modal').style.display = 'none';
         
         // 2. 更新標籤文字
