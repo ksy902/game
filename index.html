@@ -420,33 +420,39 @@
             </div>
         </div>
 
-        <div style="font-weight: 900; font-size: 1.2rem; margin-top: 10px;">設定敵方難度等級：</div>
-        <div class="grid-select" id="diff-select-group">
-            <div class="select-card diff-card" onclick="selectDiff('easy', this)">
-                <div class="diff-stars">
-                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
-                    <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
-                    <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
-                </div>
-                <div class="skill-desc">有機率錯失配對機會</div>
-            </div>
-            <div class="select-card diff-card active" onclick="selectDiff('normal', this)">
-                <div class="diff-stars">
-                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
-                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
-                    <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
-                </div>
-                <div class="skill-desc">擁有絕對記憶零失誤</div>
-            </div>
-            <div class="select-card diff-card" onclick="selectDiff('hard', this)">
-                <div class="diff-stars">
-                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
-                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
-                    <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
-                </div>
-                <div class="skill-desc">初始手牌僅 3 張，且零失誤</div>
-            </div>
+     <div style="font-weight: 900; font-size: 1.2rem; margin-top: 10px;">設定敵方難度等級：</div>
+<div class="grid-select" id="diff-select-group">
+    <div class="select-card diff-card" onclick="selectDiff('easy', this)">
+        <div class="diff-stars">
+            <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+            <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
+            <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
         </div>
+        <div class="skill-desc">有機率錯失配對機會</div>
+    </div>
+    <div class="select-card diff-card active" onclick="selectDiff('normal', this)">
+        <div class="diff-stars">
+            <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+            <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+            <svg class="svg-icon"><use href="#icon-star-empty"></use></svg>
+        </div>
+        <div class="skill-desc">擁有絕對記憶零失誤</div>
+    </div>
+    <div class="select-card diff-card" onclick="selectDiff('hard', this)">
+        <div class="diff-stars">
+            <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+            <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+            <svg class="svg-icon"><use href="#icon-star-filled"></use></svg>
+        </div>
+        <div class="skill-desc">初始手牌僅 3 張</div>
+    </div>
+</div> <!-- 這裡要把難度的 div 關掉 -->
+
+<!-- 範圍選擇區 (獨立出來) -->
+<div style="font-weight: 900; font-size: 1.2rem; margin-top: 15px;">選擇考查範圍：</div>
+<div class="grid-select" id="scope-select-group" style="max-height: 150px; overflow-y: auto; padding: 10px; border: 3px solid var(--c-black); background: #eee; border-radius: 0; box-shadow: inset 4px 4px 0 rgba(0,0,0,0.1);">
+    <!-- 範圍卡片將由 JS 自動生成 -->
+</div>
 
         <button class="btn btn-red" style="font-size: 1.5rem; justify-content: center; padding: 15px; margin-top: 10px;" onclick="startGame()">
             確認出戰
