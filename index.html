@@ -372,8 +372,9 @@
 </head>
 <body>
 <audio id="bgm-player" loop preload="auto">
-    <source src="https://assets.mixkit.co/music/preview/mixkit-glitchy-epic-drums-and-percussion-544.mp3" type="audio/mpeg">
+    <source src="https://upload.wikimedia.org/wikipedia/commons/2/23/Epic_Battle_Music_-_The_Final_Battle.mp3" type="audio/mpeg">
 </audio>
+    
 <!-- SVG 圖標庫 (僅保留功能性圖標，已刪除頭像引用) -->
 <svg style="display: none;">
     <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></symbol>
@@ -543,7 +544,6 @@ const charImgMap = {
 };
 
 const audio = {
-    // 連結到 HTML 的播放器
     bgm: document.getElementById('bgm-player'),
     correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
     error: new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3'),
@@ -551,8 +551,12 @@ const audio = {
     enabled: true
 };
 
-// 初始化設定
-audio.bgm.volume = 0.6; // 戰鼓聲調高一點才有氣勢
+// 初始設定
+if (audio.bgm) {
+    audio.bgm.volume = 0.5;
+    // 解決部分瀏覽器預載問題
+    audio.bgm.load(); 
+}
     
 /** 3. 遊戲狀態變數 **/
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
@@ -606,28 +610,30 @@ function startGame() {
     try {
         gameStarted = true;
         
-        // 播放背景音樂
-        if (audio.enabled) {
-            // 由於已經在 HTML 預載，這裡直接 play 成功率最高
-            audio.bgm.play().then(() => {
-                console.log("BGM 成功播放");
-            }).catch(e => {
-                console.warn("播放失敗，嘗試手動解鎖", e);
-            });
+        // --- 核心修復：強制啟動背景音樂 ---
+        if (audio.enabled && audio.bgm) {
+            audio.bgm.currentTime = 0; // 重置到開頭
+            
+            // 嘗試播放
+            const playPromise = audio.bgm.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    console.log("音樂成功響起！");
+                }).catch(error => {
+                    console.log("自動播放被攔截，請檢查網址或瀏覽器設定");
+                });
+            }
         }
+        // ------------------------------
         
-        // 隱藏大廳
         document.getElementById('lobby-modal').style.display = 'none';
-        
-        // 2. 更新標籤文字
         document.getElementById('player-char-label').innerText = charMap[playerChar];
         document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
         
-        // 3. 更新按鈕文字
         document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
         document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
         
-        // 4. 啟動遊戲 UI 渲染
         initGame();
         
     } catch (err) {
