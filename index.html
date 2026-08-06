@@ -16,11 +16,11 @@
         * { box-sizing: border-box; font-family: "Noto Serif TC", serif; user-select: none; }
         
         body {
-            margin: 0; padding: 0; 
-            background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url('https://raw.githubusercontent.com/ksy902/game/main/%E8%83%8C%E6%99%AF.jpeg');
-            background-size: cover; background-position: center; background-attachment: fixed;
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-        }
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 防止整頁滾動 */
+}
 
         /* 角色卡片樣式 - 大廳專用 */
         .char-card {
@@ -153,7 +153,10 @@
         .btn-cyan { background: var(--c-cyan); }
         .btn-purple { background: var(--c-purple); color: white; }
 
-        .bar { background: var(--c-white); border-bottom: var(--stroke); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+      .bar {
+    height: 70px;
+    flex-shrink: 0;
+}
         .bar.bottom {
     min-height: 70px;
     background: var(--c-white);
@@ -166,7 +169,16 @@
         .avatar { display: none; } 
         .hp-badge { background: var(--c-black); color: var(--c-white); padding: 2px 10px; border-radius: 20px; }
 
-        .field { flex: 1; display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 30px; overflow-y: auto; flex-wrap: wrap; }
+        .field {
+    flex: 1; /* 自動填滿中間 */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* 電腦版讓卡片居中 */
+    gap: 20px;
+    padding: 20px;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.1);
+}
         .target-card { width: 140px; height: 180px; background: var(--c-black); color: var(--c-white); border: 4px solid var(--c-white); box-shadow: var(--shadow-solid); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transform: skew(-2deg); }
         .t-word { font-size: 4rem; font-weight: 900; text-shadow: 3px 3px 0 #555; }
         .diamond-container { display: flex; gap: 8px; }
@@ -188,9 +200,9 @@
     padding: 20px 10px;
 }
       .lobby-content {
-    max-height: 90vh; /* 允許大廳本身滾動 */
-    overflow-y: auto;
-    padding-bottom: 30px; 
+    width: 90%;
+    max-width: 650px; /* 電腦版限制最大寬度，不會看起來鬆散 */
+    margin: auto;
 }
        #scope-select-group {
     display: grid !important;
@@ -221,15 +233,40 @@
         
         #detail-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 500; display: none; justify-content: center; align-items: center; }
         .modal-content { background: var(--c-white); border: 6px solid var(--c-black); padding: 20px; width: 90%; max-width: 400px; }
-        .sfx-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 999; display: flex; justify-content: center; align-items: center; }
-        .sfx-box { background: white; border: 6px solid black; padding: 20px; font-size: 2rem; font-weight: 900; transform: scale(0); opacity: 0; }
+        .sfx-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* 讓點擊可以穿透 */
+    z-index: 9999; /* 最高的層級 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+        .sfx-box {
+    background: var(--c-white);
+    border: 6px solid var(--c-black);
+    color: var(--c-black);
+    padding: 30px 50px;
+    font-size: 3rem; /* 增大字體更有衝擊力 */
+    font-weight: 900;
+    text-align: center;
+    transform: skew(-5deg) scale(0); /* 初始縮小 */
+    opacity: 0;
+    box-shadow: 15px 15px 0 var(--c-black);
+    /* 移除任何可能影響定位的 margin */
+    margin: 0; 
+}
 
         @keyframes popInStay {
-            0% { transform: scale(0); opacity: 0; }
-            10% { transform: scale(1.1); opacity: 1; }
-            90% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(0); opacity: 0; }
-        }
+    0% { transform: scale(0) skew(-5deg); opacity: 0; }
+    10% { transform: scale(1.2) skew(-5deg); opacity: 1; }
+    20% { transform: scale(1) skew(-5deg); opacity: 1; }
+    80% { transform: scale(1) skew(-5deg); opacity: 1; }
+    100% { transform: scale(0) skew(-5deg); opacity: 0; }
+}
         
         /* 菱形紅燈 */
         .diamond-container { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
@@ -1150,8 +1187,16 @@ function aiAction() {
 
 function playSfx(text, type) {
     const sfx = document.getElementById('sfx-layer');
-    sfx.innerText = text; sfx.className = `sfx-box sfx-${type}`;
-    sfx.style.animation = 'none'; void sfx.offsetWidth; sfx.style.animation = 'popInStay 2s forwards';
+    if (!sfx) return;
+    
+    sfx.innerText = text;
+    // 移除舊的類名並加入新的（例如 sfx-player, sfx-error 等）
+    sfx.className = `sfx-box sfx-${type}`;
+    
+    // 強制重啟動畫
+    sfx.style.animation = 'none';
+    void sfx.offsetWidth; 
+    sfx.style.animation = 'popInStay 2s forwards'; // 這裡要與 CSS 的動畫名稱一致
 }
 function triggerShake() { document.body.classList.remove('shake-effect'); void document.body.offsetWidth; document.body.classList.add('shake-effect'); }
 function checkWin() {
