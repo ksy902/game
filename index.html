@@ -512,6 +512,7 @@
 
 <div class="hand-area" id="hand-area"></div>
 
+/** 1. 完整字詞數據庫 (已合併 2 & 6 節，並包含 1-11 節內容) **/
 const fullWordDatabase = {
     "第一節：手": [
         {"字詞":"拔","字義":["抽出","提拔","攻取"],"用例":[{"用例字義":"提拔","句子":"「是以先帝簡拔以遺陛下。」"},{"用例字義":"攻取","句子":"「已拔趙。」"}]},
@@ -520,24 +521,24 @@ const fullWordDatabase = {
         {"字詞":"受","字義":["給予","接受","教授"],"用例":[{"用例字義":"給予","句子":"「因能而受官。」"},{"用例字義":"教授","句子":"「師者，所以傳道、受業、解惑也。」"}]},
         {"字詞":"奉","字義":["雙手恭敬捧著","獻送","貫徹執行"],"用例":[{"用例字義":"雙手恭敬捧著","句子":"「沛公奉卮酒為壽。」"}]},
         {"字詞":"予","字義":["給予","讚許"],"用例":[{"用例字義":"讚許","句子":"「眾必予之。」"}]},
-        {"字詞":"冥","字義":["深夜","昏暗"],"用例":[{"用例字義":"深夜","句子":"「冥行而已矣。」"}]},
-        {"字詞":"亂","字義":["治絲","治理"],"用例":[{"用例字義":"治理","句子":"「予有亂臣十人。」"}]},
-        {"字詞":"微","字義":["美麗","藏匿","偷偷","若不是","衰敗","精妙"],"用例":[{"用例字義":"藏匿","句子":"「其徒微之。」"}]},
-        {"字詞":"易","字義":["賜與","交換","替代","整治","輕視"],"用例":[{"用例字義":"交換","句子":"「寡人欲以百里之地易安陵。」"}]},
+        {"字詞":"微","字義":["美麗","藏匿","偷偷","若不是"],"用例":[{"用例字義":"藏匿","句子":"「其徒微之。」"}]},
+        {"字詞":"易","字義":["賜與","交換","替代","整治"],"用例":[{"用例字義":"交換","句子":"「寡人欲以百里之地易安陵。」"}]},
         {"字詞":"敝","字義":["破舊衣服","損害","丟棄","失敗","疲憊"],"用例":[{"用例字義":"損害","句子":"「因人之力而敝之，不仁。」"}]},
         {"字詞":"寇","字義":["入侵","敵人"],"用例":[{"用例字義":"入侵","句子":"「大兵不寇。」"}]},
         {"字詞":"逮","字義":["及、到","逮捕"],"用例":[{"用例字義":"及、到","句子":"「逮事父母。」"}]},
-        {"字詞":"服","字義":["降服、使服從","從事","致力","任用"],"用例":[{"用例字義":"致力","句子":"「有事，弟子服其勞。」"}]},
-        {"字詞":"舉","字義":["雙手托物","推薦","全","盡","施行","攻克"],"用例":[{"用例字義":"推薦","句子":"「君子不以言舉人。」"}]},
-        {"字詞":"與","字義":["給予","幫助"],"用例":[{"用例字義":"給予","句子":"「玉斗一雙，欲與亞父。」"}]},
-        {"字詞":"采","字義":["採摘","採集"],"用例":[{"用例字義":"採摘","句子":"「参差荇菜，左右采之。」"}]},
-        {"字詞":"及","字義":["追上","到達","及至","接近"],"用例":[{"用例字義":"追上","句子":"「懷王悔，追張儀，不及。」"}]},
-        {"字詞":"使","字義":["差遣","出使","使臣","使命","使喚","假使"],"用例":[{"用例字義":"差遣","句子":"「懷王使屈原造為憲令。」"}]},
-        {"字詞":"具","字義":["備辦","完備、詳盡","有"],"用例":[{"用例字義":"完備、詳盡","句子":"「此人一一為具言所聞。」"}]},
-        {"字詞":"付","字義":["交給"],"用例":[{"用例字義":"交給","句子":"「宜付有司，論其行賞。」"}]},
-        {"字詞":"假","字義":["借用","寬容","憑藉","給予","暫且"],"用例":[{"用例字義":"憑藉","句子":"「善假於物也。」"}] }
+        {"字詞":"服","字義":["降服","從事","致力","任用"],"用例":[{"用例字義":"致力","句子":"「有事，弟子服其勞。」"}]},
+        {"字詞":"舉","字義":["雙手托物","推薦","施行","攻克"],"用例":[{"用例字義":"推薦","句子":"「君子不以言舉人。」"}]},
+        {"字詞":"使","字義":["差遣","使臣"],"用例":[{"用例字義":"差遣","句子":"「懷王使屈原造為憲令。」"}]},
+        {"字詞":"具","字義":["備辦","完備","有"],"用例":[{"用例字義":"完備","句子":"「此人一一為具言所聞。」"}]},
+        {"字詞":"假","字義":["借用","憑藉","暫且"],"用例":[{"用例字義":"憑藉","句子":"「善假於物也。」"}]},
+        {"字詞":"謝","字義":["辭職","辭別","推辭","道歉"],"用例":[{"用例字義":"道歉","句子":"「旦日不可不蚤自來謝項王。」"}]},
+        {"字詞":"顧","字義":["回頭看","觀看","拜訪"],"用例":[{"用例字義":"拜訪","句子":"「將軍宜屈駕顧之。」"}]},
+        {"字詞":"竟","字義":["完畢","全部"],"用例":[{"用例字義":"完畢","句子":"「語竟。」"}]},
+        {"字詞":"悉","字義":["詳盡","了解","全部"],"用例":[{"用例字義":"了解","句子":"「丞相亮其悉朕意。」"}]},
+        {"字詞":"與","字義":["給予","幫助"],"用例":[{"用例字義":"幫助","句子":"「君不與勝者。」"}]},
+        {"字詞":"采","字義":["採摘","採集"],"用例":[{"用例字義":"採摘","句子":"「左右采之。」"}]}
     ],
-    "頭、眼、鼻、農業": [ // 已合併原 PDF 第二節與第六節
+    "頭、眼、鼻、農業": [
         {"字詞":"監","字義":["察看","借鑑","映照"],"用例":[{"用例字義":"借鑑","句子":"「我不可不監於有夏。」"}]},
         {"字詞":"臨","字義":["俯視","來到","管理"],"用例":[{"用例字義":"來到","句子":"「東臨碣石，以觀滄海。」"}]},
         {"字詞":"相","字義":["觀察","輔助"],"用例":[{"用例字義":"觀察","句子":"「相鼠有皮，人而無儀。」"}]},
@@ -546,12 +547,9 @@ const fullWordDatabase = {
         {"字詞":"釋","字義":["解下","捨棄","免除"],"用例":[{"用例字義":"解下","句子":"「釋獲。」"}]},
         {"字詞":"見","字義":["看見","被"],"用例":[{"用例字義":"被","句子":"「徒見欺。」"}]},
         {"字詞":"臭","字義":["辨別氣味","氣味"],"用例":[{"用例字義":"氣味","句子":"「其臭如蘭。」"}]},
-        {"字詞":"項","字義":"頸後部","字義":["頸"],"用例":[{"用例字義":"頸","句子":"「青項金翅。」"}]},
+        {"字詞":"項","字義":["頸"],"用例":[{"用例字義":"頸","句子":"「青項金翅。」"}]},
         {"字詞":"碩","字義":["頭大","大"],"用例":[{"用例字義":"大","句子":"「碩鼠碩鼠。」"}]},
-        {"字詞":"顧","字義":["回頭看","觀看","拜訪","關心","只是","難道"],"用例":[{"用例字義":"拜訪","句子":"「將軍宜屈駕顧之。」"}]},
-        {"字詞":"冠","字義":["帽子","戴"],"用例":[{"用例字義":"戴","句子":"「冠切雲之崔巍。」"}]},
-        {"字詞":"竟","字義":["完畢","全部"],"用例":[{"用例字義":"完畢","句子":"「語竟。」"}]},
-        {"字詞":"利","字義":["割禾收成","利益","敏捷"],"用例":[{"用例字義":"利益","句子":"「利盡南海。」"}]},
+        {"字詞":"利","字義":["收成","利益","敏捷"],"用例":[{"用例字義":"利益","句子":"「利盡南海。」"}]},
         {"字詞":"廩","字義":["米倉","儲積"],"用例":[{"用例字義":"米倉","句子":"「父母使舜完廩。」"}]},
         {"字詞":"夙","字義":["早","前","平素"],"用例":[{"用例字義":"早","句子":"「夙夜在公。」"}]},
         {"字詞":"薪","字義":["柴木"],"用例":[{"用例字義":"柴木","句子":"「場主積薪其中。」"}]},
@@ -569,7 +567,7 @@ const fullWordDatabase = {
         {"字詞":"惡","字義":["罪過","厭惡","妒嫉","怎麼"],"用例":[{"用例字義":"怎麼","句子":"「惡能無紀。」"}]},
         {"字詞":"恨","字義":["怨恨","遺憾","違逆"],"用例":[{"用例字義":"遺憾","句子":"「嘆息痛恨於桓靈也。」"}]},
         {"字詞":"次","字義":["商議","駐紮"],"用例":[{"用例字義":"駐紮","句子":"「次於魚陵。」"}]},
-        {"字詞":"憐","字義":["憐憫","愛"],"用例":[{"用例字義":"愛","句子":"「項燕為楚將，數有功，愛士卒。」"}]},
+        {"字詞":"憐","字義":["憐憫","愛"],"用例":[{"用例字義":"愛","句子":"「楚人憐之。」"}]},
         {"字詞":"旨","字義":["美味","美好","意義"],"用例":[{"用例字義":"美味","句子":"「既飲旨酒。」"}]},
         {"字詞":"司","字義":["掌管","官吏"],"用例":[{"用例字義":"掌管","句子":"「司王朝。」"}]},
         {"字詞":"否","字義":["否定","貶斥","惡"],"用例":[{"用例字義":"惡","句子":"「陟罰臧否。」"}]},
@@ -658,7 +656,7 @@ const fullWordDatabase = {
         {"字詞":"或","字義":["兵器","有的","假如"],"用例":[{"用例字義":"有的","句子":"「或曰：『六國互喪』。」"}]},
         {"字詞":"辭","字義":["言辭","政令","辭別","推辭","計較"],"用例":[{"用例字義":"辭別","句子":"「今者出，未辭也。」"}]}
     ],
-    "第八節：動植物": [
+    "第八節至十一節：其他": [
         {"字詞":"刺","字義":["兵器","指責","諷刺"],"用例":[{"用例字義":"指責","句子":"「能面刺寡人之過者。」"}]},
         {"字詞":"季","字義":["幼小","排行最後"],"用例":[{"用例字義":"幼小","句子":"「一翁二季對雙望。」"}]},
         {"字詞":"乖","字義":["違背","謬誤","分離","差異"],"用例":[{"用例字義":"差異","句子":"「人度量之乖舛。」"}]},
@@ -674,122 +672,16 @@ const fullWordDatabase = {
         {"字詞":"條","字義":["小樹條","條理"],"用例":[{"用例字義":"條理","句子":"「有條而不紊。」"}]},
         {"字詞":"非","字義":["違背","責難","錯誤"],"用例":[{"用例字義":"錯誤","句子":"「覺今是而昨非。」"}]},
         {"字詞":"喪","字義":["失去","滅亡"],"用例":[{"用例字義":"失去","句子":"「賢者能勿喪耳。」"}]},
-        {"字詞":"狎","字義":["親近","不重視"],"用例":[{"用例字義":"親近","句子":"「稍近，益狎。」"}]},
-        {"字詞":"華","字義":["花","繁榮"],"用例":[{"用例字義":"繁榮","句子":"「不居其華。」"}]},
-        {"字詞":"善","字義":["美好","喜愛","讚美","交好","擅長"],"用例":[{"用例字義":"擅長","句子":"「友善柔。」"}]},
-        {"字詞":"虞","字義":["欺詐","擔憂","料想","準備"],"用例":[{"用例字義":"擔憂","句子":"「高枕而無虞。」"}]},
-        {"字詞":"獄","字義":["訟案","刑罰"],"用例":[{"用例字義":"訟案","句子":"「夫君臣無獄。」"}]},
         {"字詞":"胡","字義":["肉","為什麼"],"用例":[{"用例字義":"為什麼","句子":"「胡不歸?」"}]},
         {"字詞":"本","字義":["根","根本","版本","查考"],"用例":[{"用例字義":"根本","句子":"「必固其根本。」"}]},
         {"字詞":"屬","字義":["連續","類","親屬","管轄","跟隨"],"用例":[{"用例字義":"跟隨","句子":"「騎能屬者百餘人。」"}]}
-    ],
-    "第九節：大自然及建設": [
-        {"字詞":"向","字義":["回響","從前"],"用例":[{"用例字義":"從前","句子":"「向為身死而不受。」"}]},
-        {"字詞":"封","字義":["封疆","國土"],"用例":[{"用例字義":"國土","句子":"「封內千里。」"}]},
-        {"字詞":"陰","字義":["北面","幽暗","暗中","女子","月亮"],"用例":[{"用例字義":"北面","句子":"「陰谷皆入濟。」"}]},
-        {"字詞":"莫","字義":["傍晚"],"用例":[{"用例字義":"傍晚","句子":"「莫夜月明。」"}]},
-        {"字詞":"崇","字義":["高大"],"用例":[{"用例字義":"高大","句子":"「崇四尺。」"}]},
-        {"字詞":"麓","字義":["山腳"],"用例":[{"用例字義":"山腳","句子":"「瞻彼旱麓。」"}]},
-        {"字詞":"濟","字義":["水名","渡河"],"用例":[{"用例字義":"渡河","句子":"「濟河，圍令狐。」"}]},
-        {"字詞":"邑","字義":["聚居地","國家"],"用例":[{"用例字義":"國家","句子":"「君惠徼福於敝邑。」"}]},
-        {"字詞":"旦","字義":["破曉","早晨","日"],"用例":[{"用例字義":"日","句子":"「比三旦立市。」"}]},
-        {"字詞":"實","字義":["富足","加強","充塞"],"用例":[{"用例字義":"加強","句子":"「徙民實邊。」"}]},
-        {"字詞":"除","字義":["臺階","拜受官位"],"用例":[{"用例字義":"臺階","句子":"「苔痕上除綠。」"}]},
-        {"字詞":"隙","字義":["牆隙","缺點","過節","空閒"],"用例":[{"用例字義":"過節","句子":"「素與諸葛亮有隙。」"}]},
-        {"字詞":"淫","字義":["久雨","過多"],"用例":[{"用例字義":"久雨","句子":"「淫雨霏霏。」"}]},
-        {"字詞":"就","字義":["登上","赴任","靠近","成就","完成"],"用例":[{"用例字義":"成就","句子":"「欲就公子之名。」"}]},
-        {"字詞":"陳","字義":["陳列","陳述","陣列"],"用例":[{"用例字義":"陳列","句子":"「陳魚而觀之。」"}]},
-        {"字詞":"泛","字義":["漂浮"],"用例":[{"用例字義":"漂浮","句子":"「大蘇泛赤壁。」"}]},
-        {"字詞":"道","字義":["路途","取道","方法","風尚","真理","正義","學說"],"用例":[{"用例字義":"風尚","句子":"「師道之不傳也久矣。」"}]},
-        {"字詞":"廢","字義":["傾倒","廢棄","停止","放下"],"用例":[{"用例字義":"廢棄","句子":"「今存其本不忍廢。」"}]},
-        {"字詞":"薄","字義":["密集處","迫近"],"用例":[{"用例字義":"迫近","句子":"「日薄西山。」"}]},
-        {"字詞":"良","字義":["良善","長","很"],"用例":[{"用例字義":"很","句子":"「良多趣味。」"}]},
-        {"字詞":"郭","字義":["圍牆"],"用例":[{"用例字義":"圍牆","句子":"「出郭相扶將。」"}]},
-        {"字詞":"間","字義":["門隙","空隙","機會","時間","隔閡","挑撥","參與","夾雜"],"用例":[{"用例字義":"夾雜","句子":"「中間力拉崩倒之聲。」"}]}
-    ],
-    "第十節：器物財賄": [
-        {"字詞":"鄙","字義":["邊邑","輕視","淺陋"],"用例":[{"用例字義":"淺陋","句子":"「肉食者鄙。」"}]},
-        {"字詞":"陽","字義":["山的南面"],"用例":[{"用例字義":"山的南面","句子":"「華山之陽。」"}]},
-        {"字詞":"窮","字義":["盡","不得志","尋究"],"用例":[{"用例字義":"盡","句子":"「圖窮而匕首見。」"}]},
-        {"字詞":"行","字義":["走路","離開","經過"],"用例":[{"用例字義":"離開","句子":"「欲毋行。」"}]},
-        {"字詞":"察","字義":["審察","精明","考查推薦"],"用例":[{"用例字義":"審察","句子":"「向察眾人之議。」"}]},
-        {"字詞":"朝","字義":["早晨","朝見","朝廷","朝代"],"用例":[{"用例字義":"早晨","句子":"「朝發白帝。」"}]},
-        {"字詞":"當","字義":["相對","抵擋","把守","執掌"],"用例":[{"用例字義":"相對","句子":"「當窗理雲鬢。」"}]},
-        {"字詞":"期","字義":["時期","時間","約會","約定","期望"],"用例":[{"用例字義":"時間","句子":"「度已失期。」"}]},
-        {"字詞":"益","字義":["溢出","增加","擴大","更加","漸漸"],"用例":[{"用例字義":"增加","句子":"「人或益之。」"}]},
-        {"字詞":"俎","字義":["砧板"],"用例":[{"用例字義":"砧板","句子":"「方為刀俎。」"}]},
-        {"字詞":"席","字義":["墊子","憑藉","壓"],"用例":[{"用例字義":"憑藉","句子":"「席太后之寵。」"}]},
-        {"字詞":"束","字義":["捆縛","收拾","約束"],"用例":[{"用例字義":"捆縛","句子":"「入束矢於朝。」"}]},
-        {"字詞":"策","字義":["馬鞭","駕馭"],"用例":[{"用例字義":"駕馭","句子":"「策其馬。」"}]},
-        {"字詞":"引","字義":["拉開","拉伸","薦舉","舉起"],"用例":[{"用例字義":"舉起","句子":"「引其匕首。」"}]},
-        {"字詞":"轡","字義":["繮繩"],"用例":[{"用例字義":"繮繩","句子":"「公子執轡。」"}]},
-        {"字詞":"負","字義":["以背負物","擔負","覆蓋","辜負","仗恃"],"用例":[{"用例字義":"以背負物","句子":"「負二山。」"}]},
-        {"字詞":"素","字義":["白色","質樸","平時"],"用例":[{"用例字義":"質樸","句子":"「可以調素琴。」"}]},
-        {"字詞":"卑","字義":["地勢低下","衰弱","輕視"],"用例":[{"用例字義":"地勢低下","句子":"「聞長沙卑濕。」"}]},
-        {"字詞":"勒","字義":["馬銜","約束","雕刻"],"用例":[{"用例字義":"約束","句子":"「勒騎下平原。」"}]},
-        {"字詞":"羈","字義":["馬籠頭","拘束","停留"],"用例":[{"用例字義":"拘束","句子":"「羈鳥戀舊林。」"}]},
-        {"字詞":"規","字義":["工具","法度","模範","勸告"],"用例":[{"用例字義":"模範","句子":"「死為壯士規。」"}]},
-        {"字詞":"曲","字義":["彎曲","理虧"],"用例":[{"用例字義":"理虧","句子":"「曲在秦。」"}]},
-        {"字詞":"累","字義":["拘繫","重疊","多次"],"用例":[{"用例字義":"多次","句子":"「累召不應。」"}]},
-        {"字詞":"嘉","字義":["美味","美好","讚賞"],"用例":[{"用例字義":"讚賞","句子":"「嘉其能行古道。」"}]},
-        {"字詞":"畢","字義":["獵具","獵取","完","全部"],"用例":[{"用例字義":"完","句子":"「老人語未畢。」"}]},
-        {"字詞":"輿","字義":["車"],"用例":[{"用例字義":"車","句子":"「雖有舟輿。」"}]},
-        {"字詞":"輦","字義":["人拉車","載運"],"用例":[{"用例字義":"載運","句子":"「輦金輸虜庭。」"}]},
-        {"字詞":"至","字義":["到達","極致"],"用例":[{"用例字義":"到達","句子":"「鳳鳥不至。」"}]},
-        {"字詞":"中","字義":["符合","中傷"],"用例":[{"用例字義":"符合","句子":"「其曲中規。」"}]},
-        {"字詞":"則","字義":["法則","榜樣"],"用例":[{"用例字義":"法則","句子":"「地不易其則。」"}]},
-        {"字詞":"輟","字義":["停止","長官"],"用例":[{"用例字義":"停止","句子":"「輟行。」"}]},
-        {"字詞":"契","字義":["雕刻","契約"],"用例":[{"用例字義":"契約","句子":"「得人遺契者。」"}]},
-        {"字詞":"旌","字義":["旗子","表揚"],"用例":[{"用例字義":"旗子","句子":"「旌蔽日兮。」"}]},
-        {"字詞":"賈","字義":["買賣","商人"],"用例":[{"用例字義":"買賣","句子":"「令我行賈。」"}]},
-        {"字詞":"絕","字義":["斷絲","橫越","停止","極","完全","陡峭"],"用例":[{"用例字義":"完全","句子":"「絕無蹤響。」"}]},
-        {"字詞":"賢","字義":["多財","超過"],"用例":[{"用例字義":"超過","句子":"「不必賢於弟子。」"}]},
-        {"字詞":"鏤","字義":["鐵","雕刻"],"用例":[{"用例字義":"雕刻","句子":"「金石可鏤。」"}]},
-        {"字詞":"盈","字義":["充溢","自滿","旺盛","超過"],"用例":[{"用例字義":"充溢","句子":"「水流而不盈。」"}]},
-        {"字詞":"卒","字義":["完畢","終結","終究","死亡"],"用例":[{"用例字義":"死亡","句子":"「劉表卒。」"}]},
-        {"字詞":"湯","字義":["熱水"],"用例":[{"用例字義":"熱水","句子":"「如探湯。」"}]},
-        {"字詞":"約","字義":["纏束","約束","節儉","簡要"],"用例":[{"用例字義":"約束","句子":"「約我以禮。」"}]},
-        {"字詞":"圖","字義":["版圖","謀劃"],"用例":[{"用例字義":"謀劃","句子":"「君與臣圖事。」"}]},
-        {"字詞":"納","字義":["水浸","接受","進獻"],"用例":[{"用例字義":"接受","句子":"「察納雅言。」"}]},
-        {"字詞":"被","字義":["被子","覆蓋"],"用例":[{"用例字義":"覆蓋","句子":"「被南越中數州。」"}]},
-        {"字詞":"曾","字義":["炊器","親屬","竟","增加"],"用例":[{"用例字義":"親屬","句子":"「高曾之時。」"}]},
-        {"字詞":"得","字義":["財富","收穫","體會","融洽","得意","正確"],"用例":[{"用例字義":"收穫","句子":"「冀有萬一之得。」"}]},
-        {"字詞":"蓋","字義":["覆蓋物","車蓋","遮蓋","壓倒","原來是","大概","怎麼"],"用例":[{"用例字義":"壓倒","句子":"「英才蓋世。」"}]},
-        {"字詞":"率","字義":["繩","遵循","全","大概"],"用例":[{"用例字義":"遵循","句子":"「其不率教者。」"}]},
-        {"字詞":"亡","字義":["逃亡","丟失","無"],"用例":[{"用例字義":"逃亡","句子":"「今亡亦死。」"}]},
-        {"字詞":"王","字義":["君王","稱王"],"用例":[{"用例字義":"稱王","句子":"「欲王關中。」"}]},
-        {"字詞":"遺","字義":["遺落","捨棄","送給"],"用例":[{"用例字義":"捨棄","句子":"「小學而大遺。」"}]},
-        {"字詞":"貽","字義":["贈送"],"用例":[{"用例字義":"贈送","句子":"「以貽之。」"}]},
-        {"字詞":"質","字義":["抵押","抵押物"],"用例":[{"用例字義":"抵押","句子":"「質於齊。」"}]}
-    ],
-    "第十一節：祭祀、占卜、死亡及其他": [
-        {"字詞":"夷","字義":["繳射","平坦"],"用例":[{"用例字義":"平坦","句子":"「馳騁夷道。」"}]},
-        {"字詞":"醜","字義":["可惡","厭惡","慚愧"],"用例":[{"用例字義":"慚愧","句子":"「寡人醜乎。」"}]},
-        {"字詞":"幸","字義":["免凶","寵幸","希望","親臨"],"用例":[{"用例字義":"免凶","句子":"「不幸短命。」"}]},
-        {"字詞":"故","字義":["故舊","舊交","衰老","從前","仍舊","本來","原因","所以","事故"],"用例":[{"用例字義":"原因","句子":"「問其故。」"}]},
-        {"字詞":"殊","字義":["殺傷","分","出眾","很"],"用例":[{"用例字義":"分","句子":"「不殊貴賤。」"}]},
-        {"字詞":"示","字義":["吉凶","顯現"],"用例":[{"用例字義":"顯現","句子":"「武王示之病。」"}]},
-        {"字詞":"齋","字義":["禁食","恭敬"],"用例":[{"用例字義":"恭敬","句子":"「潔齋俟兮。」"}]},
-        {"字詞":"殆","字義":["危險","死亡","戰敗","疲乏","大概","幾乎"],"用例":[{"用例字義":"死亡","句子":"「國危身殆。」"}]},
-        {"字詞":"外","字義":["例外","疏遠","背離","排斥","拋棄"],"用例":[{"用例字義":"疏遠","句子":"「內小人而外君子。」"}]},
-        {"字詞":"遂","字義":["逃跑","成功"],"用例":[{"用例字義":"成功","句子":"「百事乃遂。」"}]},
-        {"字詞":"私","字義":["私田","私下","偏愛"],"用例":[{"用例字義":"偏愛","句子":"「吾妻之美我者，私我也。」"}]},
-        {"字詞":"固","字義":["堅固","久遠","固執","本來","確實"],"用例":[{"用例字義":"固執","句子":"「汝心之固。」"}]},
-        {"字詞":"倍","字義":["背向","背叛","違背","一倍","更加"],"用例":[{"用例字義":"更加","句子":"「每逢佳節倍思親。」"}]},
-        {"字詞":"少","字義":["數量少","稍微","輕視"],"用例":[{"用例字義":"稍微","句子":"「顏色不少變。」"}]},
-        {"字詞":"勝","字義":["勝任","禁得住","戰勝","優美","盛大","盡"],"用例":[{"用例字義":"盡","句子":"「材木不可勝用也。」"}]},
-        {"字詞":"修","字義":["裝飾","編寫","學習","美好","長、高"],"用例":[{"用例字義":"美好","句子":"「是故事修而謗興。」"}]}
     ]
 };
 
-/** 2. 圖片與音效設定 **/
+/** 2. 圖片配置與音效 **/
 const IMG_BASE_URL = "https://raw.githubusercontent.com/ksy902/game/main/";
 const charImgMap = {
-    'seer': '%E5%A4%A9%E6%A9%9F.jpeg',
-    'knight': '%E5%A2%A8%E4%BF%A0.jpeg',
-    'trickster': '%E8%A9%AD%E9%81%93.jpeg',
-    'rock': '%E7%A3%90%E7%9F%B3.jpeg',
-    'berserker': '%E7%8B%82%E8%8D%89.jpeg'
+    'seer': '天機.jpeg', 'knight': '墨俠.jpeg', 'trickster': '詭道.jpeg', 'rock': '磐石.jpeg', 'berserker': '狂草.jpeg'
 };
 
 const audio = {
@@ -801,7 +693,7 @@ const audio = {
 };
 audio.bgm.loop = true; audio.bgm.volume = 0.3;
 
-/** 3. 遊戲狀態變數 **/
+/** 3. 遊戲核心變數 **/
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
 let playerHand = [], aiHand = [], activeField = []; 
 let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
@@ -809,22 +701,20 @@ let playerChar = 'seer', aiDifficulty = 'normal', selectedScope = "第一節：�
 let pressTimer = null, pressStartTime = 0;
 
 const charMap = { 'seer':'天機', 'knight':'墨俠', 'trickster':'詭道', 'rock':'磐石', 'berserker':'狂草' };
-const diffStarsHTML = { 'easy': '⭐', 'normal': '⭐⭐', 'hard': '⭐⭐⭐' };
 
-let selectedScope = "第一節：手"; // 預設範圍
-
-/** 新增：初始化範圍選擇介面 **/
+/** 4. 初始化功能 (修復空白條與點擊無效) **/
 function initLobby() {
     const scopeGroup = document.getElementById('scope-select-group');
     if(!scopeGroup) return;
     scopeGroup.innerHTML = '';
+    
+    // 生成考查範圍按鈕
     Object.keys(fullWordDatabase).forEach(scope => {
         const card = document.createElement('div');
-        // 複用現有的 select-card 樣式
         card.className = `select-card ${scope === selectedScope ? 'active' : ''}`;
         card.innerText = scope;
-        card.style.minWidth = "120px";
-        card.style.flex = "1 1 auto";
+        card.style.minWidth = "140px";
+        card.style.margin = "5px";
         card.onclick = () => {
             selectedScope = scope;
             document.querySelectorAll('#scope-select-group .select-card').forEach(c => c.classList.remove('active'));
@@ -834,26 +724,7 @@ function initLobby() {
     });
 }
 
-/** 5. 基礎控制函數 **/
-function toggleAudio() {
-    audio.enabled = !audio.enabled;
-    const volIcon = document.getElementById('vol-icon');
-    if (audio.enabled) {
-        volIcon.innerHTML = '<use href="#icon-vol-on"></use>';
-        if (gameStarted) audio.bgm.play().catch(()=>{});
-    } else {
-        volIcon.innerHTML = '<use href="#icon-vol-off"></use>';
-        audio.bgm.pause();
-    }
-}
-    
-function playSfxAudio(type) {
-    if (!audio.enabled) return;
-    if (type === 'correct') { audio.correct.currentTime = 0; audio.correct.play(); }
-    if (type === 'error') { audio.error.currentTime = 0; audio.error.play(); }
-    if (type === 'draw') { audio.draw.currentTime = 0; audio.draw.play(); }
-}
-
+// 選擇職階與難度
 function selectChar(c, el) {
     playerChar = c;
     document.querySelectorAll('#char-select-group .select-card').forEach(node => node.classList.remove('active'));
@@ -866,37 +737,51 @@ function selectDiff(d, el) {
     el.classList.add('active');
 }
 
-/** 6. 核心啟動函數 **/
+function toggleAudio() {
+    audio.enabled = !audio.enabled;
+    const volIcon = document.getElementById('vol-icon');
+    if (audio.enabled) {
+        volIcon.innerHTML = '<use href="#icon-vol-on"></use>';
+        if (gameStarted) audio.bgm.play().catch(()=>{});
+    } else {
+        volIcon.innerHTML = '<use href="#icon-vol-off"></use>';
+        audio.bgm.pause();
+    }
+}
+
+/** 5. 核心啟動函數 (修復邏輯洩漏) **/
 function startGame() {
     gameStarted = true;
     if (audio.enabled) audio.bgm.play().catch(()=>{});
     document.getElementById('lobby-modal').style.display = 'none';
-    document.getElementById('player-char-label').innerText = charMap[playerChar];
-    document.getElementById('ai-diff-label').innerHTML = diffStarsHTML[aiDifficulty];
-    document.getElementById('pass-btn').innerHTML = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
-    document.getElementById('discard-btn').innerHTML = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
     
+    // 初始化 UI 標籤
+    document.getElementById('player-char-label').innerText = charMap[playerChar];
+    document.getElementById('pass-btn').innerText = playerChar === 'rock' ? 'PASS(無罰)' : 'PASS(罰1)';
+    document.getElementById('discard-btn').innerText = playerChar === 'knight' ? '捨棄(罰1)' : '捨棄(罰2)';
+
     initGame();
 }
-    
+
 function initGame() {
-    // 1. 根據所選範圍提取數據
+    // 1. 根據所選範圍篩選數據
     let rawList = [...fullWordDatabase[selectedScope]];
     
-    // 2. 核心邏輯：如果多於 20 個字，隨機抽 20 個；少於 20 個則全出
+    // 2. 隨機選取最多 20 個字詞
     if (rawList.length > 20) {
-        rawList.sort(() => 0.5 - Math.random()); // 洗牌
-        gameDataPool = rawList.slice(0, 20);      // 取前 20 個
+        rawList.sort(() => 0.5 - Math.random());
+        gameDataPool = rawList.slice(0, 20);
     } else {
-        gameDataPool = rawList; // 全部展示
+        gameDataPool = rawList;
     }
     
-    // 3. 初始化其餘遊戲變數
+    // 3. 初始化數據 (修復：這些現在都在 initGame 裡面運行)
     unspawnedWords = [...gameDataPool];
     buildDeck();
-    spawnFieldTargets(3);
+    activeField = [];
+    spawnFieldTargets(3); 
     
-    // 4. 起始抽牌
+    // 4. 起始手牌
     playerHand = []; aiHand = [];
     let pCount = (playerChar === 'seer') ? 4 : 5;
     let aCount = (aiDifficulty === 'hard') ? 3 : 5;
@@ -906,21 +791,6 @@ function initGame() {
     updateUI();
     playSfx(`範圍：${selectedScope}。戰鬥開始！`, "player");
 }
-    
-    unspawnedWords = [...gameDataPool];
-
-    buildDeck();
-    spawnFieldTargets(3);
-    
-    let pCount = (playerChar === 'seer') ? 4 : 5;
-    let aCount = (aiDifficulty === 'hard') ? 3 : 5;
-
-    for(let i=0; i<pCount; i++) playerHand.push(drawCard());
-    for(let i=0; i<aCount; i++) aiHand.push(drawCard());
-    
-    updateUI();
-    playSfx("言靈之戰，開始！", "player");
-}
 
 function buildDeck() {
     deck = [];
@@ -929,10 +799,11 @@ function buildDeck() {
             deck.push({ id: `m_${item.字詞}_${mean}`, type: 'meaning', parentWord: item.字詞, text: mean });
         });
     });
+    // 增加特殊言靈牌
     for(let i=0; i<2; i++) {
-        deck.push({ id: `f1_${i}`, type: 'func', action: 'attack', text: '令敵方罰抽牌' }); 
-        deck.push({ id: `f2_${i}`, type: 'func', action: 'skip', text: '封印敵方一回合' });
-        deck.push({ id: `f3_${i}`, type: 'func', action: 'reset', text: '捨棄手牌並重抽' });
+        deck.push({ id: `f1_${i}`, type: 'func', action: 'attack', text: '令敵罰抽' }); 
+        deck.push({ id: `f2_${i}`, type: 'func', action: 'skip', text: '封印回合' });
+        deck.push({ id: `f3_${i}`, type: 'func', action: 'reset', text: '重構手牌' });
     }
     shuffle(deck);
 }
@@ -968,11 +839,8 @@ function updateUI() {
     document.getElementById('player-hand-count').innerText = playerHand.length + " 張";
     document.getElementById('ai-hand-count').innerText = aiHand.length + " 張";
     const turnDisp = document.getElementById('turn-display');
-    if (turn === 'player') {
-        turnDisp.innerText = '你的回合'; turnDisp.style.background = 'var(--c-cyan)'; turnDisp.style.color = 'var(--c-black)';
-    } else {
-        turnDisp.innerText = '敵方回合'; turnDisp.style.background = 'var(--c-red)'; turnDisp.style.color = 'var(--c-white)';
-    }
+    turnDisp.innerText = turn === 'player' ? '你的回合' : '敵方回合';
+    turnDisp.style.background = turn === 'player' ? 'var(--c-cyan)' : 'var(--c-red)';
 
     document.getElementById('discard-btn').disabled = (turn !== 'player' || selectedIndex === null);
     document.getElementById('recast-btn').disabled = (turn !== 'player');
@@ -980,53 +848,63 @@ function updateUI() {
     
     const funcBtn = document.getElementById('func-btn');
     if (selectedIndex !== null && playerHand[selectedIndex] && playerHand[selectedIndex].type === 'func' && turn === 'player') {
-        funcBtn.style.display = 'inline-flex';
+        funcBtn.style.display = 'block';
     } else {
         funcBtn.style.display = 'none';
     }
 
+    // 場上區域
     const fieldDOM = document.getElementById('field-area');
     fieldDOM.innerHTML = '';
     activeField.forEach((target, tIdx) => {
         const tCard = document.createElement('div');
         tCard.className = 'target-card';
-        tCard.innerHTML = `<div class="t-word">${target.word}</div><div class="diamond-container">${target.meanings.map(m => `<div class="diamond ${m.unlocked ? 'on' : ''}"></div>`).join('')}</div><div class="hint-text">長按探查</div>`;
+        tCard.innerHTML = `
+            <div class="t-word">${target.word}</div>
+            <div class="diamond-container">
+                ${target.meanings.map(m => `<div class="diamond ${m.unlocked ? 'on' : ''}"></div>`).join('')}
+            </div>`;
         tCard.onpointerdown = () => { pressStartTime = Date.now(); pressTimer = setTimeout(() => showModal(tIdx), 400); };
         tCard.onpointerup = () => { clearTimeout(pressTimer); if (Date.now() - pressStartTime < 400) tryMatch(tIdx); };
         fieldDOM.appendChild(tCard);
     });
 
+    // 手牌區域
     const handDOM = document.getElementById('hand-area');
     handDOM.innerHTML = '';
 
-    if (gameStarted) {
-        const charStaticCard = document.createElement('div');
-        charStaticCard.className = 'play-card static-char-card';
-        charStaticCard.style.backgroundImage = `url('${IMG_BASE_URL + charImgMap[playerChar]}')`;
-        charStaticCard.innerHTML = `<div class="c-tag">職階</div><div class="c-text">${charMap[playerChar]}</div>`;
-        handDOM.appendChild(charStaticCard);
-    }
+    // 固定職階卡
+    const charCard = document.createElement('div');
+    charCard.className = 'play-card static-char-card';
+    charCard.style.backgroundImage = `url('${IMG_BASE_URL + encodeURIComponent(charImgMap[playerChar])}')`;
+    charCard.innerHTML = `<div class="c-tag">職階</div><div class="c-text">${charMap[playerChar]}</div>`;
+    handDOM.appendChild(charCard);
 
+    // 實際玩家手牌
     playerHand.forEach((card, idx) => {
+        if(!card) return;
         const cDiv = document.createElement('div');
-        cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''}`;
-        if(idx === selectedIndex) cDiv.classList.add('selected');
+        cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''} ${idx === selectedIndex ? 'selected' : ''}`;
         cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text">${card.text}</div>`;
         cDiv.onclick = () => { if(turn === 'player') { selectedIndex = selectedIndex === idx ? null : idx; updateUI(); } };
         handDOM.appendChild(cDiv);
     });
     checkWin();
 }
-    
+
+/** 6. 交互與戰鬥邏輯 **/
 function showModal(tIdx) {
     let target = activeField[tIdx];
     let modal = document.getElementById('detail-modal');
     let content = document.getElementById('detail-content');
-    let listHTML = target.meanings.map(m => m.unlocked ? `<div class="m-slot unlocked"><span>[ 破譯 ] ${m.text}</span>${m.example ? `<div class="m-example">典籍：${m.example}</div>` : ''}</div>` : `<div class="m-slot"><span style="color:#666;">[ 鎖定 ] 未知字義</span></div>`).join('');
-    content.innerHTML = `<div class="m-word">${target.word}</div>${listHTML}<div style="font-size:0.85rem; text-align:right; margin-top:15px; color:#555; font-weight:bold;">(放開以關閉)</div>`;
+    let listHTML = target.meanings.map(m => m.unlocked ? 
+        `<div style="background:#eee; padding:10px; margin-bottom:5px;"><b>${m.text}</b><div style="font-size:0.8rem;">典籍：${m.example || '無'}</div></div>` : 
+        `<div style="color:#aaa; padding:10px;">[ 鎖定中 ]</div>`).join('');
+    content.innerHTML = `<h2 style="margin:0;">${target.word}</h2>${listHTML}`;
     modal.style.display = 'flex';
 }
-function hideModal() { document.getElementById('detail-modal').style.display = 'none'; }
+
+window.addEventListener('pointerup', () => { document.getElementById('detail-modal').style.display = 'none'; });
 
 function tryMatch(targetIndex) {
     if(turn !== 'player' || selectedIndex === null) return;
@@ -1038,7 +916,7 @@ function tryMatch(targetIndex) {
         if(target.meanings.every(m => m.unlocked)) triggerBurst(targetIndex, 'player', target.meanings.length);
         else { playSfx("破譯成功！", "correct"); updateUI(); setTimeout(endTurn, 1000); }
     } else {
-        triggerShake(); playSfxAudio('error'); playSfx("配對錯誤！反噬抽2張", "error");
+        playSfxAudio('error'); playSfx("配對錯誤！抽牌處罰", "error");
         for(let i=0; i<2; i++) { let c = drawCard(); if(c) playerHand.push(c); }
         selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
     }
@@ -1046,105 +924,89 @@ function tryMatch(targetIndex) {
 
 function triggerBurst(targetIndex, who, damage) {
     if(who === 'player') {
-        playSfx(`擊破！對手遭罰抽${damage}張`, "correct");
+        playSfx(`擊破！對手遭罰抽 ${damage} 張`, "correct");
         for(let i=0; i<damage; i++) { let c = drawCard(); if(c) aiHand.push(c); }
     } else {
-        triggerShake(); playSfx(`崩潰！你遭罰抽${damage}張`, "error");
+        playSfx(`崩潰！你遭罰抽 ${damage} 張`, "error");
         for(let i=0; i<damage; i++) { let c = drawCard(); if(c) playerHand.push(c); }
     }
     activeField.splice(targetIndex, 1); updateUI(); setTimeout(endTurn, 2000);
 }
 
 function recastHand() {
-    if(turn !== 'player') return;
     let count = playerHand.length; deck.push(...playerHand); shuffle(deck); playerHand = [];
     for(let i=0; i < count + 1; i++) { let c = drawCard(); if(c) playerHand.push(c); }
-    playSfxAudio('draw'); selectedIndex = null; updateUI();
-    if(playerChar === 'trickster') playSfx("【詭道】重鑄！", "player");
-    else { playSfx("重鑄！結束回合", "player"); setTimeout(endTurn, 1500); }
+    if(playerChar === 'trickster') { playSfx("【詭道】重鑄不換人", "player"); updateUI(); }
+    else { playSfx("重鑄！換人", "player"); setTimeout(endTurn, 1000); }
 }
 
 function passTurn() {
-    if(turn !== 'player') return;
-    if(playerChar === 'rock') playSfx("【磐石】不罰抽", "player");
-    else { playSfx("罰抽1張", "player"); let c = drawCard(); if(c) playerHand.push(c); playSfxAudio('draw');}
-    selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
+    if(playerChar !== 'rock') { let c = drawCard(); if(c) playerHand.push(c); }
+    playSfx("跳過回合", "player"); setTimeout(endTurn, 1000);
 }
 
 function discardSelected() {
-    if(turn !== 'player' || selectedIndex === null) return;
     discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
-    let dmg = playerChar === 'knight' ? 1 : 2;
-    for(let i=0; i<dmg; i++) { let c = drawCard(); if(c) playerHand.push(c); }
-    playSfxAudio('draw'); selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
+    let d = playerChar === 'knight' ? 1 : 2;
+    for(let i=0; i<d; i++) { let c = drawCard(); if(c) playerHand.push(c); }
+    setTimeout(endTurn, 1000);
 }
 
 function useFunctionCard() {
-    let card = playerHand[selectedIndex];
-    discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
-    selectedIndex = null; playSfxAudio('correct');
+    let card = playerHand[selectedIndex]; discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
     if(card.action === 'attack') {
-        let dmg = playerChar === 'berserker' ? 3 : 2;
-        playSfx(`言靈發動！敵方罰抽${dmg}張`, "player");
-        for(let i=0; i<dmg; i++) { let c = drawCard(); if(c) aiHand.push(c); }
-    } else if (card.action === 'skip') { playSfx("封印敵方回合！", "player"); skipNextAi = true; }
-    else if (card.action === 'reset') { playSfx("重構手牌！", "player"); playerHand = []; for(let i=0; i<5; i++) { let c = drawCard(); if(c) playerHand.push(c); } }
-    updateUI(); setTimeout(() => { if(skipNextAi) { skipNextAi = false; turn = 'player'; spawnFieldTargets(1); updateUI(); } else endTurn(); }, 1500);
+        let d = playerChar === 'berserker' ? 3 : 2;
+        for(let i=0; i<d; i++) { let c = drawCard(); if(c) aiHand.push(c); }
+        playSfx(`言靈！罰敵 ${d} 張`, "player");
+    } else if (card.action === 'skip') { skipNextAi = true; playSfx("敵方封印你一回合！", "player"); }
+    else if (card.action === 'reset') { playerHand = []; for(let i=0; i<5; i++) playerHand.push(drawCard()); playSfx("敵方重構手牌", "player"); }
+    setTimeout(endTurn, 1500);
 }
 
 function endTurn() {
+    if(skipNextAi) { skipNextAi = false; turn = 'player'; spawnFieldTargets(1); updateUI(); return; }
     turn = turn === 'player' ? 'ai' : 'player'; selectedIndex = null;
     if(turn === 'player') spawnFieldTargets(1);
-    updateUI(); if(turn === 'ai') setTimeout(aiAction, 1500);
+    updateUI(); if(turn === 'ai') setTimeout(aiAction, 1200);
 }
 
 function aiAction() {
     if(aiHand.length === 0) return;
-    let funcIdx = aiHand.findIndex(c => c.type === 'func');
-    if (funcIdx > -1) {
-        let card = aiHand.splice(funcIdx, 1)[0]; discardPile.push(card);
-        if(card.action === 'attack') { triggerShake(); playSfxAudio('error'); playSfx("敵方言靈！令你罰抽", "ai"); for(let i=0; i<2; i++) { let c = drawCard(); if(c) playerHand.push(c); } updateUI(); setTimeout(endTurn, 1500); return; }
-        else if (card.action === 'skip') { playSfx("敵方封印你一回合！", "ai"); updateUI(); setTimeout(aiAction, 1500); return; }
-        else if (card.action === 'reset') { playSfx("敵方重構手牌", "ai"); aiHand = []; for(let i=0; i<5; i++) { let c = drawCard(); if(c) aiHand.push(c); } updateUI(); setTimeout(endTurn, 1500); return; }
-    }
     let matched = false;
-    let isEasyMiss = (aiDifficulty === 'easy' && Math.random() < 0.5);
-    if (!isEasyMiss) {
-        for (let i = 0; i < aiHand.length; i++) {
-            let card = aiHand[i]; if(card.type !== 'meaning') continue;
-            for(let tIdx = 0; tIdx < activeField.length; tIdx++) {
-                let mObj = activeField[tIdx].meanings.find(m => m.text === card.text);
-                if(mObj && !mObj.unlocked) {
-                    mObj.unlocked = true; discardPile.push(aiHand.splice(i, 1)[0]); matched = true;
-                    if(activeField[tIdx].meanings.every(mm=>mm.unlocked)) triggerBurst(tIdx, 'ai', activeField[tIdx].meanings.length);
-                    else { playSfxAudio('error'); playSfx("敵方成功破譯！", "ai"); updateUI(); setTimeout(endTurn, 1500); }
-                    break;
-                }
+    for (let i = 0; i < aiHand.length; i++) {
+        let card = aiHand[i];
+        for(let tIdx = 0; tIdx < activeField.length; tIdx++) {
+            let mObj = activeField[tIdx].meanings.find(m => m.text === card.text);
+            if(mObj && !mObj.unlocked) {
+                mObj.unlocked = true; discardPile.push(aiHand.splice(i, 1)[0]); matched = true;
+                if(activeField[tIdx].meanings.every(mm=>mm.unlocked)) triggerBurst(tIdx, 'ai', activeField[tIdx].meanings.length);
+                else { playSfx("敵方成功破譯!", "ai"); updateUI(); setTimeout(endTurn, 1000); }
+                break;
             }
-            if(matched) break;
         }
+        if(matched) break;
     }
     if(!matched) {
-        if(aiHand.length > 0) discardPile.push(aiHand.pop());
-        for(let k=0; k<2; k++) { let c = drawCard(); if(c) aiHand.push(c); }
-        updateUI(); setTimeout(endTurn, 1500);
+        aiHand.push(drawCard()); aiHand.push(drawCard());
+        playSfx("敵方失誤罰抽", "ai"); setTimeout(endTurn, 1000);
     }
 }
 
 function playSfx(text, type) {
     const sfx = document.getElementById('sfx-layer');
     sfx.innerText = text; sfx.className = `sfx-box sfx-${type}`;
-    sfx.style.animation = 'none'; void sfx.offsetWidth; sfx.style.animation = 'popInStay 2.5s forwards';
+    sfx.style.animation = 'none'; void sfx.offsetWidth; sfx.style.animation = 'popInStay 2s forwards';
 }
 function triggerShake() { document.body.classList.remove('shake-effect'); void document.body.offsetWidth; document.body.classList.add('shake-effect'); }
 function checkWin() {
     if (playerHand.length === 0) { setTimeout(() => { alert("你贏了！言靈臣服於你！"); location.reload(); }, 500); }
     else if (aiHand.length === 0) { setTimeout(() => { alert("你輸了... 被AI擊潰。"); location.reload(); }, 500); }
 }
-function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play().catch(()=>{}); }            
-window.onload = () => {
-    initLobby(); 
-};
+
+function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play().catch(()=>{}); }
+
+// 初始化大廳
+window.onload = () => { initLobby(); };
 </script>
 </body>
 </html>
