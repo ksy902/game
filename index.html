@@ -1238,14 +1238,11 @@ function showModal(tIdx) {
     let target = activeField[tIdx];
     let modal = document.getElementById('detail-modal');
     let content = document.getElementById('detail-content');
-    let listHTML = target.meanings.map(m => m.unlocked ? 
-        `<div style="background:#eee; padding:10px; margin-bottom:5px;"><b>${m.text}</b><div style="font-size:0.8rem;">典籍：${m.example || '無'}</div></div>` : 
-        `<div style="color:#aaa; padding:10px;">[ 鎖定中 ]</div>`).join('');
-    content.innerHTML = `<h2 style="margin:0;">${target.word}</h2>${listHTML}`;
+    let listHTML = target.meanings.map(m => m.unlocked ? `<div class="m-slot unlocked"><span>[ 破譯 ] ${m.text}</span>${m.example ? `<div class="m-example">典籍：${m.example}</div>` : ''}</div>` : `<div class="m-slot"><span style="color:#666;">[ 鎖定 ] 未知字義</span></div>`).join('');
+    content.innerHTML = `<div class="m-word">${target.word}</div>${listHTML}<div style="font-size:0.85rem; text-align:right; margin-top:15px; color:#555; font-weight:bold;">(放開以關閉)</div>`;
     modal.style.display = 'flex';
 }
-
-window.addEventListener('pointerup', () => { document.getElementById('detail-modal').style.display = 'none'; });
+function hideModal() { document.getElementById('detail-modal').style.display = 'none'; }
 
 function tryMatch(targetIndex) {
     if(turn !== 'player' || selectedIndex === null) return;
@@ -1257,7 +1254,7 @@ function tryMatch(targetIndex) {
         if(target.meanings.every(m => m.unlocked)) triggerBurst(targetIndex, 'player', target.meanings.length);
         else { playSfx("破譯成功！", "correct"); updateUI(); setTimeout(endTurn, 1000); }
     } else {
-        playSfxAudio('error'); playSfx("配對錯誤！抽牌處罰", "error");
+        triggerShake(); playSfxAudio('error'); playSfx("配對錯誤！反噬抽2張", "error");
         for(let i=0; i<2; i++) { let c = drawCard(); if(c) playerHand.push(c); }
         selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
     }
@@ -1265,86 +1262,95 @@ function tryMatch(targetIndex) {
 
 function triggerBurst(targetIndex, who, damage) {
     if(who === 'player') {
-        playSfx(`擊破！對手遭罰抽 ${damage} 張`, "correct");
+        playSfx(`擊破！對手遭罰抽${damage}張`, "correct");
         for(let i=0; i<damage; i++) { let c = drawCard(); if(c) aiHand.push(c); }
     } else {
-        playSfx(`崩潰！你遭罰抽 ${damage} 張`, "error");
+        triggerShake(); playSfx(`崩潰！你遭罰抽${damage}張`, "error");
         for(let i=0; i<damage; i++) { let c = drawCard(); if(c) playerHand.push(c); }
     }
     activeField.splice(targetIndex, 1); updateUI(); setTimeout(endTurn, 2000);
 }
 
 function recastHand() {
+    if(turn !== 'player') return;
     let count = playerHand.length; deck.push(...playerHand); shuffle(deck); playerHand = [];
     for(let i=0; i < count + 1; i++) { let c = drawCard(); if(c) playerHand.push(c); }
-    if(playerChar === 'trickster') { playSfx("【詭道】戰術重鑄後不結束回合", "player"); updateUI(); }
-    else { playSfx("重鑄！結束回合", "player"); setTimeout(endTurn, 1000); }
+    playSfxAudio('draw'); selectedIndex = null; updateUI();
+    if(playerChar === 'trickster') playSfx("【詭道】重鑄！", "player");
+    else { playSfx("重鑄！結束回合", "player"); setTimeout(endTurn, 1500); }
 }
 
 function passTurn() {
-    if(playerChar !== 'rock') { let c = drawCard(); if(c) playerHand.push(c); }
-    playSfx("跳過回合", "player"); setTimeout(endTurn, 1000);
+    if(turn !== 'player') return;
+    if(playerChar === 'rock') playSfx("【磐石】不罰抽", "player");
+    else { playSfx("罰抽1張", "player"); let c = drawCard(); if(c) playerHand.push(c); playSfxAudio('draw');}
+    selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
 }
 
 function discardSelected() {
+    if(turn !== 'player' || selectedIndex === null) return;
     discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
-    let d = playerChar === 'knight' ? 1 : 2;
-    for(let i=0; i<d; i++) { let c = drawCard(); if(c) playerHand.push(c); }
-    setTimeout(endTurn, 1000);
+    let dmg = playerChar === 'knight' ? 1 : 2;
+    for(let i=0; i<dmg; i++) { let c = drawCard(); if(c) playerHand.push(c); }
+    playSfxAudio('draw'); selectedIndex = null; updateUI(); setTimeout(endTurn, 1500);
 }
 
 function useFunctionCard() {
-    let card = playerHand[selectedIndex]; discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
+    let card = playerHand[selectedIndex];
+    discardPile.push(playerHand.splice(selectedIndex, 1)[0]);
+    selectedIndex = null; playSfxAudio('correct');
     if(card.action === 'attack') {
-        let d = playerChar === 'berserker' ? 3 : 2;
-        for(let i=0; i<d; i++) { let c = drawCard(); if(c) aiHand.push(c); }
-        playSfx(`言靈！罰敵 ${d} 張`, "player");
-    } else if (card.action === 'skip') { skipNextAi = true; playSfx("封印一回合！", "player"); }
-    else if (card.action === 'reset') { playerHand = []; for(let i=0; i<5; i++) playerHand.push(drawCard()); playSfx("重構手牌", "player"); }
-    setTimeout(endTurn, 1500);
+        let dmg = playerChar === 'berserker' ? 3 : 2;
+        playSfx(`言靈發動！敵方罰抽${dmg}張`, "player");
+        for(let i=0; i<dmg; i++) { let c = drawCard(); if(c) aiHand.push(c); }
+    } else if (card.action === 'skip') { playSfx("封印敵方回合！", "player"); skipNextAi = true; }
+    else if (card.action === 'reset') { playSfx("重構手牌！", "player"); playerHand = []; for(let i=0; i<5; i++) { let c = drawCard(); if(c) playerHand.push(c); } }
+    updateUI(); setTimeout(() => { if(skipNextAi) { skipNextAi = false; turn = 'player'; spawnFieldTargets(1); updateUI(); } else endTurn(); }, 1500);
 }
 
 function endTurn() {
-    if(skipNextAi) { skipNextAi = false; turn = 'player'; spawnFieldTargets(1); updateUI(); return; }
     turn = turn === 'player' ? 'ai' : 'player'; selectedIndex = null;
     if(turn === 'player') spawnFieldTargets(1);
-    updateUI(); if(turn === 'ai') setTimeout(aiAction, 1200);
+    updateUI(); if(turn === 'ai') setTimeout(aiAction, 1500);
 }
 
 function aiAction() {
     if(aiHand.length === 0) return;
+    let funcIdx = aiHand.findIndex(c => c.type === 'func');
+    if (funcIdx > -1) {
+        let card = aiHand.splice(funcIdx, 1)[0]; discardPile.push(card);
+        if(card.action === 'attack') { triggerShake(); playSfxAudio('error'); playSfx("敵方言靈！令你罰抽", "ai"); for(let i=0; i<2; i++) { let c = drawCard(); if(c) playerHand.push(c); } updateUI(); setTimeout(endTurn, 1500); return; }
+        else if (card.action === 'skip') { playSfx("敵方封印你一回合！", "ai"); updateUI(); setTimeout(aiAction, 1500); return; }
+        else if (card.action === 'reset') { playSfx("敵方重構手牌", "ai"); aiHand = []; for(let i=0; i<5; i++) { let c = drawCard(); if(c) aiHand.push(c); } updateUI(); setTimeout(endTurn, 1500); return; }
+    }
     let matched = false;
-    for (let i = 0; i < aiHand.length; i++) {
-        let card = aiHand[i];
-        for(let tIdx = 0; tIdx < activeField.length; tIdx++) {
-            let mObj = activeField[tIdx].meanings.find(m => m.text === card.text);
-            if(mObj && !mObj.unlocked) {
-                mObj.unlocked = true; discardPile.push(aiHand.splice(i, 1)[0]); matched = true;
-                if(activeField[tIdx].meanings.every(mm=>mm.unlocked)) triggerBurst(tIdx, 'ai', activeField[tIdx].meanings.length);
-                else { playSfx("敵方成功破譯!", "ai"); updateUI(); setTimeout(endTurn, 1000); }
-                break;
+    let isEasyMiss = (aiDifficulty === 'easy' && Math.random() < 0.5);
+    if (!isEasyMiss) {
+        for (let i = 0; i < aiHand.length; i++) {
+            let card = aiHand[i]; if(card.type !== 'meaning') continue;
+            for(let tIdx = 0; tIdx < activeField.length; tIdx++) {
+                let mObj = activeField[tIdx].meanings.find(m => m.text === card.text);
+                if(mObj && !mObj.unlocked) {
+                    mObj.unlocked = true; discardPile.push(aiHand.splice(i, 1)[0]); matched = true;
+                    if(activeField[tIdx].meanings.every(mm=>mm.unlocked)) triggerBurst(tIdx, 'ai', activeField[tIdx].meanings.length);
+                    else { playSfxAudio('error'); playSfx("敵方成功破譯！", "ai"); updateUI(); setTimeout(endTurn, 1500); }
+                    break;
+                }
             }
+            if(matched) break;
         }
-        if(matched) break;
     }
     if(!matched) {
-        aiHand.push(drawCard()); aiHand.push(drawCard());
-        playSfx("敵方失誤罰抽", "ai"); setTimeout(endTurn, 1000);
+        if(aiHand.length > 0) discardPile.push(aiHand.pop());
+        for(let k=0; k<2; k++) { let c = drawCard(); if(c) aiHand.push(c); }
+        updateUI(); setTimeout(endTurn, 1500);
     }
 }
 
 function playSfx(text, type) {
     const sfx = document.getElementById('sfx-layer');
-    if (!sfx) return;
-    
-    sfx.innerText = text;
-    // 移除舊的類名並加入新的（例如 sfx-player, sfx-error 等）
-    sfx.className = `sfx-box sfx-${type}`;
-    
-    // 強制重啟動畫
-    sfx.style.animation = 'none';
-    void sfx.offsetWidth; 
-    sfx.style.animation = 'popInStay 2s forwards'; // 這裡要與 CSS 的動畫名稱一致
+    sfx.innerText = text; sfx.className = `sfx-box sfx-${type}`;
+    sfx.style.animation = 'none'; void sfx.offsetWidth; sfx.style.animation = 'popInStay 2.5s forwards';
 }
 function triggerShake() { document.body.classList.remove('shake-effect'); void document.body.offsetWidth; document.body.classList.add('shake-effect'); }
 function checkWin() {
