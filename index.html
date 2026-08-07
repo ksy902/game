@@ -1641,14 +1641,21 @@ async function startReviewAnimation() {
     isReviewing = true;
     clickCount = 0; 
 
-    // 1. 立即隱藏結算界面
-    document.getElementById('result-modal').style.display = "none";
+    // 1. 強制隱藏結算界面（使用 !important 確保覆蓋所有狀態）
+    const resultModal = document.getElementById('result-modal');
+    if (resultModal) {
+        resultModal.style.setProperty('display', 'none', 'important');
+    }
+
+    // 給瀏覽器一個極短的時間 (50ms) 來重新渲染 UI，確保玩家看到界面消失
+    await new Promise(r => setTimeout(r, 50));
 
     // 獲取目前手牌區域的所有卡片 DOM
     const handCards = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
     
     // 2. 遍歷手牌執行歸位
     for (let i = 0; i < playerHand.length; i++) {
+        // 如果偵測到雙擊，立即結束
         if (clickCount >= 2) { location.reload(); return; }
 
         const cardData = playerHand[i];
@@ -1661,7 +1668,7 @@ async function startReviewAnimation() {
         const startRect = sourceDOM.getBoundingClientRect();
         sourceDOM.style.visibility = "hidden";
 
-        // 創建飛行幻影（寫上字詞與字義）
+        // 創建飛行幻影（100% 不透明度）
         const fly = document.createElement('div');
         fly.className = 'flying-card';
         fly.innerHTML = `
@@ -1672,6 +1679,7 @@ async function startReviewAnimation() {
         fly.style.height = startRect.height + 'px';
         fly.style.top = startRect.top + 'px';
         fly.style.left = startRect.left + 'px';
+        fly.style.opacity = "1"; // 確保 100% 不透明
         document.body.appendChild(fly);
 
         // 尋找場上目標
@@ -1679,13 +1687,11 @@ async function startReviewAnimation() {
         const targetCards = document.querySelectorAll('.target-card');
         const targetDOM = targetCards[targetIdx];
 
-        // --- 物理動畫階段 ---
         // 第一階段：稍微向上彈起並傾斜
         requestAnimationFrame(() => {
             fly.style.transform = "translateY(-60px) rotate(-10deg) scale(1.1)";
         });
 
-        // 短暫延遲後執行第二階段：飛向目標並下墜
         await new Promise(r => setTimeout(r, 150)); 
 
         if (targetDOM) {
@@ -1694,38 +1700,32 @@ async function startReviewAnimation() {
             fly.style.top = endRect.top + 'px';
             fly.style.left = endRect.left + 'px';
             fly.style.transform = "translateY(0) rotate(0deg) scale(1)";
-            fly.style.opacity = "0.8";
+            fly.style.opacity = "1"; 
 
-            // 當抵達時亮起綠光
+            // 抵達時亮起綠光
             setTimeout(() => {
                 targetDOM.style.transition = "0.3s";
                 targetDOM.style.boxShadow = "0 0 30px 10px var(--c-green)";
                 targetDOM.style.borderColor = "var(--c-green)";
-                playSfxAudio('correct'); // 播放成功歸位音效
+                playSfxAudio('correct'); 
                 
-                // 1秒後綠光消失
                 setTimeout(() => {
                     targetDOM.style.boxShadow = "";
                     targetDOM.style.borderColor = "";
                 }, 1000);
             }, 700); 
         } else {
-            // 若場上無目標，則向隨機高處飄散
+            // 無目標則飛散
             fly.style.top = "-200px";
-            fly.style.opacity = "0";
+            fly.style.opacity = "0"; 
         }
 
-        // 移除幻影
         setTimeout(() => fly.remove(), 1000);
-        
-        // 每張牌發射的間隔感
         await new Promise(r => setTimeout(r, 250)); 
     }
 
-    // 全部歸位完成後延遲刷新
-    setTimeout(() => {
-        if (isReviewing) location.reload();
-    }, 1500);
+    // 全部完成後重啟
+    setTimeout(() => { if (isReviewing) location.reload(); }, 1500);
 }
 // 修改全局點擊監聽：處理「點擊兩次停止」
 document.addEventListener('mousedown', () => {
