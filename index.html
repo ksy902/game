@@ -1299,8 +1299,8 @@ function useFunctionCard() {
         let d = playerChar === 'berserker' ? 3 : 2;
         for(let i=0; i<d; i++) { let c = drawCard(); if(c) aiHand.push(c); }
         playSfx(`言靈！罰敵 ${d} 張`, "player");
-    } else if (card.action === 'skip') { skipNextAi = true; playSfx("敵方封印你一回合！", "player"); }
-    else if (card.action === 'reset') { playerHand = []; for(let i=0; i<5; i++) playerHand.push(drawCard()); playSfx("敵方重構手牌", "player"); }
+    } else if (card.action === 'skip') { skipNextAi = true; playSfx("封印一回合！", "player"); }
+    else if (card.action === 'reset') { playerHand = []; for(let i=0; i<5; i++) playerHand.push(drawCard()); playSfx("重構手牌", "player"); }
     setTimeout(endTurn, 1500);
 }
 
