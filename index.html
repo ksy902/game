@@ -545,14 +545,16 @@
         #lobby-modal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: var(--c-black); z-index: 2000; display: flex;
-            justify-content: center; align-items: center; padding: 20px;
+            justify-content: center; align-items: flex-start; padding: 20px;
             background-image: radial-gradient(#333 5%, transparent 6%), radial-gradient(#333 5%, transparent 6%);
             background-size: 20px 20px; background-position: 0 0, 10px 10px;
+            overflow-y: auto;
         }
         .lobby-content {
             background: var(--c-white); border: 6px solid var(--c-white); outline: 6px solid var(--c-black);
             box-shadow: 20px 20px 0 var(--c-cyan); width: 100%; max-width: 700px; 
             padding: 30px; display: flex; flex-direction: column; gap: 20px; transform: skew(-1deg);
+            margin: auto;
         }
         .lobby-title { font-size: 2.5rem; font-weight: 900; border-bottom: 4px solid var(--c-black); padding-bottom: 10px; text-align: center;}
         
@@ -593,58 +595,114 @@
 
         .actions-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
+        /* 響應式設計：平板 (Tablet) */
+        @media (max-width: 1024px) {
+            .field { gap: 15px; padding: 20px; }
+            .target-card { width: 120px; height: 160px; }
+            .t-word { font-size: 3.5rem; }
+            .hand-area { height: 24vh; padding: 10px 15px; }
+            .lobby-content { padding: 20px; width: 95%; }
+            .actions-group { gap: 6px; }
+        }
+
+        /* 響應式設計：手機 (Mobile) */
         @media (max-width: 768px) {
+            .target-card { width: 100px; height: 140px; }
             .target-card::after {
-    content: "長按探查";
-    position: absolute;
-    bottom: 10px;
-    font-size: 0.75rem;
-    color: #ccc;
-    width: 100%;
-    text-align: center;
-}
-            .t-word { font-size: 3rem; }
+                content: "長按探查";
+                position: absolute;
+                bottom: 5px;
+                font-size: 0.7rem;
+                color: #ccc;
+                width: 100%;
+                text-align: center;
+            }
+            .t-word { font-size: 2.5rem; }
             .c-text { font-size: 1rem; }
-            .btn { font-size: 0.85rem; padding: 8px 10px; }
+            .btn { 
+                font-size: 0.75rem; 
+                padding: 8px 4px; 
+                flex: 1;
+                white-space: nowrap;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 2px;
+            }
             .sfx-box { font-size: 1.8rem; padding: 15px 20px; }
             .lobby-title { font-size: 1.8rem; }
-            .select-card { width: 45%; }
+            
+            #char-select-group { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            #scope-select-group { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            #diff-select-group { flex-direction: column; }
+            .diff-card { width: 100%; min-width: auto; }
+            
             .hand-area {
-    height: 24vh;
-    background: rgba(255, 255, 255, 0.5); /* 淡淡的透明感 */
-    background-image: repeating-linear-gradient(45deg, #eee 0, #eee 2px, transparent 2px, transparent 8px);
-    border-top: 2px solid #000;
-    padding: 10px 20px;
-    justify-content: center;
-}
-    .char-card {
-    background-size: cover !important;
-    background-position: center !important;
-    height: 150px !important; /* 增加高度以展示立繪 */
-    justify-content: flex-end !important; /* 文字靠下 */
-    color: white !important;
-    text-shadow: 2px 2px 4px rgba(0,0,0,1); /* 增強文字辨識度 */
-    border: 3px solid var(--c-black) !important;
-}
-.char-card .skill-desc { 
-    background: rgba(0,0,0,0.7); 
-    padding: 5px; 
-    margin-top: 0; 
-    width: 100%;
-}
-.char-card.active {
-    outline: 4px solid var(--c-red);
-    transform: scale(1.05);
-}
+                height: 22vh;
+                background: rgba(255, 255, 255, 0.5); /* 淡淡的透明感 */
+                background-image: repeating-linear-gradient(45deg, #eee 0, #eee 2px, transparent 2px, transparent 8px);
+                border-top: 2px solid #000;
+                padding: 10px;
+                justify-content: flex-start;
+            }
+            .char-card {
+                background-size: cover !important;
+                background-position: center !important;
+                height: 130px !important; /* 增加高度以展示立繪 */
+                justify-content: flex-end !important; /* 文字靠下 */
+                color: white !important;
+                text-shadow: 2px 2px 4px rgba(0,0,0,1); /* 增強文字辨識度 */
+                border: 3px solid var(--c-black) !important;
+            }
+            .char-card .skill-desc { 
+                background: rgba(0,0,0,0.7); 
+                padding: 5px; 
+                margin-top: 0; 
+                width: 100%;
+            }
+            .char-card.active {
+                outline: 4px solid var(--c-red);
+                transform: scale(1.05);
+            }
+            #char-cutin {
+                height: 35vh;
+                right: -10px;
+                opacity: 0.6; /* 手機端增加透明度，避免遮擋文字 */
+            }
+            .bar.bottom {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                padding: 10px;
+            }
+            .player-info { margin-left: 0; display: flex; align-items: center; gap: 8px; justify-content: center; }
+            .actions-group { 
+                justify-content: space-between; 
+                width: 100%; 
+                flex-wrap: nowrap;
+                gap: 4px;
+            }
+            .svg-icon {
+                width: 14px;
+                height: 14px;
+            }
+        }
 
-/* 響應式優化：手機端縮小立繪，避免擋住動作按鈕 */
-@media (max-width: 768px) {
-    #char-cutin {
-        height: 35vh;
-        right: -10px;
-        opacity: 0.6; /* 手機端增加透明度，避免遮擋文字 */
-    }
-}        
+        /* 響應式設計：超小手機 (Small Mobile) */
+        @media (max-width: 480px) {
+            .target-card { width: 85px; height: 120px; border-width: 3px; }
+            .t-word { font-size: 2rem; }
+            .c-text { font-size: 0.85rem; }
+            .btn { font-size: 0.65rem; padding: 6px 2px; }
+            .lobby-content { padding: 15px; }
+            .lobby-title { font-size: 1.5rem; }
+            .hand-area { height: 20vh; gap: 8px; }
+            .result-content { padding: 20px; width: 95%; }
+            .result-title { font-size: 2.2rem; }
+            .result-stats { font-size: 1.1rem; }
+            
+            .char-card { height: 110px !important; }
+        }
     </style>
 </head>
 <body>
