@@ -1117,7 +1117,7 @@ audio.bgm.loop = true; audio.bgm.volume = 0.3;
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
 let playerHand = [], aiHand = [], activeField = []; 
 let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
-let playerChar = 'seer', aiDifficulty = 'normal', selectedScope = "第一節：手";
+let playerChar = 'seer', aiDifficulty = 'normal', selectedScope = "手";
 let pressTimer = null, pressStartTime = 0;
 let hintsRemaining = 3;    
 
@@ -1150,7 +1150,11 @@ function selectChar(c, el) {
     document.querySelectorAll('#char-select-group .select-card').forEach(node => node.classList.remove('active'));
     el.classList.add('active');
 }
-
+function triggerShake() {
+    const field = document.getElementById('field-area');
+    field.classList.add('shake-effect');
+    setTimeout(() => field.classList.remove('shake-effect'), 400);
+}
 function selectDiff(d, el) {
     aiDifficulty = d;
     document.querySelectorAll('#diff-select-group .select-card').forEach(node => node.classList.remove('active'));
