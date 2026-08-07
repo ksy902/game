@@ -241,23 +241,7 @@
 
         .hand-area { height: 25vh; background: rgba(238, 238, 238, 0.8); border-top: var(--stroke); display: flex; justify-content: center; align-items: flex-end; padding: 10px; gap: 12px; overflow-x: auto; }
         .play-card { height: 90%; aspect-ratio: 2/2.8; background: var(--c-white); border: var(--stroke); padding: 10px; cursor: pointer; display: flex; flex-direction: column; flex-shrink: 0; }
-        .play-card.selected {
-    transform: translateY(-35px) scale(1.02) !important; /* 向上彈起並微放大 */
-    border-color: var(--c-cyan) !important;
-    border-width: 4px !important;
-    /* 核心：雙重陰影，一圈藍色實線外圈 + 一圈藍色發光 */
-    box-shadow: 
-        0 0 0 6px var(--c-cyan), 
-        0 0 20px var(--c-cyan), 
-        10px 10px 0 var(--c-black) !important;
-    z-index: 100 !important; /* 確保選中的牌在最前方 */
-    transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* 確保如果是功能牌選中時，紫色背景不會吃掉藍邊 */
-.play-card.is-func.selected {
-    border-color: var(--c-cyan) !important;
-}
+        
         .card-hint-line {
     border-bottom-width: 8px !important; /* 加粗底部邊框作為顏色提示 */
 }
@@ -661,7 +645,22 @@
     outline: 4px solid var(--c-red);
     transform: scale(1.05);
 }
+.play-card.selected {
+    transform: translateY(-45px) scale(1.05) !important; /* 彈得更高並稍微放大 */
+    border: 4px solid var(--c-cyan) !important; /* 邊框變青藍色 */
+    /* 核心：0 spread 的第二層陰影製造「外圈」感，再加上發光效果 */
+    box-shadow: 
+        0 0 0 8px var(--c-cyan), 
+        0 0 25px var(--c-cyan), 
+        15px 15px 0 rgba(0,0,0,0.5) !important;
+    z-index: 1000 !important;
+}
 
+/* 確保功能牌選中時也顯示藍圈 */
+.play-card.is-func.selected {
+    border-color: var(--c-cyan) !important;
+    box-shadow: 0 0 0 8px var(--c-cyan), 0 0 25px var(--c-cyan) !important;
+}
 /* 響應式優化：手機端縮小立繪，避免擋住動作按鈕 */
 @media (max-width: 768px) {
     #char-cutin {
@@ -669,7 +668,8 @@
         right: -10px;
         opacity: 0.6; /* 手機端增加透明度，避免遮擋文字 */
     }
-}        
+}
+            
     </style>
 </head>
 <body>
@@ -1424,23 +1424,20 @@ function updateUI() {
         if(!card) return;
         const cDiv = document.createElement('div');
         
-        // 核心：判斷是否選中，掛載 selected 類別
-        const isSelected = (idx === selectedIndex);
+        // 判斷狀態
+        const isSelected = (idx === selectedIndex); // 這裡是關鍵
         const isFunc = (card.type === 'func');
         
         cDiv.className = `play-card ${isFunc ? 'is-func' : ''} ${isSelected ? 'selected' : ''}`;
         
-        // 如果是字義卡且有重複，加上底部顏色提示
+        // 字詞關聯提示顏色
         if (card.type === 'meaning' && wordToColor[card.parentWord]) {
-            cDiv.style.borderBottom = `10px solid ${wordToColor[card.parentWord]}`;
+            cDiv.classList.add('card-hint-line');
+            cDiv.style.borderBottomColor = wordToColor[card.parentWord];
         }
 
-        cDiv.innerHTML = `
-            <div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div>
-            <div class="c-text" style="font-weight:900;">${card.text}</div>
-        `;
+        cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text" style="font-weight:900;">${card.text}</div>`;
         
-        // 點擊事件
         cDiv.onclick = () => { 
             if(turn === 'player') { 
                 selectedIndex = (selectedIndex === idx) ? null : idx; 
@@ -1449,7 +1446,7 @@ function updateUI() {
         };
         handDOM.appendChild(cDiv);
     });
-
+    
     // 6. 檢查勝負
     checkWin();
 }
