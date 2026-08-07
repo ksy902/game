@@ -1160,14 +1160,46 @@ function shuffle(arr) {
     }
 }
 
-function drawCard() {
-    if (deck.length === 0) {
-        if (discardPile.length === 0) return null;
-        deck = [...discardPile]; discardPile = []; shuffle(deck);
+function isMeaningNeeded(card) {
+    if (card.type !== 'meaning') return true; // 言靈牌（功能牌）永遠有效
+
+    // 1. 檢查該字詞是否正在場上，且該字義尚未被破譯
+    const targetOnField = activeField.find(t => t.word === card.parentWord);
+    if (targetOnField) {
+        const meaningStatus = targetOnField.meanings.find(m => m.text === card.text);
+        if (meaningStatus && !meaningStatus.unlocked) return true;
     }
-    return deck.pop();
+
+    // 2. 檢查該字詞是否還在等待生成的隊列中（尚未出現在場上）
+    const inUnspawned = unspawnedWords.find(w => w.字詞 === card.parentWord);
+    if (inUnspawned) return true;
+
+    // 如果場上沒有這個字（或已破譯），且隊列裡也沒有這個字，這張牌就是廢牌
+    return false;
 }
 
+// 修改後的抽牌邏輯
+function drawCard() {
+    // 如果牌庫空了，嘗試洗掉棄牌堆
+    if (deck.length === 0) {
+        if (discardPile.length === 0) return null;
+        deck = [...discardPile]; 
+        discardPile = []; 
+        shuffle(deck);
+    }
+
+    // 抽出一張牌
+    let card = deck.pop();
+
+    // 核心邏輯：如果是字義牌且已經不再需要，則直接廢棄並重抽
+    if (card && card.type === 'meaning' && !isMeaningNeeded(card)) {
+        // 這張牌被永久移除（不進入 discardPile 循環），確保牌庫越來越乾淨
+        return drawCard(); 
+    }
+
+    return card;
+}
+    
 function spawnFieldTargets(count) {
     for(let i=0; i<count; i++) {
         if(unspawnedWords.length === 0) break;
