@@ -684,42 +684,50 @@
         opacity: 0.6; /* 手機端增加透明度，避免遮擋文字 */
     }
 }
+.hand-area {
+    /* 必須允許垂直溢出，否則彈起的卡片會消失 */
+    overflow-y: visible !important; 
+    overflow-x: auto; /* 保留橫向滾動 */
+    padding-top: 70px !important; /* 給彈起的卡片預留充足頂部空間 */
+    z-index: 100;
+}
+
+/* 2. 選中狀態：使用「擴散陰影」而非「邊框」 */
+/* 這樣做的好處是：陰影在外層，完全不影響你底部的 border-bottom-color 提示 */
 body .hand-area .play-card.selected {
-    transform: translateY(-50px) scale(1.1) !important;
+    transform: translateY(-60px) scale(1.05) !important;
     z-index: 9999 !important;
+
+    /* 關鍵：不要設置 border: ... !important，否則會蓋掉底部的顏色提示線 */
     
-    /* 保持黑色邊框，確保底部的字詞關聯顏色（border-bottom）依然清晰 */
-    border: 3px solid #000 !important;
-
-    /* 【核心修正】使用多重陰影製造「發光藍色外圈」 */
-    /* 第一層 0 0 0 6px：模擬一個厚度為 6px 的外圈，不佔用邊框空間 */
-    /* 第二層 0 0 20px：藍色發光效果 */
-    /* 第三層 15px 15px 0：原本的漫畫風格硬陰影 */
+    /* 使用 box-shadow 的第四個參數（擴散半徑）來模擬藍圈 */
+    /* 參數：X偏移, Y偏移, 模糊, 擴散半徑, 顏色 */
     box-shadow: 
-        0 0 0 8px #00e5ff, 
-        0 0 30px #00e5ff, 
-        15px 15px 0 rgba(0,0,0,0.4) !important;
+        0 0 0 6px #00e5ff,             /* 第一層：純色硬邊藍圈 (不遮擋底部邊框) */
+        0 0 25px 2px #00e5ff,          /* 第二層：藍色發光感 */
+        15px 15px 0 0 rgba(0,0,0,0.3) !important; /* 第三層：原本的漫畫硬陰影 */
 }
 
-/* 2. 針對功能牌（紫色牌）選中時的修正 */
+/* 3. 針對紫色功能牌的選中加強 */
 body .hand-area .play-card.is-func.selected {
-    background-color: var(--c-purple) !important;
-    border: 3px solid #000 !important;
     box-shadow: 
-        0 0 0 8px #00e5ff, 
-        0 0 30px #00e5ff, 
-        15px 15px 0 rgba(0,0,0,0.4) !important;
+        0 0 0 6px #00e5ff, 
+        0 0 25px 2px #00e5ff, 
+        15px 15px 0 0 rgba(0,0,0,0.3) !important;
 }
 
-/* 3. 當卡牌被選中時，如果它有底部顏色提示，強制讓它加粗，更明顯 */
+/* 4. 確保底部提示色在選中時更顯眼 */
 body .hand-area .play-card.selected.card-hint-line {
-    border-bottom-width: 12px !important;
+    /* 增加底部的邊框厚度，讓提示色更粗 */
+    border-bottom-width: 10px !important;
 }
 
-/* 4. 防止鼠標懸停效果與選中效果衝突 */
-body .hand-area .play-card.selected:hover {
-    transform: translateY(-50px) scale(1.1) !important;
-}            
+/* 5. 修復 iPad/手機上可能的觸控偏移 */
+@media (max-width: 768px) {
+    body .hand-area .play-card.selected {
+        transform: translateY(-40px) scale(1.05) !important;
+    }
+}
     </style>
 </head>
 <body>
