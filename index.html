@@ -68,18 +68,23 @@
 
 /* 飛行卡片樣式：優化文字間距 */
 .flying-card {
-    position: fixed; pointer-events: none; z-index: 9999;
-    /* 使用自定義三次貝茲曲線，模擬先緩後快的下墜感 */
+    position: fixed; 
+    pointer-events: none; 
+    z-index: 9999;
     transition: all 0.8s cubic-bezier(0.5, -0.5, 0.1, 1.5); 
     border: 4px solid #000; 
-    background: #fff; 
+    background: #ffffff !important; /* 確保背景是純白實色 */
     padding: 15px; 
     font-weight: 900; 
     box-shadow: 8px 8px 0 #000; 
-    display: flex; flex-direction: column; align-items: center; 
-    justify-content: center; text-align: center; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center; 
     line-height: 1.3;
     min-width: 120px;
+    opacity: 1; /* 預設不透明度 */
 }
         
 /* 2. 角色固定卡基礎設定：看到整張圖片 */
@@ -1672,7 +1677,7 @@ async function startReviewAnimation() {
         fly.style.height = startRect.height + 'px';
         fly.style.top = startRect.top + 'px';
         fly.style.left = startRect.left + 'px';
-        fly.style.opacity = "1"; // 初始不透明度設為 100%
+        fly.style.opacity = "1"; // 強制設定初始不透明度為 100%
         document.body.appendChild(fly);
 
         // 尋找場上目標
@@ -1695,25 +1700,24 @@ async function startReviewAnimation() {
             fly.style.top = endRect.top + 'px';
             fly.style.left = endRect.left + 'px';
             fly.style.transform = "translateY(0) rotate(0deg) scale(1)";
-            fly.style.opacity = "1"; // 【修改處】保持 100% 不透明度
+            fly.style.opacity = "1"; // 抵達時保持 100% 不透明度
 
             // 當抵達時亮起綠光
             setTimeout(() => {
                 targetDOM.style.transition = "0.3s";
                 targetDOM.style.boxShadow = "0 0 30px 10px var(--c-green)";
                 targetDOM.style.borderColor = "var(--c-green)";
-                playSfxAudio('correct'); // 播放成功歸位音效
+                playSfxAudio('correct'); 
                 
-                // 1秒後綠光消失
                 setTimeout(() => {
                     targetDOM.style.boxShadow = "";
                     targetDOM.style.borderColor = "";
                 }, 1000);
             }, 700); 
         } else {
-            // 若場上無目標，則向隨機高處飄散
+            // 若場上無目標（已被擊破），則向隨機高處飄散並逐漸消失
             fly.style.top = "-200px";
-            fly.style.opacity = "0";
+            fly.style.opacity = "0"; 
         }
 
         // 移除幻影
@@ -1728,6 +1732,7 @@ async function startReviewAnimation() {
         if (isReviewing) location.reload();
     }, 1500);
 }
+    
 // 修改全局點擊監聽：處理「點擊兩次停止」
 document.addEventListener('mousedown', () => {
     if (isReviewing) {
