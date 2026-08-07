@@ -241,8 +241,23 @@
 
         .hand-area { height: 25vh; background: rgba(238, 238, 238, 0.8); border-top: var(--stroke); display: flex; justify-content: center; align-items: flex-end; padding: 10px; gap: 12px; overflow-x: auto; }
         .play-card { height: 90%; aspect-ratio: 2/2.8; background: var(--c-white); border: var(--stroke); padding: 10px; cursor: pointer; display: flex; flex-direction: column; flex-shrink: 0; }
-        .play-card.selected { transform: translateY(-20px); border-color: var(--c-cyan); box-shadow: 0 0 15px var(--c-cyan); }
-        .play-card.is-func { background-color: var(--c-purple); color: white; }
+        .play-card.selected {
+    transform: translateY(-35px) scale(1.02) !important; /* 向上彈起並微放大 */
+    border-color: var(--c-cyan) !important;
+    border-width: 4px !important;
+    /* 核心：雙重陰影，一圈藍色實線外圈 + 一圈藍色發光 */
+    box-shadow: 
+        0 0 0 6px var(--c-cyan), 
+        0 0 20px var(--c-cyan), 
+        10px 10px 0 var(--c-black) !important;
+    z-index: 100 !important; /* 確保選中的牌在最前方 */
+    transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 確保如果是功能牌選中時，紫色背景不會吃掉藍邊 */
+.play-card.is-func.selected {
+    border-color: var(--c-cyan) !important;
+}
         .card-hint-line {
     border-bottom-width: 8px !important; /* 加粗底部邊框作為顏色提示 */
 }
@@ -298,7 +313,7 @@
             display: flex; flex-direction: column; flex-shrink: 0; position: relative;
         }
         .play-card:hover { transform: translateY(-15px); z-index: 20; box-shadow: 8px 8px 0 var(--c-black); }
-        .play-card.selected { transform: translateY(-30px); border-color: var(--c-cyan); box-shadow: 0 0 0 4px var(--c-cyan), 8px 8px 0 var(--c-black); z-index: 30; }
+        
         
         .play-card.is-func { 
             background-color: var(--c-purple); 
@@ -503,7 +518,6 @@
             display: flex; flex-direction: column; flex-shrink: 0; position: relative;
         }
         .play-card:hover { transform: translateY(-15px); z-index: 20; box-shadow: 8px 8px 0 var(--c-black); }
-        .play-card.selected { transform: translateY(-30px); border-color: var(--c-cyan); box-shadow: 0 0 0 4px var(--c-cyan), 8px 8px 0 var(--c-black); z-index: 30; }
         
         .play-card.is-func { 
             background-color: var(--c-purple); 
@@ -1380,22 +1394,21 @@ function updateUI() {
     const handDOM = document.getElementById('hand-area');
     handDOM.innerHTML = '';
 
-    // 固定職階卡
+    // A. 固定職階卡
     const charCard = document.createElement('div');
     charCard.className = 'play-card static-char-card';
     charCard.style.backgroundImage = `url('${IMG_BASE_URL + encodeURIComponent(charImgMap[playerChar])}')`;
     charCard.innerHTML = `<div class="c-tag">職階</div><div class="c-text">${charMap[playerChar]}</div>`;
     handDOM.appendChild(charCard);
 
-    // 實際玩家手牌
+    // B. 計算字詞關聯顏色 (wordCounts 邏輯保持不變)
     const wordCounts = {};
     playerHand.forEach(card => {
-        if (card.type === 'meaning' && card.parentWord) {
+        if (card && card.type === 'meaning' && card.parentWord) {
             wordCounts[card.parentWord] = (wordCounts[card.parentWord] || 0) + 1;
         }
     });
 
-    // 2. 為出現兩次以上的字詞分配顏色
     const hintColors = ['#e6203a', '#00b35a', '#00e5ff', '#ffdb00', '#ff6600', '#7a1fd1', '#ff00ff'];
     const wordToColor = {};
     let colorIndex = 0;
@@ -1406,23 +1419,28 @@ function updateUI() {
         }
     });
 
-    // 3. 渲染實際玩家手牌
+    // C. 渲染玩家手牌 (唯一循環)
     playerHand.forEach((card, idx) => {
         if(!card) return;
         const cDiv = document.createElement('div');
         
-        // 基礎 Class
-        cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''} ${idx === selectedIndex ? 'selected' : ''}`;
+        // 核心：判斷是否選中，掛載 selected 類別
+        const isSelected = (idx === selectedIndex);
+        const isFunc = (card.type === 'func');
         
-        // 如果屬於同一個字詞且有重複，加上顏色提示
+        cDiv.className = `play-card ${isFunc ? 'is-func' : ''} ${isSelected ? 'selected' : ''}`;
+        
+        // 如果是字義卡且有重複，加上底部顏色提示
         if (card.type === 'meaning' && wordToColor[card.parentWord]) {
-            cDiv.classList.add('card-hint-line');
-            cDiv.style.borderBottomColor = wordToColor[card.parentWord];
+            cDiv.style.borderBottom = `10px solid ${wordToColor[card.parentWord]}`;
         }
 
-        cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text" style="font-weight:900;">${card.text}</div>`;
+        cDiv.innerHTML = `
+            <div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div>
+            <div class="c-text" style="font-weight:900;">${card.text}</div>
+        `;
         
-        // 綁定點擊事件
+        // 點擊事件
         cDiv.onclick = () => { 
             if(turn === 'player') { 
                 selectedIndex = (selectedIndex === idx) ? null : idx; 
