@@ -177,6 +177,9 @@
         .play-card { height: 90%; aspect-ratio: 2/2.8; background: var(--c-white); border: var(--stroke); padding: 10px; cursor: pointer; display: flex; flex-direction: column; flex-shrink: 0; }
         .play-card.selected { transform: translateY(-20px); border-color: var(--c-cyan); box-shadow: 0 0 15px var(--c-cyan); }
         .play-card.is-func { background-color: var(--c-purple); color: white; }
+        .card-hint-line {
+    border-bottom-width: 8px !important; /* 加粗底部邊框作為顏色提示 */
+}
         .c-tag { font-size: 0.7rem; background: var(--c-black); color: white; padding: 2px 5px; align-self: flex-start; }
         .c-text { font-size: 1rem; font-weight: 900; text-align: center; flex: 1; display: flex; align-items: center; }
 
@@ -1223,16 +1226,54 @@ function updateUI() {
     handDOM.appendChild(charCard);
 
     // 實際玩家手牌
+    const wordCounts = {};
+    playerHand.forEach(card => {
+        if (card.type === 'meaning' && card.parentWord) {
+            wordCounts[card.parentWord] = (wordCounts[card.parentWord] || 0) + 1;
+        }
+    });
+
+    // 2. 為出現兩次以上的字詞分配顏色
+    const hintColors = ['#e6203a', '#00b35a', '#00e5ff', '#ffdb00', '#ff6600', '#7a1fd1', '#ff00ff'];
+    const wordToColor = {};
+    let colorIndex = 0;
+    Object.keys(wordCounts).forEach(word => {
+        if (wordCounts[word] > 1) {
+            wordToColor[word] = hintColors[colorIndex % hintColors.length];
+            colorIndex++;
+        }
+    });
+
+    // 3. 渲染實際玩家手牌
     playerHand.forEach((card, idx) => {
         if(!card) return;
         const cDiv = document.createElement('div');
+        
+        // 基礎 Class
         cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''} ${idx === selectedIndex ? 'selected' : ''}`;
+        
+        // 如果屬於同一個字詞且有重複，加上顏色提示
+        if (card.type === 'meaning' && wordToColor[card.parentWord]) {
+            cDiv.classList.add('card-hint-line');
+            cDiv.style.borderBottomColor = wordToColor[card.parentWord];
+        }
+
         cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text" style="font-weight:900;">${card.text}</div>`;
-        cDiv.onclick = () => { if(turn === 'player') { selectedIndex = selectedIndex === idx ? null : idx; updateUI(); } };
+        
+        // 綁定點擊事件
+        cDiv.onclick = () => { 
+            if(turn === 'player') { 
+                selectedIndex = (selectedIndex === idx) ? null : idx; 
+                updateUI(); 
+            } 
+        };
         handDOM.appendChild(cDiv);
     });
+
+    // 6. 檢查勝負
     checkWin();
 }
+    
 /** 6. 交互與戰鬥邏輯 **/
 function showModal(tIdx) {
     let target = activeField[tIdx];
