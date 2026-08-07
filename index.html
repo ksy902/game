@@ -703,6 +703,57 @@
             
             .char-card { height: 110px !important; }
         }
+        #study-modal {
+    position: fixed; inset: 0; background: var(--c-white);
+    z-index: 6000; display: none; flex-direction: column;
+    padding: 30px; overflow-y: auto;
+    background-image: radial-gradient(#ccc 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+.study-header {
+    text-align: center; border-bottom: 8px solid #000;
+    margin-bottom: 30px; padding-bottom: 15px; transform: skew(-2deg);
+}
+.study-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px; padding-bottom: 100px;
+}
+.study-card {
+    border: 4px solid #000; background: #fff;
+    padding: 20px; box-shadow: 10px 10px 0 var(--c-cyan);
+    position: relative; transition: 0.3s;
+}
+.study-card:hover { transform: scale(1.02); box-shadow: 15px 15px 0 var(--c-yellow); }
+.study-word { 
+    font-size: 2.8rem; font-weight: 900; color: var(--c-red); 
+    border-bottom: 3px solid #000; margin-bottom: 15px; 
+}
+.study-m-item { 
+    margin-bottom: 12px; font-size: 1.1rem; line-height: 1.4;
+    padding-left: 15px; border-left: 4px solid var(--c-purple);
+}
+.study-m-item b { background: var(--c-yellow); padding: 0 5px; margin-right: 5px; }
+.study-example { 
+    font-size: 0.9rem; color: #555; margin-top: 5px; 
+    font-style: italic; background: #f9f9f9; padding: 5px;
+}
+
+.study-footer {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    padding: 20px; background: rgba(255,255,255,0.95);
+    border-top: 5px solid #000; display: flex; justify-content: center;
+    z-index: 6001;
+}
+
+/* 跳過提示 */
+#skip-hint-ui {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: #000; color: #fff; padding: 8px 20px;
+    border-radius: 30px; font-weight: 900; font-size: 0.9rem;
+    z-index: 7000; opacity: 0.7; pointer-events: none;
+    display: none;
+}
     </style>
 </head>
 <body>
@@ -1696,111 +1747,123 @@ function showResultModal(winner, msg) {
 }
 
 let isReviewing = false;
-let clickCount = 0;
+let reviewAborted = false; // 跳過標記
+let reviewClickCount = 0;
 
 async function startReviewAnimation() {
     if (isReviewing) return;
-    
-    // 1. 立即隱藏結算界面
+
+    // 1. 初始化狀態
     const resultModal = document.getElementById('result-modal');
     if (resultModal) resultModal.style.display = 'none';
+    document.getElementById('skip-hint-ui').style.display = 'block';
 
     isReviewing = true;
-    clickCount = 0; 
+    reviewAborted = false;
+    reviewClickCount = 0;
 
-    // 2. 【核心修復】一次性獲取所有手牌的 DOM 和它們的原始尺寸（防止佈局抖動導致縮小）
+    // 2. 準備動畫任務
     const handElements = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
     const cardRects = Array.from(handElements).map(el => el.getBoundingClientRect());
     
-    // 3. 準備需要動畫的數據清單
     const taskList = [];
     playerHand.forEach((card, i) => {
         if (card && card.type === 'meaning' && handElements[i]) {
-            taskList.push({
-                data: card,
-                element: handElements[i],
-                rect: cardRects[i] // 使用預先存好的尺寸
-            });
+            taskList.push({ data: card, element: handElements[i], rect: cardRects[i] });
         }
     });
 
-    // 4. 依序執行歸位動畫
+    // 3. 順序執行歸位動畫
     for (const task of taskList) {
-        if (clickCount >= 2) { location.reload(); return; }
+        if (reviewAborted) break; // 如果玩家跳過，立即終止循環
 
         const { data, element, rect } = task;
-
-        // 隱藏原始手牌，但因為我們已經有 rect 了，所以不怕佈局改變
         element.style.visibility = "hidden";
 
-        // 創建飛行幻影
         const fly = document.createElement('div');
         fly.className = 'flying-card';
-        // 確保繼承手牌的 HTML 結構與文字
         fly.innerHTML = `<div class="c-tag">字義</div><div class="c-text" style="font-weight:900;">${data.text}</div>`;
-        
-        // 【修復】強制設定寬高為「拍照」時的大小，並鎖定比例
         fly.style.width = rect.width + 'px';
         fly.style.height = rect.height + 'px';
         fly.style.top = rect.top + 'px';
         fly.style.left = rect.left + 'px';
-        fly.style.aspectRatio = "auto"; // 防止 CSS 的 aspect-ratio 覆蓋 JS 設定的尺寸
         document.body.appendChild(fly);
 
-        // 尋找場上目標
         const targetIdx = activeField.findIndex(t => t.word === data.parentWord);
         const targetCards = document.querySelectorAll('.target-card');
         const targetDOM = targetCards[targetIdx];
 
-        // 第一階段：彈起
         requestAnimationFrame(() => {
-            fly.style.transform = "translateY(-60px) rotate(-5deg)"; 
+            fly.style.transform = "translateY(-60px) rotate(-5deg)";
         });
 
-        await new Promise(r => setTimeout(r, 150)); 
+        await new Promise(r => setTimeout(r, 100)); 
 
-        if (targetDOM) {
+        if (targetDOM && !reviewAborted) {
             const endRect = targetDOM.getBoundingClientRect();
-            // 移動到目標位置中心（計算位移使其居中）
-            const targetCenterX = endRect.left + endRect.width / 2;
-            const targetCenterY = endRect.top + endRect.height / 2;
-            
-            fly.style.top = (targetCenterY - rect.height / 2) + 'px';
-            fly.style.left = (targetCenterX - rect.width / 2) + 'px';
-            fly.style.transform = "translateY(0) rotate(0deg)"; 
-
-            // 抵達時反饋
-            setTimeout(() => {
-                targetDOM.style.transition = "0.3s";
-                targetDOM.style.boxShadow = "0 0 30px 10px var(--c-green)";
-                targetDOM.style.borderColor = "var(--c-green)";
-                playSfxAudio('correct'); 
-                
-                setTimeout(() => {
-                    targetDOM.style.boxShadow = "";
-                    targetDOM.style.borderColor = "";
-                }, 1000);
-            }, 700); 
+            fly.style.top = (endRect.top + endRect.height/2 - rect.height/2) + 'px';
+            fly.style.left = (endRect.left + endRect.width/2 - rect.width/2) + 'px';
+            fly.style.transform = "translateY(0) rotate(0deg) scale(0.2)";
+            fly.style.opacity = "0";
+            playSfxAudio('draw');
         } else {
-            // 無目標則飛出屏幕
-            fly.style.top = "-200px";
-            fly.style.opacity = "0"; 
+            fly.remove();
         }
 
-        // 移除幻影並等待下一張
-        setTimeout(() => fly.remove(), 1000);
-        await new Promise(r => setTimeout(r, 300)); 
+        setTimeout(() => fly.remove(), 700);
+        await new Promise(r => setTimeout(r, 200)); 
     }
 
-    // 全部完成後自動重新開始
-    setTimeout(() => { if (isReviewing) location.reload(); }, 1500);
+    // 4. 結束動畫進入靜態界面
+    showStudyScreen();
 }
-// 修改全局點擊監聽：處理「點擊兩次停止」
+
+// 顯示深層記憶總結界面
+function showStudyScreen() {
+    isReviewing = false;
+    document.getElementById('skip-hint-ui').style.display = 'none';
+    
+    // 清除畫面上可能殘留的飛行卡片
+    document.querySelectorAll('.flying-card').forEach(el => el.remove());
+
+    const studyModal = document.getElementById('study-modal');
+    const studyGrid = document.getElementById('study-grid');
+    studyGrid.innerHTML = '';
+
+    // gameDataPool 包含了對局中出現過的所有字詞對象
+    gameDataPool.forEach(wordObj => {
+        const card = document.createElement('div');
+        card.className = 'study-card';
+        
+        // 生成該字詞的所有字義 HTML
+        let meaningsHTML = wordObj.字義.map(m => {
+            // 尋找對應的例句
+            const example = wordObj.用例 ? wordObj.用例.find(e => e.用例字義 === m || m.includes(e.用例字義)) : null;
+            return `
+                <div class="study-m-item">
+                    <b>${m}</b>
+                    ${example ? `<div class="study-example">「${example.句子}」</div>` : ''}
+                </div>
+            `;
+        }).join('');
+
+        card.innerHTML = `
+            <div class="study-word">${wordObj.字詞}</div>
+            <div class="study-meanings">${meaningsHTML}</div>
+        `;
+        studyGrid.appendChild(card);
+    });
+
+    studyModal.style.display = 'flex';
+}
+
+// 監聽點擊，處理雙擊跳過
 document.addEventListener('mousedown', () => {
     if (isReviewing) {
-        clickCount++;
-        if (clickCount >= 2) {
-            location.reload(); // 第二次點擊直接重洗
+        reviewClickCount++;
+        if (reviewClickCount >= 2) {
+            reviewAborted = true; 
+            // 這裡不需要 reload，循環結束會自動進入 showStudyScreen
         }
     }
 });
@@ -1818,5 +1881,21 @@ document.getElementById('detail-modal').onclick = hideModal;
         <div style="margin-top: 20px; color: #999; font-weight: bold; font-size: 0.9rem;">( 點擊空白位置后消失 )</div>
     </div>
 </div>    
+<div id="skip-hint-ui">雙擊螢幕跳過動畫</div>
+
+<!-- 深層記憶戰報界面 -->
+<div id="study-modal">
+    <div class="study-header">
+        <div style="font-size: 1.2rem; font-weight: 900; color: #666;">BATTLE REVIEW</div>
+        <h1 style="font-size: 3rem; font-weight: 900; margin: 0;">言靈戰報：深層記憶回流</h1>
+        <p style="font-weight: 700;">本次對局涉及的所有言靈釋義已全數解析</p>
+    </div>
+    <div class="study-grid" id="study-grid">
+        <!-- JS 動態生成內容 -->
+    </div>
+    <div class="study-footer">
+        <button class="btn btn-red" style="font-size: 1.5rem; padding: 10px 60px;" onclick="location.reload()">歸還卷軸 (回到大廳)</button>
+    </div>
+</div>
 </body>
 </html>
