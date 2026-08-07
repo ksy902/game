@@ -1566,7 +1566,8 @@ function playSfx(text, type) {
     sfx.innerText = text; sfx.className = `sfx-box sfx-${type}`;
     sfx.style.animation = 'none'; void sfx.offsetWidth; sfx.style.animation = 'popInStay 2.5s forwards';
 }
-let winner = null;
+function checkWin() {    
+    let winner = null;
     let resultMsg = "";
 
     // 1. 基礎勝負：某一方手牌清空
