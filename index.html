@@ -196,6 +196,14 @@
         .btn-cyan { background: var(--c-cyan); }
         .btn-purple { background: var(--c-purple); color: white; }
         .btn-orange { background: var(--c-orange); color: white; }
+        .btn:disabled {
+    background: var(--c-gray) !important; /* 使用淺灰色 */
+    color: #888 !important;              /* 字體變灰 */
+    border-color: #999 !important;       /* 邊框變淺 */
+    box-shadow: none !important;         /* 移除陰影 */
+    cursor: not-allowed;                 /* 滑鼠指標變更 */
+    transform: none !important;          /* 移除斜切位移效果 */
+}
 
 /* 提示界面專用樣式 */
 #hint-modal { 
@@ -1415,6 +1423,16 @@ function updateUI() {
     
     const hintBtn = document.getElementById('hint-btn');
     const selectedCard = playerHand[selectedIndex];
+    const canUseHint = (
+        turn === 'player' && 
+        selectedIndex !== null && 
+        selectedCard && 
+        selectedCard.type === 'meaning' && 
+        hintsRemaining > 0
+    );
+
+    hintBtn.disabled = !canUseHint; // 如果不符合上述任一條件，按鈕變灰(disabled)
+    hintBtn.innerText = `💡 提示(${hintsRemaining}/3)`;
     // 只有在選中「字義牌」且還有次數時才可用
     hintBtn.disabled = (turn !== 'player' || selectedIndex === null || !selectedCard || selectedCard.type !== 'meaning' || hintsRemaining <= 0);
     hintBtn.innerText = `💡 提示(${hintsRemaining}/3)`;
