@@ -1638,24 +1638,22 @@ let clickCount = 0;
 
 async function startReviewAnimation() {
     if (isReviewing) return;
+    
+    // 1. 【立即執行】強制隱藏結算界面，不留任何延遲
+    const resultModal = document.getElementById('result-modal');
+    if (resultModal) {
+        resultModal.style.display = 'none';
+    }
+
     isReviewing = true;
     clickCount = 0; 
 
-    // 1. 強制隱藏結算界面（使用 !important 確保覆蓋所有狀態）
-    const resultModal = document.getElementById('result-modal');
-    if (resultModal) {
-        resultModal.style.setProperty('display', 'none', 'important');
-    }
-
-    // 給瀏覽器一個極短的時間 (50ms) 來重新渲染 UI，確保玩家看到界面消失
-    await new Promise(r => setTimeout(r, 50));
-
-    // 獲取目前手牌區域的所有卡片 DOM
+    // 2. 獲取目前手牌區域的所有卡片 DOM
     const handCards = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
     
-    // 2. 遍歷手牌執行歸位
+    // 3. 遍歷手牌執行歸位動畫
     for (let i = 0; i < playerHand.length; i++) {
-        // 如果偵測到雙擊，立即結束
+        // 如果偵測到雙擊，立即徹底重啟
         if (clickCount >= 2) { location.reload(); return; }
 
         const cardData = playerHand[i];
@@ -1668,7 +1666,7 @@ async function startReviewAnimation() {
         const startRect = sourceDOM.getBoundingClientRect();
         sourceDOM.style.visibility = "hidden";
 
-        // 創建飛行幻影（100% 不透明度）
+        // 創建飛行幻影
         const fly = document.createElement('div');
         fly.className = 'flying-card';
         fly.innerHTML = `
@@ -1679,7 +1677,7 @@ async function startReviewAnimation() {
         fly.style.height = startRect.height + 'px';
         fly.style.top = startRect.top + 'px';
         fly.style.left = startRect.left + 'px';
-        fly.style.opacity = "1"; // 確保 100% 不透明
+        fly.style.opacity = "1";
         document.body.appendChild(fly);
 
         // 尋找場上目標
@@ -1687,7 +1685,7 @@ async function startReviewAnimation() {
         const targetCards = document.querySelectorAll('.target-card');
         const targetDOM = targetCards[targetIdx];
 
-        // 第一階段：稍微向上彈起並傾斜
+        // 第一階段：向上彈起
         requestAnimationFrame(() => {
             fly.style.transform = "translateY(-60px) rotate(-10deg) scale(1.1)";
         });
@@ -1700,9 +1698,8 @@ async function startReviewAnimation() {
             fly.style.top = endRect.top + 'px';
             fly.style.left = endRect.left + 'px';
             fly.style.transform = "translateY(0) rotate(0deg) scale(1)";
-            fly.style.opacity = "1"; 
 
-            // 抵達時亮起綠光
+            // 抵達時反饋
             setTimeout(() => {
                 targetDOM.style.transition = "0.3s";
                 targetDOM.style.boxShadow = "0 0 30px 10px var(--c-green)";
@@ -1715,7 +1712,7 @@ async function startReviewAnimation() {
                 }, 1000);
             }, 700); 
         } else {
-            // 無目標則飛散
+            // 無目標則向上飛出
             fly.style.top = "-200px";
             fly.style.opacity = "0"; 
         }
@@ -1724,7 +1721,7 @@ async function startReviewAnimation() {
         await new Promise(r => setTimeout(r, 250)); 
     }
 
-    // 全部完成後重啟
+    // 全部完成後重載遊戲
     setTimeout(() => { if (isReviewing) location.reload(); }, 1500);
 }
 // 修改全局點擊監聽：處理「點擊兩次停止」
