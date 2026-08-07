@@ -197,6 +197,18 @@
         .btn-red { background: var(--c-red); color: white; }
         .btn-cyan { background: var(--c-cyan); }
         .btn-purple { background: var(--c-purple); color: white; }
+        .btn-orange { background: var(--c-orange); color: white; }
+
+/* 提示界面專用樣式 */
+#hint-modal { 
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+    z-index: 4000; display: none; justify-content: center; align-items: center; 
+}
+.hint-content {
+    background: var(--c-white); border: 6px solid var(--c-orange);
+    padding: 30px; width: 90%; max-width: 400px; transform: skew(-1deg);
+    box-shadow: 15px 15px 0 var(--c-black); text-align: center;
+}
 
         .bar { background: var(--c-white); border-bottom: var(--stroke); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
         .bar.bottom {
@@ -781,6 +793,9 @@
         <button class="btn btn-cyan" id="recast-btn" onclick="recastHand()" disabled>
             <svg class="svg-icon"><use href="#icon-refresh"></use></svg> 重鑄
         </button>
+        <button class="btn btn-orange" id="hint-btn" onclick="useHint()" disabled>
+    💡 提示(3/3)
+</button>
         <button class="btn btn-white" id="pass-btn" onclick="passTurn()" disabled>
             <svg class="svg-icon"><use href="#icon-skip"></use></svg> PASS
         </button>
@@ -1104,6 +1119,7 @@ let playerHand = [], aiHand = [], activeField = [];
 let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
 let playerChar = 'seer', aiDifficulty = 'normal', selectedScope = "第一節：手";
 let pressTimer = null, pressStartTime = 0;
+let hintsRemaining = 3;    
 
 const charMap = { 'seer':'天機', 'knight':'墨俠', 'trickster':'詭道', 'rock':'磐石', 'berserker':'狂草' };
 
@@ -1187,6 +1203,7 @@ function initGame() {
     
     // 4. 起始手牌
     playerHand = []; aiHand = [];
+    hintsRemaining = 3;
     let pCount = (playerChar === 'seer') ? 4 : 5;
     let aCount = (aiDifficulty === 'hard') ? 3 : 5;
     for(let i=0; i<pCount; i++) playerHand.push(drawCard());
@@ -1282,6 +1299,11 @@ function updateUI() {
     document.getElementById('recast-btn').disabled = (turn !== 'player');
     document.getElementById('pass-btn').disabled = (turn !== 'player');
     
+    const hintBtn = document.getElementById('hint-btn');
+    const selectedCard = playerHand[selectedIndex];
+    // 只有在選中「字義牌」且還有次數時才可用
+    hintBtn.disabled = (turn !== 'player' || selectedIndex === null || !selectedCard || selectedCard.type !== 'meaning' || hintsRemaining <= 0);
+    hintBtn.innerText = `💡 提示(${hintsRemaining}/3)`;
     const funcBtn = document.getElementById('func-btn');
     if (selectedIndex !== null && playerHand[selectedIndex] && playerHand[selectedIndex].type === 'func' && turn === 'player') {
         funcBtn.style.display = 'block';
@@ -1405,7 +1427,37 @@ function hideModal() {
     if (modal) modal.style.display = 'none'; 
 }
 
+function useHint() {
+    if (hintsRemaining <= 0 || selectedIndex === null) return;
+    const card = playerHand[selectedIndex];
+    if (card.type !== 'meaning') return;
 
+    // 從數據庫中尋找對應的字詞資料
+    const scopeData = fullWordDatabase[selectedScope];
+    const wordData = scopeData.find(w => w.字詞 === card.parentWord);
+    
+    if (wordData) {
+        // 尋找對應字義的例句
+        const exampleObj = wordData.用例 ? wordData.用例.find(e => e.用例字義.includes(card.text) || card.text.includes(e.用例字義)) : null;
+        const sentence = exampleObj ? `例句：${exampleObj.句子}` : "此字義在典籍中暫無對應例句。";
+
+        // 填入內容並顯示界面
+        document.getElementById('hint-word-display').innerText = `【${card.parentWord}】`;
+        document.getElementById('hint-example-display').innerText = sentence;
+        document.getElementById('hint-modal').style.display = 'flex';
+
+        // 扣除次數
+        hintsRemaining--;
+        updateUI();
+        playSfxAudio('draw'); // 播放一個輕微音效
+    }
+}
+
+// 關閉提示界面
+function closeHint() {
+    document.getElementById('hint-modal').style.display = 'none';
+}
+    
 function tryMatch(targetIndex) {
     if(turn !== 'player' || selectedIndex === null) return;
     let card = playerHand[selectedIndex], target = activeField[targetIndex];
@@ -1679,5 +1731,13 @@ function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play(
 window.onload = () => { initLobby(); };
 document.getElementById('detail-modal').onclick = hideModal;
 </script>
+<div id="hint-modal" onclick="closeHint()">
+    <div class="hint-content" onclick="event.stopPropagation()">
+        <div style="font-size: 1.2rem; color: #666; margin-bottom: 10px;">言靈指引</div>
+        <div id="hint-word-display" style="font-size: 2.5rem; font-weight: 900; border-bottom: 3px solid #000; margin-bottom: 15px; padding-bottom: 5px;"></div>
+        <div id="hint-example-display" style="font-size: 1.15rem; line-height: 1.6; text-align: left; background: #f0f0f0; padding: 15px; border-left: 5px solid var(--c-orange);"></div>
+        <div style="margin-top: 20px; color: #999; font-weight: bold; font-size: 0.9rem;">( 點擊空白位置后消失 )</div>
+    </div>
+</div>    
 </body>
 </html>
