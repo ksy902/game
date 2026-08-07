@@ -1580,34 +1580,39 @@ function showResultModal(winner, msg) {
 let isReviewing = false;
 let clickCount = 0;
 
-// 修改後的歸位動畫與自動結束邏輯
 async function startReviewAnimation() {
     if (isReviewing) return;
     isReviewing = true;
-    clickCount = 0; // 重置點擊次數
+    clickCount = 0; 
 
-    // 1. 讓結算界面完全消失，避免遮擋
+    // 1. 讓結算界面消失
     const modal = document.getElementById('result-modal');
     modal.style.display = "none";
 
+    // 獲取目前手牌區域的所有卡片 DOM（排除職階卡）
     const handCards = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
     
     // 2. 遍歷手牌執行歸位動畫
     for (let i = 0; i < playerHand.length; i++) {
-        // 如果玩家雙擊或多次點擊，立即停止循環並重載
         if (clickCount >= 2) break;
 
         const cardData = playerHand[i];
-        if (!cardData || cardData.type !== 'meaning') continue;
+        // 只處理字義牌，功能牌直接跳過或消失
+        if (!cardData || cardData.type !== 'meaning') {
+            if(handCards[i]) handCards[i].style.opacity = "0";
+            continue;
+        }
 
         const sourceDOM = handCards[i];
         if (!sourceDOM) continue;
 
-        // 創建飛行卡片實體
+        // --- 核心修改：獲取起始位置並立即讓原手牌消失 ---
         const startRect = sourceDOM.getBoundingClientRect();
+        sourceDOM.style.visibility = "hidden"; // 讓原位置的卡牌消失，但不影響佈局
+
+        // 創建飛行幻影
         const fly = document.createElement('div');
         fly.className = 'flying-card';
-        // 教學設計：上方顯示原字詞，下方顯示字義
         fly.innerHTML = `
             <div style="font-size:0.8rem; color:#666; border-bottom:1px solid #ddd; margin-bottom:5px; padding-bottom:2px;">${cardData.parentWord}</div>
             <div style="color:var(--c-red); font-weight:900;">${cardData.text}</div>
@@ -1623,16 +1628,12 @@ async function startReviewAnimation() {
         const targetCards = document.querySelectorAll('.target-card');
         const targetDOM = targetCards[targetIdx];
 
-        await new Promise(r => setTimeout(r, 50)); // 確保瀏覽器已捕捉初始位置
+        await new Promise(r => setTimeout(r, 50)); 
 
         if (targetDOM) {
+            // 如果場上有對應字，飛向它
             const endRect = targetDOM.getBoundingClientRect();
-            fly.style.top = (endRect.top + 10) + 'px';
-            fly.style.left = (endRect.left + 10) + 'px';
-            if (targetDOM) {
-            const endRect = targetDOM.getBoundingClientRect();
-            // --- 修改這裡：將 scale(0.7) 改為 scale(1.2) 或更大 ---
-            fly.style.top = (endRect.top - 20) + 'px'; // 稍微往上一點，避免完全重疊
+            fly.style.top = (endRect.top - 20) + 'px'; 
             fly.style.left = (endRect.left + 5) + 'px';
             fly.style.transform = `rotate(${Math.random() * 10 - 5}deg) scale(1.2)`; 
             
@@ -1642,37 +1643,26 @@ async function startReviewAnimation() {
                 playSfxAudio('correct');
             }, 700);
         } else {
-            // 場上無該字時，向上方飛散消失
+            // 場上已無該字，向隨機方向飛散
             fly.style.top = "-200px";
             fly.style.left = (Math.random() * window.innerWidth) + "px";
             fly.style.opacity = "0";
-            // --- 修改這裡：同樣放大飛散的過程 ---
             fly.style.transform = `rotate(${Math.random() * 360}deg) scale(1.2)`;
         }
-            
-            setTimeout(() => {
-                targetDOM.style.boxShadow = "0 0 30px var(--c-green)";
-                targetDOM.style.borderColor = "var(--c-green)";
-                playSfxAudio('correct');
-            }, 700);
-        } else {
-            // 場上無該字時，向上方飛散消失
-            fly.style.top = "-150px";
-            fly.style.left = (Math.random() * window.innerWidth) + "px";
-            fly.style.opacity = "0";
-            fly.style.transform = `rotate(${Math.random() * 360}deg) scale(0.5)`;
-        }
 
+        // 動畫結束後移除幻影
         setTimeout(() => fly.remove(), 1000);
-        await new Promise(r => setTimeout(r, 400)); // 控制出牌速度
+        
+        // 控制每張牌飛出的間隔感
+        await new Promise(r => setTimeout(r, 350)); 
     }
 
-    // 3. 所有動畫結束（或點擊中斷）後，等待一下便重回大廳
+    // 3. 全部飛完後重啟遊戲
     setTimeout(() => {
         location.reload();
-    }, 800);
+    }, 1000);
 }
-
+    
 // 監聽全局點擊：玩家在動畫中點擊兩下就直接退出
 document.addEventListener('mousedown', () => {
     if (isReviewing) {
@@ -1682,9 +1672,6 @@ document.addEventListener('mousedown', () => {
         }
     }
 });
-
-
-   
 
 function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play().catch(()=>{}); }
 
