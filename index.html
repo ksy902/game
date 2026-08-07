@@ -1209,9 +1209,35 @@ function updateUI() {
             <div class="diamond-container">
                 ${target.meanings.map(m => `<div class="diamond ${m.unlocked ? 'on' : ''}"></div>`).join('')}
             </div>`;
-        tCard.onpointerdown = () => { pressStartTime = Date.now(); pressTimer = setTimeout(() => showModal(tIdx), 400); };
-        tCard.onpointerup = () => { clearTimeout(pressTimer); if (Date.now() - pressStartTime < 400) tryMatch(tIdx); };
-        fieldDOM.appendChild(tCard);
+
+        // --- 這裡開始是修改後的交互邏輯 ---
+        tCard.onpointerdown = (e) => { 
+            if (e.button === 2) return; 
+            pressStartTime = Date.now(); 
+            pressTimer = setTimeout(() => showModal(tIdx), 400); 
+        };
+
+        tCard.onpointerup = () => { 
+            clearTimeout(pressTimer); 
+            hideModal(); // 鬆開時關閉界面
+            if (Date.now() - pressStartTime < 400) {
+                tryMatch(tIdx); 
+            }
+        };
+
+        tCard.onpointerleave = () => { // 鼠標移出卡牌時也要關閉，防止卡死
+            clearTimeout(pressTimer);
+            hideModal();
+        };
+
+        tCard.onpointercancel = () => {
+            clearTimeout(pressTimer);
+            hideModal();
+        };
+        // --- 交互邏輯結束 ---
+
+        // 這行一定要保留，負責把卡片畫到畫面上
+        fieldDOM.appendChild(tCard); 
     });
 
     // 手牌區域 (保持您的邏輯，CSS 已處理外觀)
@@ -1283,7 +1309,11 @@ function showModal(tIdx) {
     content.innerHTML = `<div class="m-word">${target.word}</div>${listHTML}<div style="font-size:0.85rem; text-align:right; margin-top:15px; color:#555; font-weight:bold;">(放開以關閉)</div>`;
     modal.style.display = 'flex';
 }
-function hideModal() { document.getElementById('detail-modal').style.display = 'none'; }
+function hideModal() { 
+    const modal = document.getElementById('detail-modal');
+    if (modal) modal.style.display = 'none'; 
+}
+
 
 function tryMatch(targetIndex) {
     if(turn !== 'player' || selectedIndex === null) return;
@@ -1403,6 +1433,7 @@ function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play(
 
 // 初始化大廳
 window.onload = () => { initLobby(); };
+document.getElementById('detail-modal').onclick = hideModal;
 </script>
 </body>
 </html>
