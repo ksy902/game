@@ -1116,6 +1116,7 @@ audio.bgm.loop = true; audio.bgm.volume = 0.3;
 
 /** 3. 遊戲核心變數 **/
 let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
+let isGameOver = false;     
 let playerHand = [], aiHand = [], activeField = []; 
 let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
 let playerChar = 'seer', aiDifficulty = 'normal', selectedScope = "手";
@@ -1177,6 +1178,7 @@ function toggleAudio() {
 /** 5. 核心啟動函數 (修復邏輯洩漏) **/
 function startGame() {
     gameStarted = true;
+    isGameOver = false; // 每次開始新遊戲，重置鎖定
     if (audio.enabled) audio.bgm.play().catch(()=>{});
     document.getElementById('lobby-modal').style.display = 'none';
     
@@ -1572,6 +1574,9 @@ function playSfx(text, type) {
     sfx.style.animation = 'none'; void sfx.offsetWidth; sfx.style.animation = 'popInStay 2.5s forwards';
 }
 function checkWin() {    
+    // 【保險鎖】如果遊戲已經判定結束，直接跳出，不再執行後面的彈窗邏輯
+    if (isGameOver) return;
+
     let winner = null;
     let resultMsg = "";
 
@@ -1583,7 +1588,7 @@ function checkWin() {
         winner = 'ai';
         resultMsg = "AI 已清空手牌，你被擊敗了。";
     }
-    // 2. 終局比牌：20張字詞全部完成
+    // 2. 終局比牌：當所有備選字詞都已出完且場上也被清空時
     else if (unspawnedWords.length === 0 && activeField.length === 0) {
         let pLen = playerHand.length;
         let aLen = aiHand.length;
@@ -1601,11 +1606,12 @@ function checkWin() {
         }
     }
 
+    // 如果判定出勝負，則鎖定狀態並顯示彈窗
     if (winner) {
+        isGameOver = true; // 【關鍵】立刻鎖死，防止 updateUI 重複觸發此函數
         showResultModal(winner, resultMsg);
     }
 }
-
 // 顯示結果彈窗
 function showResultModal(winner, msg) {
     const modal = document.getElementById('result-modal');
