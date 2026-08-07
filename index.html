@@ -198,13 +198,14 @@
         .btn-cyan { background: var(--c-cyan); }
         .btn-purple { background: var(--c-purple); color: white; }
         .btn-orange { background: var(--c-orange); color: white; }
-        .btn:disabled {
-    background: #cccccc !important; /* 灰色背景 */
-    color: #888888 !important;     /* 灰色文字 */
+        .btn:disabled, .btn-orange:disabled, .btn-purple:disabled {
+    background: #cccccc !important; 
+    color: #888888 !important;     
     border-color: #999999 !important;
-    cursor: not-allowed;           /* 顯示禁止符號鼠標 */
-    box-shadow: none !important;    /* 移除陰影 */
-    transform: none !important;     /* 移除斜切位移 */
+    cursor: not-allowed !important;           
+    box-shadow: none !important;    
+    transform: none !important;     
+    filter: grayscale(1); /* 增加濾鏡確保徹底變灰 */
 }
 
 /* 提示界面專用樣式 */
@@ -1308,17 +1309,20 @@ function updateUI() {
     document.getElementById('pass-btn').disabled = (turn !== 'player');
     
     const hintBtn = document.getElementById('hint-btn');
-    const selectedCard = playerHand[selectedIndex];
-    const shouldDisableHint = (
-        turn !== 'player' || 
-        selectedIndex === null || 
-        !selectedCard || 
-        selectedCard.type !== 'meaning' || 
-        hintsRemaining <= 0
-    );
+    if (hintBtn) {
+        const selectedCard = selectedIndex !== null ? playerHand[selectedIndex] : null;
+        
+        // 判斷禁用條件：
+        // 1. 不是玩家回合 OR 
+        // 2. 未選牌 OR 
+        // 3. 選中的是言靈牌 (selectedCard.type !== 'meaning') OR 
+        // 4. 次數用完 (hintsRemaining <= 0)
+        const isMeaningCard = selectedCard && selectedCard.type === 'meaning';
+        const canUseHint = (turn === 'player' && isMeaningCard && hintsRemaining > 0);
 
-    hintBtn.disabled = shouldDisableHint;
-    hintBtn.innerText = `💡 提示(${hintsRemaining}/3) `;
+        hintBtn.disabled = !canUseHint;
+        hintBtn.innerText = `💡 提示(${hintsRemaining}/3)`;
+    }
    
     // 只有在選中「字義牌」且還有次數時才可用
     hintBtn.disabled = (turn !== 'player' || selectedIndex === null || !selectedCard || selectedCard.type !== 'meaning' || hintsRemaining <= 0);
@@ -1447,8 +1451,9 @@ function hideModal() {
 }
 
 function useHint() {
-    // 雙重檢查：次數、選牌狀態、牌的類型
+    // 嚴格檢查：必須有剩餘次數、必須選中牌、必須是字義牌
     if (hintsRemaining <= 0 || selectedIndex === null) return;
+    
     const card = playerHand[selectedIndex];
     if (!card || card.type !== 'meaning') return;
 
@@ -1464,7 +1469,7 @@ function useHint() {
         document.getElementById('hint-modal').style.display = 'flex';
 
         hintsRemaining--; // 扣除次數
-        updateUI();       // 立即更新按鈕狀態（變灰）
+        updateUI();       // 更新按鈕狀態（變灰）
         playSfxAudio('draw'); 
     }
 }
