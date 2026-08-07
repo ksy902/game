@@ -48,20 +48,32 @@
 .result-title { font-size: 3.5rem; font-weight: 900; margin-bottom: 10px; }
 .result-stats { font-size: 1.5rem; font-weight: 700; margin: 20px 0; border-top: 2px solid #000; padding-top: 20px; }
 .winner-player { color: var(--c-cyan); text-shadow: 4px 4px 0 #000; }
-.winner-ai { color: var(--c-red); text-shadow: 4px 4px 0 #000; }
+.winner-ai { 
+    color: var(--c-red) !important; 
+    font-weight: 900; 
+    text-shadow: none !important; 
+}
 
-/* 飛行卡片動畫 */
-.flying-card {
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    border: 3px solid #000;
-    background: #fff;
-    padding: 10px;
+/* 新增：結算界面關閉按鈕 (X) */
+.close-result {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2rem;
     font-weight: 900;
-    box-shadow: 5px 5px 0 #000;
-    display: flex; align-items: center; justify-content: center; text-align: center;
+    cursor: pointer;
+    color: #000;
+}
+.close-result:hover { color: var(--c-red); }
+
+/* 飛行卡片樣式：優化文字間距 */
+.flying-card {
+    position: fixed; pointer-events: none; z-index: 9999;
+    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 3px solid #000; background: #fff; padding: 10px;
+    font-weight: 900; box-shadow: 5px 5px 0 #000;
+    display: flex; flex-direction: column; align-items: center; 
+    justify-content: center; text-align: center; line-height: 1.2;
 }
         
 /* 2. 角色固定卡基礎設定：看到整張圖片 */
@@ -622,6 +634,9 @@
 <body>
 <div id="result-modal">
     <div class="result-content">
+        <!-- 新增關閉按鈕 -->
+        <div class="close-result" onclick="location.reload()">×</div>
+        
         <div id="result-title-text" class="result-title">勝負已分</div>
         <div id="result-winner-name" style="font-size: 2rem; font-weight: 900;"></div>
         <div class="result-stats" id="result-stats-text"></div>
@@ -630,7 +645,7 @@
             <button class="btn btn-red" onclick="location.reload()">🔄 重回大廳</button>
         </div>
     </div>
-</div>    
+</div>
 <audio id="bgm-player" loop preload="auto">
     <source src="https://upload.wikimedia.org/wikipedia/commons/2/23/Epic_Battle_Music_-_The_Final_Battle.mp3" type="audio/mpeg">
 </audio>
@@ -1557,59 +1572,86 @@ function showResultModal(winner, msg) {
 }
 
 // 動畫：手牌歸位 (字義回溯)
+let isReviewing = false;
+let clickCount = 0;
+
+// 修改後的歸位動畫邏輯
 async function startReviewAnimation() {
-    // 暫時淡化結算框，讓玩家看清動畫
+    if (isReviewing) return;
+    isReviewing = true;
+    clickCount = 0; // 重置點擊計數
+
+    // 1. 讓結算界面完全消失
     const modal = document.getElementById('result-modal');
-    modal.style.opacity = "0.2";
-    modal.style.pointerEvents = "none";
+    modal.style.display = "none";
 
     const handCards = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
-    const fieldArea = document.getElementById('field-area');
-
+    
+    // 遍歷手牌執行歸位
     for (let i = 0; i < playerHand.length; i++) {
+        // 如果玩家在過程中點擊超過兩次，直接結束重載
+        if (clickCount >= 2) break;
+
         const cardData = playerHand[i];
         if (!cardData || cardData.type !== 'meaning') continue;
 
         const sourceDOM = handCards[i];
         if (!sourceDOM) continue;
 
-        // 創建飛行卡片
+        // 創建飛行幻影
         const startRect = sourceDOM.getBoundingClientRect();
         const fly = document.createElement('div');
         fly.className = 'flying-card';
-        fly.innerText = `${cardData.parentWord}\n↓\n${cardData.text}`;
+        fly.innerHTML = `<span style="font-size:0.8rem; color:#666;">${cardData.parentWord}</span><span style="color:var(--c-red)">${cardData.text}</span>`;
         fly.style.width = startRect.width + 'px';
         fly.style.height = startRect.height + 'px';
         fly.style.top = startRect.top + 'px';
         fly.style.left = startRect.left + 'px';
         document.body.appendChild(fly);
 
-        // 隨機在場上生成一個位置（模仿瀑布效果）
-        const randomX = Math.random() * (window.innerWidth - 100);
-        const randomY = Math.random() * (window.innerHeight - 200);
+        // 尋找場上對應卡牌
+        const targetIdx = activeField.findIndex(t => t.word === cardData.parentWord);
+        const targetCards = document.querySelectorAll('.target-card');
+        const targetDOM = targetCards[targetIdx];
 
-        await new Promise(r => setTimeout(r, 50)); 
-        
-        // 執行飛行
-        fly.style.top = randomY + 'px';
-        fly.style.left = randomX + 'px';
-        fly.style.transform = `rotate(${Math.random() * 720 - 360}deg) scale(0.8)`;
-        fly.style.opacity = "0";
+        await new Promise(r => setTimeout(r, 50));
 
-        playSfxAudio('draw');
+        if (targetDOM) {
+            // 如果場上有對應字詞，飛向它
+            const endRect = targetDOM.getBoundingClientRect();
+            fly.style.top = endRect.top + 'px';
+            fly.style.left = endRect.left + 'px';
+            fly.style.transform = `rotate(${Math.random() * 20 - 10}deg) scale(0.6)`;
+            setTimeout(() => {
+                targetDOM.style.boxShadow = "0 0 20px var(--c-green)";
+                playSfxAudio('correct');
+            }, 700);
+        } else {
+            // 如果場上已無該字，隨機飛散並消失
+            fly.style.top = "-100px";
+            fly.style.left = (Math.random() * window.innerWidth) + "px";
+            fly.style.opacity = "0";
+        }
 
-        // 飛行完畢後移除
-        setTimeout(() => fly.remove(), 800);
-        await new Promise(r => setTimeout(r, 150)); // 每張卡片間隔
+        setTimeout(() => fly.remove(), 1000);
+        await new Promise(r => setTimeout(r, 300)); // 每張卡片間隔 0.3 秒
     }
 
-    // 恢復結算框
-    setTimeout(() => {
-        modal.style.opacity = "1";
-        modal.style.pointerEvents = "auto";
-        document.getElementById('review-btn').style.display = "none";
-    }, 500);
+    // 動畫自然結束或點擊退出後，一律重載
+    location.reload();
 }
+
+// 監聽全屏點擊：用於動畫中途快速退出
+document.addEventListener('mousedown', () => {
+    if (isReviewing) {
+        clickCount++;
+        if (clickCount >= 2) {
+            location.reload(); // 雙擊或多次點擊則強制重載（退出動畫）
+        }
+    }
+});
+
+   
 
 function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play().catch(()=>{}); }
 
