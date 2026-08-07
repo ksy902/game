@@ -198,6 +198,14 @@
         .btn-cyan { background: var(--c-cyan); }
         .btn-purple { background: var(--c-purple); color: white; }
         .btn-orange { background: var(--c-orange); color: white; }
+        .btn:disabled {
+    background: #cccccc !important; /* 灰色背景 */
+    color: #888888 !important;     /* 灰色文字 */
+    border-color: #999999 !important;
+    cursor: not-allowed;           /* 顯示禁止符號鼠標 */
+    box-shadow: none !important;    /* 移除陰影 */
+    transform: none !important;     /* 移除斜切位移 */
+}
 
 /* 提示界面專用樣式 */
 #hint-modal { 
@@ -1301,6 +1309,17 @@ function updateUI() {
     
     const hintBtn = document.getElementById('hint-btn');
     const selectedCard = playerHand[selectedIndex];
+    const shouldDisableHint = (
+        turn !== 'player' || 
+        selectedIndex === null || 
+        !selectedCard || 
+        selectedCard.type !== 'meaning' || 
+        hintsRemaining <= 0
+    );
+
+    hintBtn.disabled = shouldDisableHint;
+    hintBtn.innerText = `💡 提示(${hintsRemaining}/3) `;
+   
     // 只有在選中「字義牌」且還有次數時才可用
     hintBtn.disabled = (turn !== 'player' || selectedIndex === null || !selectedCard || selectedCard.type !== 'meaning' || hintsRemaining <= 0);
     hintBtn.innerText = `💡 提示(${hintsRemaining}/3)`;
@@ -1428,28 +1447,25 @@ function hideModal() {
 }
 
 function useHint() {
+    // 雙重檢查：次數、選牌狀態、牌的類型
     if (hintsRemaining <= 0 || selectedIndex === null) return;
     const card = playerHand[selectedIndex];
-    if (card.type !== 'meaning') return;
+    if (!card || card.type !== 'meaning') return;
 
-    // 從數據庫中尋找對應的字詞資料
     const scopeData = fullWordDatabase[selectedScope];
     const wordData = scopeData.find(w => w.字詞 === card.parentWord);
     
     if (wordData) {
-        // 尋找對應字義的例句
         const exampleObj = wordData.用例 ? wordData.用例.find(e => e.用例字義.includes(card.text) || card.text.includes(e.用例字義)) : null;
         const sentence = exampleObj ? `例句：${exampleObj.句子}` : "此字義在典籍中暫無對應例句。";
 
-        // 填入內容並顯示界面
         document.getElementById('hint-word-display').innerText = `【${card.parentWord}】`;
         document.getElementById('hint-example-display').innerText = sentence;
         document.getElementById('hint-modal').style.display = 'flex';
 
-        // 扣除次數
-        hintsRemaining--;
-        updateUI();
-        playSfxAudio('draw'); // 播放一個輕微音效
+        hintsRemaining--; // 扣除次數
+        updateUI();       // 立即更新按鈕狀態（變灰）
+        playSfxAudio('draw'); 
     }
 }
 
