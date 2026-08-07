@@ -36,7 +36,34 @@
     z-index: 20;
     box-shadow: 8px 8px 0 var(--c-black);
 }
+#result-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    z-index: 5000; display: none; justify-content: center; align-items: center;
+}
+.result-content {
+    background: var(--c-white); border: 8px solid var(--c-black);
+    padding: 40px; width: 90%; max-width: 500px; text-align: center;
+    transform: skew(-2deg); box-shadow: 20px 20px 0 var(--c-yellow);
+}
+.result-title { font-size: 3.5rem; font-weight: 900; margin-bottom: 10px; }
+.result-stats { font-size: 1.5rem; font-weight: 700; margin: 20px 0; border-top: 2px solid #000; padding-top: 20px; }
+.winner-player { color: var(--c-cyan); text-shadow: 4px 4px 0 #000; }
+.winner-ai { color: var(--c-red); text-shadow: 4px 4px 0 #000; }
 
+/* 飛行卡片動畫 */
+.flying-card {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border: 3px solid #000;
+    background: #fff;
+    padding: 10px;
+    font-weight: 900;
+    box-shadow: 5px 5px 0 #000;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+}
+        
 /* 2. 角色固定卡基礎設定：看到整張圖片 */
 .static-char-card {
     height: 95%; /* 稍微增加高度，確保露出更多細節 */
@@ -593,6 +620,17 @@
     </style>
 </head>
 <body>
+<div id="result-modal">
+    <div class="result-content">
+        <div id="result-title-text" class="result-title">勝負已分</div>
+        <div id="result-winner-name" style="font-size: 2rem; font-weight: 900;"></div>
+        <div class="result-stats" id="result-stats-text"></div>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn btn-purple" id="review-btn" onclick="startReviewAnimation()">✨ 強化記憶 (歸位)</button>
+            <button class="btn btn-red" onclick="location.reload()">🔄 重回大廳</button>
+        </div>
+    </div>
+</div>    
 <audio id="bgm-player" loop preload="auto">
     <source src="https://upload.wikimedia.org/wikipedia/commons/2/23/Epic_Battle_Music_-_The_Final_Battle.mp3" type="audio/mpeg">
 </audio>
@@ -1457,35 +1495,120 @@ function playSfx(text, type) {
 }
 function triggerShake() { document.body.classList.remove('shake-effect'); void document.body.offsetWidth; document.body.classList.add('shake-effect'); }
 function checkWin() {
-    // 1. 基礎勝負判斷：某一方手牌清空
-    if (playerHand.length === 0) { 
-        setTimeout(() => { alert("你贏了！言靈臣服於你！"); location.reload(); }, 500); 
-        return; // 觸發清空勝負後直接返回，不再執行後續邏輯
+    let winner = null;
+    let resultMsg = "";
+
+    // 1. 基礎勝負：某一方手牌清空
+    if (playerHand.length === 0) {
+        winner = 'player';
+        resultMsg = "你率先破譯所有言靈，贏得了最終勝利！";
+    } else if (aiHand.length === 0) {
+        winner = 'ai';
+        resultMsg = "AI 已清空手牌，你被擊敗了。";
     }
-    if (aiHand.length === 0) { 
-        setTimeout(() => { alert("你輸了... 被AI擊潰。"); location.reload(); }, 500); 
-        return;
+    // 2. 終局比牌：20張字詞全部完成
+    else if (unspawnedWords.length === 0 && activeField.length === 0) {
+        let pLen = playerHand.length;
+        let aLen = aiHand.length;
+        resultMsg = `所有字詞已全部破譯！\n你的剩餘手牌：${pLen} 張\n敵方剩餘手牌：${aLen} 張\n\n`;
+
+        if (pLen < aLen) {
+            winner = 'player';
+            resultMsg += "恭喜！你以更少的手牌贏得了最終勝利！";
+        } else if (pLen > aLen) {
+            winner = 'ai';
+            resultMsg += "遺憾！敵方殘餘手牌更少，你輸了。";
+        } else {
+            winner = 'draw';
+            resultMsg += "雙方殘餘手牌數量相同，戰成平手！";
+        }
     }
 
-    // 2. 新增終局判斷：場上已無字詞，且隊列也已空（20張字詞全部完成）
-    if (unspawnedWords.length === 0 && activeField.length === 0) {
-        setTimeout(() => {
-            let pLen = playerHand.length;
-            let aLen = aiHand.length;
-            let resultMsg = `所有字詞已全部破譯！\n你的剩餘手牌：${pLen} 張\n敵方剩餘手牌：${aLen} 張\n\n`;
-
-            if (pLen < aLen) {
-                resultMsg += "恭喜！你以更少的手牌贏得了最終勝利！";
-            } else if (pLen > aLen) {
-                resultMsg += "遺憾！敵方殘餘手牌更少，你輸了。";
-            } else {
-                resultMsg += "雙方殘餘手牌數量相同，戰成平手！";
-            }
-
-            alert(resultMsg);
-            location.reload();
-        }, 600); // 稍微延遲讓玩家看清最後一擊
+    if (winner) {
+        showResultModal(winner, resultMsg);
     }
+}
+
+// 顯示結果彈窗
+function showResultModal(winner, msg) {
+    const modal = document.getElementById('result-modal');
+    const title = document.getElementById('result-title-text');
+    const winnerName = document.getElementById('result-winner-name');
+    const stats = document.getElementById('result-stats-text');
+
+    modal.style.display = 'flex';
+    stats.innerText = msg;
+
+    if (winner === 'player') {
+        title.innerText = "完勝！";
+        winnerName.innerText = "挑戰者 獲勝";
+        winnerName.className = "winner-player";
+        playSfxAudio('correct');
+    } else if (winner === 'ai') {
+        title.innerText = "敗北...";
+        winnerName.innerText = "絕對記憶 AI 獲勝";
+        winnerName.className = "winner-ai";
+        playSfxAudio('error');
+    } else {
+        title.innerText = "平局";
+        winnerName.innerText = "勢均力敵";
+        winnerName.className = "winner-draw";
+    }
+}
+
+// 動畫：手牌歸位 (字義回溯)
+async function startReviewAnimation() {
+    // 暫時淡化結算框，讓玩家看清動畫
+    const modal = document.getElementById('result-modal');
+    modal.style.opacity = "0.2";
+    modal.style.pointerEvents = "none";
+
+    const handCards = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
+    const fieldArea = document.getElementById('field-area');
+
+    for (let i = 0; i < playerHand.length; i++) {
+        const cardData = playerHand[i];
+        if (!cardData || cardData.type !== 'meaning') continue;
+
+        const sourceDOM = handCards[i];
+        if (!sourceDOM) continue;
+
+        // 創建飛行卡片
+        const startRect = sourceDOM.getBoundingClientRect();
+        const fly = document.createElement('div');
+        fly.className = 'flying-card';
+        fly.innerText = `${cardData.parentWord}\n↓\n${cardData.text}`;
+        fly.style.width = startRect.width + 'px';
+        fly.style.height = startRect.height + 'px';
+        fly.style.top = startRect.top + 'px';
+        fly.style.left = startRect.left + 'px';
+        document.body.appendChild(fly);
+
+        // 隨機在場上生成一個位置（模仿瀑布效果）
+        const randomX = Math.random() * (window.innerWidth - 100);
+        const randomY = Math.random() * (window.innerHeight - 200);
+
+        await new Promise(r => setTimeout(r, 50)); 
+        
+        // 執行飛行
+        fly.style.top = randomY + 'px';
+        fly.style.left = randomX + 'px';
+        fly.style.transform = `rotate(${Math.random() * 720 - 360}deg) scale(0.8)`;
+        fly.style.opacity = "0";
+
+        playSfxAudio('draw');
+
+        // 飛行完畢後移除
+        setTimeout(() => fly.remove(), 800);
+        await new Promise(r => setTimeout(r, 150)); // 每張卡片間隔
+    }
+
+    // 恢復結算框
+    setTimeout(() => {
+        modal.style.opacity = "1";
+        modal.style.pointerEvents = "auto";
+        document.getElementById('review-btn').style.display = "none";
+    }, 500);
 }
 
 function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play().catch(()=>{}); }
