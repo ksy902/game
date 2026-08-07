@@ -580,7 +580,36 @@
             transform: translate(-2px, -2px); 
             border-color: var(--c-black);
         }
+        .play-card.selected {
+    transform: translateY(-45px) scale(1.05) !important; /* 保持原有的彈起高度 */
+    
+    /* 1. 移除 border 屬性，避免覆蓋底部的顏色提示 */
+    border: 3px solid var(--c-black) !important; 
+    
+    /* 2. 使用 outline (輪廓) 產生藍色外圈 */
+    /* outline 不會受 border 影響，且位於邊框之外 */
+    outline: 6px solid var(--c-cyan) !important;
+    outline-offset: 2px; /* 讓藍圈與卡牌之間有一點點空隙，更有立體感 */
+
+    /* 3. 使用多重陰影：一層藍色發光，一層原本的黑色硬陰影 */
+    box-shadow: 
+        0 0 20px var(--c-cyan), 
+        15px 15px 0 rgba(0,0,0,0.5) !important;
         
+    z-index: 1000 !important;
+}
+
+/* 確保功能牌（紫色）被選中時也遵循相同邏輯 */
+.play-card.is-func.selected {
+    border: 3px solid var(--c-black) !important;
+    outline: 6px solid var(--c-cyan) !important;
+    outline-offset: 2px;
+}
+
+/* 確保底部顏色提示在選中時依然加粗顯示 */
+.play-card.selected.card-hint-line {
+    border-bottom-width: 8px !important;
+}
         .diff-stars { display: flex; justify-content: center; gap: 4px; margin-bottom: 8px;}
         .skill-desc { font-size: 0.75rem; font-weight: normal; margin-top: 5px; border-top: 1px dotted #000; padding-top: 5px; width: 100%;}
         
@@ -645,22 +674,8 @@
     outline: 4px solid var(--c-red);
     transform: scale(1.05);
 }
-.play-card.selected {
-    transform: translateY(-45px) scale(1.05) !important; /* 彈得更高並稍微放大 */
-    border: 4px solid var(--c-cyan) !important; /* 邊框變青藍色 */
-    /* 核心：0 spread 的第二層陰影製造「外圈」感，再加上發光效果 */
-    box-shadow: 
-        0 0 0 8px var(--c-cyan), 
-        0 0 25px var(--c-cyan), 
-        15px 15px 0 rgba(0,0,0,0.5) !important;
-    z-index: 1000 !important;
-}
 
-/* 確保功能牌選中時也顯示藍圈 */
-.play-card.is-func.selected {
-    border-color: var(--c-cyan) !important;
-    box-shadow: 0 0 0 8px var(--c-cyan), 0 0 25px var(--c-cyan) !important;
-}
+            
 /* 響應式優化：手機端縮小立繪，避免擋住動作按鈕 */
 @media (max-width: 768px) {
     #char-cutin {
@@ -669,7 +684,42 @@
         opacity: 0.6; /* 手機端增加透明度，避免遮擋文字 */
     }
 }
-            
+body .hand-area .play-card.selected {
+    transform: translateY(-50px) scale(1.1) !important;
+    z-index: 9999 !important;
+    
+    /* 保持黑色邊框，確保底部的字詞關聯顏色（border-bottom）依然清晰 */
+    border: 3px solid #000 !important;
+
+    /* 【核心修正】使用多重陰影製造「發光藍色外圈」 */
+    /* 第一層 0 0 0 6px：模擬一個厚度為 6px 的外圈，不佔用邊框空間 */
+    /* 第二層 0 0 20px：藍色發光效果 */
+    /* 第三層 15px 15px 0：原本的漫畫風格硬陰影 */
+    box-shadow: 
+        0 0 0 8px #00e5ff, 
+        0 0 30px #00e5ff, 
+        15px 15px 0 rgba(0,0,0,0.4) !important;
+}
+
+/* 2. 針對功能牌（紫色牌）選中時的修正 */
+body .hand-area .play-card.is-func.selected {
+    background-color: var(--c-purple) !important;
+    border: 3px solid #000 !important;
+    box-shadow: 
+        0 0 0 8px #00e5ff, 
+        0 0 30px #00e5ff, 
+        15px 15px 0 rgba(0,0,0,0.4) !important;
+}
+
+/* 3. 當卡牌被選中時，如果它有底部顏色提示，強制讓它加粗，更明顯 */
+body .hand-area .play-card.selected.card-hint-line {
+    border-bottom-width: 12px !important;
+}
+
+/* 4. 防止鼠標懸停效果與選中效果衝突 */
+body .hand-area .play-card.selected:hover {
+    transform: translateY(-50px) scale(1.1) !important;
+}            
     </style>
 </head>
 <body>
