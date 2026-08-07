@@ -1457,8 +1457,35 @@ function playSfx(text, type) {
 }
 function triggerShake() { document.body.classList.remove('shake-effect'); void document.body.offsetWidth; document.body.classList.add('shake-effect'); }
 function checkWin() {
-    if (playerHand.length === 0) { setTimeout(() => { alert("你贏了！言靈臣服於你！"); location.reload(); }, 500); }
-    else if (aiHand.length === 0) { setTimeout(() => { alert("你輸了... 被AI擊潰。"); location.reload(); }, 500); }
+    // 1. 基礎勝負判斷：某一方手牌清空
+    if (playerHand.length === 0) { 
+        setTimeout(() => { alert("你贏了！言靈臣服於你！"); location.reload(); }, 500); 
+        return; // 觸發清空勝負後直接返回，不再執行後續邏輯
+    }
+    if (aiHand.length === 0) { 
+        setTimeout(() => { alert("你輸了... 被AI擊潰。"); location.reload(); }, 500); 
+        return;
+    }
+
+    // 2. 新增終局判斷：場上已無字詞，且隊列也已空（20張字詞全部完成）
+    if (unspawnedWords.length === 0 && activeField.length === 0) {
+        setTimeout(() => {
+            let pLen = playerHand.length;
+            let aLen = aiHand.length;
+            let resultMsg = `所有字詞已全部破譯！\n你的剩餘手牌：${pLen} 張\n敵方剩餘手牌：${aLen} 張\n\n`;
+
+            if (pLen < aLen) {
+                resultMsg += "恭喜！你以更少的手牌贏得了最終勝利！";
+            } else if (pLen > aLen) {
+                resultMsg += "遺憾！敵方殘餘手牌更少，你輸了。";
+            } else {
+                resultMsg += "雙方殘餘手牌數量相同，戰成平手！";
+            }
+
+            alert(resultMsg);
+            location.reload();
+        }, 600); // 稍微延遲讓玩家看清最後一擊
+    }
 }
 
 function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play().catch(()=>{}); }
