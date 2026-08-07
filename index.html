@@ -68,18 +68,16 @@
 
 /* 飛行卡片樣式：優化文字間距 */
 .flying-card {
-    position: fixed; pointer-events: none; z-index: 9999;
-    /* 使用自定義三次貝茲曲線，模擬先緩後快的下墜感 */
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
     transition: all 0.8s cubic-bezier(0.5, -0.5, 0.1, 1.5); 
-    border: 4px solid #000; 
-    background: #fff; 
-    padding: 15px; 
-    font-weight: 900; 
-    box-shadow: 8px 8px 0 #000; 
-    display: flex; flex-direction: column; align-items: center; 
-    justify-content: center; text-align: center; 
-    line-height: 1.3;
-    min-width: 120px;
+    border: 3px solid var(--c-black); /* 與 var(--stroke) 一致 */
+    background: var(--c-white); 
+    padding: 10px; /* 同步手牌內距 */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
 }
         
 /* 2. 角色固定卡基礎設定：看到整張圖片 */
@@ -1645,7 +1643,7 @@ let clickCount = 0;
 async function startReviewAnimation() {
     if (isReviewing) return;
     
-    // 1. 【立即執行】強制隱藏結算界面，不留任何延遲
+    // 1. 立即隱藏結算界面
     const resultModal = document.getElementById('result-modal');
     if (resultModal) {
         resultModal.style.display = 'none';
@@ -1654,12 +1652,11 @@ async function startReviewAnimation() {
     isReviewing = true;
     clickCount = 0; 
 
-    // 2. 獲取目前手牌區域的所有卡片 DOM
+    // 獲取目前手牌區域的所有卡片 DOM
     const handCards = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
     
-    // 3. 遍歷手牌執行歸位動畫
+    // 2. 遍歷手牌執行歸位
     for (let i = 0; i < playerHand.length; i++) {
-        // 如果偵測到雙擊，立即徹底重啟
         if (clickCount >= 2) { location.reload(); return; }
 
         const cardData = playerHand[i];
@@ -1675,15 +1672,14 @@ async function startReviewAnimation() {
         // 創建飛行幻影
         const fly = document.createElement('div');
         fly.className = 'flying-card';
-        fly.innerHTML = `
-            <div style="font-size:0.85rem; color:#555; border-bottom:2px solid #eee; margin-bottom:5px; width:100%;">${cardData.parentWord}</div>
-            <div style="color:var(--c-red); font-size:1.3rem;">${cardData.text}</div>
-        `;
+        // 【修改】使用與手牌相同的 HTML 結構
+        fly.innerHTML = `<div class="c-tag">字義</div><div class="c-text" style="font-weight:900;">${cardData.text}</div>`;
+        
+        // 設定與原始手牌完全相同的尺寸
         fly.style.width = startRect.width + 'px';
         fly.style.height = startRect.height + 'px';
         fly.style.top = startRect.top + 'px';
         fly.style.left = startRect.left + 'px';
-        fly.style.opacity = "1";
         document.body.appendChild(fly);
 
         // 尋找場上目標
@@ -1691,21 +1687,22 @@ async function startReviewAnimation() {
         const targetCards = document.querySelectorAll('.target-card');
         const targetDOM = targetCards[targetIdx];
 
-        // 第一階段：向上彈起
+        // 第一階段：彈起（移除 scale）
         requestAnimationFrame(() => {
-            fly.style.transform = "translateY(-60px) rotate(-10deg) scale(1.1)";
+            fly.style.transform = "translateY(-60px) rotate(-5deg)"; 
         });
 
         await new Promise(r => setTimeout(r, 150)); 
 
         if (targetDOM) {
             const endRect = targetDOM.getBoundingClientRect();
-            // 移動到目標位置
-            fly.style.top = endRect.top + 'px';
-            fly.style.left = endRect.left + 'px';
-            fly.style.transform = "translateY(0) rotate(0deg) scale(1)";
+            // 移動到目標位置（移除 scale）
+            // 計算位移，讓卡片中心對準目標中心
+            fly.style.top = (endRect.top + endRect.height/2 - startRect.height/2) + 'px';
+            fly.style.left = (endRect.left + endRect.width/2 - startRect.width/2) + 'px';
+            fly.style.transform = "translateY(0) rotate(0deg)"; 
 
-            // 抵達時反饋
+            // 抵達時亮起綠光
             setTimeout(() => {
                 targetDOM.style.transition = "0.3s";
                 targetDOM.style.boxShadow = "0 0 30px 10px var(--c-green)";
@@ -1718,7 +1715,6 @@ async function startReviewAnimation() {
                 }, 1000);
             }, 700); 
         } else {
-            // 無目標則向上飛出
             fly.style.top = "-200px";
             fly.style.opacity = "0"; 
         }
@@ -1727,7 +1723,6 @@ async function startReviewAnimation() {
         await new Promise(r => setTimeout(r, 250)); 
     }
 
-    // 全部完成後重載遊戲
     setTimeout(() => { if (isReviewing) location.reload(); }, 1500);
 }
 // 修改全局點擊監聽：處理「點擊兩次停止」
