@@ -1672,6 +1672,7 @@ async function startReviewAnimation() {
         fly.style.height = startRect.height + 'px';
         fly.style.top = startRect.top + 'px';
         fly.style.left = startRect.left + 'px';
+        fly.style.opacity = "1"; // 初始不透明度設為 100%
         document.body.appendChild(fly);
 
         // 尋找場上目標
@@ -1694,7 +1695,7 @@ async function startReviewAnimation() {
             fly.style.top = endRect.top + 'px';
             fly.style.left = endRect.left + 'px';
             fly.style.transform = "translateY(0) rotate(0deg) scale(1)";
-            fly.style.opacity = "0.8";
+            fly.style.opacity = "1"; // 【修改處】保持 100% 不透明度
 
             // 當抵達時亮起綠光
             setTimeout(() => {
@@ -1727,7 +1728,6 @@ async function startReviewAnimation() {
         if (isReviewing) location.reload();
     }, 1500);
 }
-
 // 修改全局點擊監聽：處理「點擊兩次停止」
 document.addEventListener('mousedown', () => {
     if (isReviewing) {
