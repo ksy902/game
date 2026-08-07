@@ -1747,97 +1747,125 @@ function showResultModal(winner, msg) {
 }
 
 let isReviewing = false;
-let reviewAborted = false; // 跳過標記
+let reviewAborted = false; 
 let reviewClickCount = 0;
 
 async function startReviewAnimation() {
     if (isReviewing) return;
-
-    // 1. 初始化狀態
+    
+    // 1. 隱藏結算界面，顯示跳過提示
     const resultModal = document.getElementById('result-modal');
     if (resultModal) resultModal.style.display = 'none';
     document.getElementById('skip-hint-ui').style.display = 'block';
 
     isReviewing = true;
     reviewAborted = false;
-    reviewClickCount = 0;
+    reviewClickCount = 0; 
 
-    // 2. 準備動畫任務
+    // 2. 獲取手牌資訊
     const handElements = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
     const cardRects = Array.from(handElements).map(el => el.getBoundingClientRect());
     
     const taskList = [];
     playerHand.forEach((card, i) => {
         if (card && card.type === 'meaning' && handElements[i]) {
-            taskList.push({ data: card, element: handElements[i], rect: cardRects[i] });
+            taskList.push({
+                data: card,
+                element: handElements[i],
+                rect: cardRects[i]
+            });
         }
     });
 
-    // 3. 順序執行歸位動畫
+    // 3. 依序執行歸位動畫
     for (const task of taskList) {
-        if (reviewAborted) break; // 如果玩家跳過，立即終止循環
+        if (reviewAborted) break;
 
         const { data, element, rect } = task;
         element.style.visibility = "hidden";
 
+        // 創建飛行幻影
         const fly = document.createElement('div');
         fly.className = 'flying-card';
+        fly.style.opacity = "1"; // 確保完全不透明
         fly.innerHTML = `<div class="c-tag">字義</div><div class="c-text" style="font-weight:900;">${data.text}</div>`;
+        
+        // 鎖定初始位置與原本大小
         fly.style.width = rect.width + 'px';
         fly.style.height = rect.height + 'px';
         fly.style.top = rect.top + 'px';
         fly.style.left = rect.left + 'px';
         document.body.appendChild(fly);
 
+        // 尋找場上目標
         const targetIdx = activeField.findIndex(t => t.word === data.parentWord);
         const targetCards = document.querySelectorAll('.target-card');
         const targetDOM = targetCards[targetIdx];
 
+        // --- 動畫階段 1：向上彈起 ---
         requestAnimationFrame(() => {
-            fly.style.transform = "translateY(-60px) rotate(-5deg)";
+            fly.style.transform = "translateY(-60px) rotate(-5deg) scale(1)"; 
+            fly.style.opacity = "1";
         });
 
-        await new Promise(r => setTimeout(r, 100)); 
+        await new Promise(r => setTimeout(r, 150)); 
 
         if (targetDOM && !reviewAborted) {
+            // --- 動畫階段 2：飛向目標中心 (維持 1.0 比例) ---
             const endRect = targetDOM.getBoundingClientRect();
-            fly.style.top = (endRect.top + endRect.height/2 - rect.height/2) + 'px';
-            fly.style.left = (endRect.left + endRect.width/2 - rect.width/2) + 'px';
-            fly.style.transform = "translateY(0) rotate(0deg) scale(0.2)";
-            fly.style.opacity = "0";
-            playSfxAudio('draw');
+            const targetCenterX = endRect.left + endRect.width / 2;
+            const targetCenterY = endRect.top + endRect.height / 2;
+            
+            fly.style.top = (targetCenterY - rect.height / 2) + 'px';
+            fly.style.left = (targetCenterX - rect.width / 2) + 'px';
+            fly.style.transform = "translateY(0) rotate(0deg) scale(1)"; 
+            fly.style.opacity = "1"; 
+
+            // --- 動畫階段 3：抵達反饋 ---
+            setTimeout(() => {
+                if (!reviewAborted) {
+                    targetDOM.style.transition = "0.3s";
+                    targetDOM.style.boxShadow = "0 0 30px 10px var(--c-green)";
+                    targetDOM.style.borderColor = "var(--c-green)";
+                    playSfxAudio('correct'); 
+                    
+                    setTimeout(() => {
+                        targetDOM.style.boxShadow = "";
+                        targetDOM.style.borderColor = "";
+                    }, 800);
+                }
+            }, 700); 
         } else {
-            fly.remove();
+            fly.style.opacity = "0"; 
         }
 
-        setTimeout(() => fly.remove(), 700);
-        await new Promise(r => setTimeout(r, 200)); 
+        // 移除卡片
+        setTimeout(() => fly.remove(), 1000);
+        await new Promise(r => setTimeout(r, 350)); 
     }
 
-    // 4. 結束動畫進入靜態界面
+    // 4. 動畫結束進入靜態溫習界面
     showStudyScreen();
 }
 
-// 顯示深層記憶總結界面
+// 顯示深層記憶溫習界面
 function showStudyScreen() {
     isReviewing = false;
     document.getElementById('skip-hint-ui').style.display = 'none';
     
-    // 清除畫面上可能殘留的飛行卡片
+    // 清理所有殘留的飛行卡片
     document.querySelectorAll('.flying-card').forEach(el => el.remove());
 
     const studyModal = document.getElementById('study-modal');
     const studyGrid = document.getElementById('study-grid');
     studyGrid.innerHTML = '';
 
-    // gameDataPool 包含了對局中出現過的所有字詞對象
+    // 展示本次遊戲池中所有字詞
     gameDataPool.forEach(wordObj => {
         const card = document.createElement('div');
         card.className = 'study-card';
         
-        // 生成該字詞的所有字義 HTML
         let meaningsHTML = wordObj.字義.map(m => {
-            // 尋找對應的例句
             const example = wordObj.用例 ? wordObj.用例.find(e => e.用例字義 === m || m.includes(e.用例字義)) : null;
             return `
                 <div class="study-m-item">
@@ -1857,16 +1885,16 @@ function showStudyScreen() {
     studyModal.style.display = 'flex';
 }
 
-// 監聽點擊，處理雙擊跳過
+// 修改全局點擊監聽：雙擊立即跳過動畫
 document.addEventListener('mousedown', () => {
     if (isReviewing) {
         reviewClickCount++;
         if (reviewClickCount >= 2) {
             reviewAborted = true; 
-            // 這裡不需要 reload，循環結束會自動進入 showStudyScreen
         }
     }
 });
+
 function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play().catch(()=>{}); }
 
 // 初始化大廳
