@@ -652,15 +652,16 @@
 <body>
 <div id="result-modal">
     <div class="result-content">
-        <!-- 新增關閉按鈕 -->
+        <!-- 新增：右上方交叉按鈕，點擊直接重洗 -->
         <div class="close-result" onclick="location.reload()">×</div>
         
         <div id="result-title-text" class="result-title">勝負已分</div>
         <div id="result-winner-name" style="font-size: 2rem; font-weight: 900;"></div>
         <div class="result-stats" id="result-stats-text"></div>
+        
         <div style="display: flex; gap: 10px; justify-content: center;">
-            <button class="btn btn-purple" id="review-btn" onclick="startReviewAnimation()">✨ 強化記憶 (歸位)</button>
-            <button class="btn btn-red" onclick="location.reload()">🔄 重回大廳</button>
+            <button class="btn" style="background:var(--c-purple); color:#fff;" onclick="startReviewAnimation()">✨ 強化記憶 (歸位)</button>
+            <button class="btn" style="background:var(--c-red); color:#fff;" onclick="location.reload()">🔄 重回大廳</button>
         </div>
     </div>
 </div>
@@ -1640,37 +1641,36 @@ async function startReviewAnimation() {
     isReviewing = true;
     clickCount = 0; 
 
-    // 1. 讓結算界面消失
-    const modal = document.getElementById('result-modal');
-    modal.style.display = "none";
+    // 1. 立即隱藏結算界面，讓玩家看見戰場
+    document.getElementById('result-modal').style.display = "none";
 
-    // 獲取目前手牌區域的所有卡片 DOM（排除職階卡）
+    // 獲取目前手牌區域的所有卡片 DOM
     const handCards = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
     
-    // 2. 遍歷手牌執行歸位動畫
+    // 2. 遍歷手牌執行歸位
     for (let i = 0; i < playerHand.length; i++) {
-        if (clickCount >= 2) break;
+        // 如果偵測到玩家在動畫期間點擊了兩次，立即停止並刷新
+        if (clickCount >= 2) {
+            location.reload();
+            return;
+        }
 
         const cardData = playerHand[i];
-        // 只處理字義牌，功能牌直接跳過或消失
-        if (!cardData || cardData.type !== 'meaning') {
-            if(handCards[i]) handCards[i].style.opacity = "0";
-            continue;
-        }
+        if (!cardData || cardData.type !== 'meaning') continue;
 
         const sourceDOM = handCards[i];
         if (!sourceDOM) continue;
 
-        // --- 核心修改：獲取起始位置並立即讓原手牌消失 ---
+        // 獲取位置並隱藏原手牌
         const startRect = sourceDOM.getBoundingClientRect();
-        sourceDOM.style.visibility = "hidden"; // 讓原位置的卡牌消失，但不影響佈局
+        sourceDOM.style.visibility = "hidden";
 
         // 創建飛行幻影
         const fly = document.createElement('div');
         fly.className = 'flying-card';
         fly.innerHTML = `
-            <div style="font-size:0.8rem; color:#666; border-bottom:1px solid #ddd; margin-bottom:5px; padding-bottom:2px;">${cardData.parentWord}</div>
-            <div style="color:var(--c-red); font-weight:900;">${cardData.text}</div>
+            <div style="font-size:0.8rem; color:#666;">${cardData.parentWord}</div>
+            <div style="color:var(--c-red);">${cardData.text}</div>
         `;
         fly.style.width = startRect.width + 'px';
         fly.style.height = startRect.height + 'px';
@@ -1678,56 +1678,40 @@ async function startReviewAnimation() {
         fly.style.left = startRect.left + 'px';
         document.body.appendChild(fly);
 
-        // 尋找場上對應目標
+        // 尋找場上目標
         const targetIdx = activeField.findIndex(t => t.word === cardData.parentWord);
-        const targetCards = document.querySelectorAll('.target-card');
-        const targetDOM = targetCards[targetIdx];
+        const targetDOM = document.querySelectorAll('.target-card')[targetIdx];
 
         await new Promise(r => setTimeout(r, 50)); 
 
         if (targetDOM) {
-            // 如果場上有對應字，飛向它
             const endRect = targetDOM.getBoundingClientRect();
-            fly.style.top = (endRect.top - 20) + 'px'; 
-            fly.style.left = (endRect.left + 5) + 'px';
-            fly.style.transform = `rotate(${Math.random() * 10 - 5}deg) scale(1.2)`; 
-            
-            setTimeout(() => {
-                targetDOM.style.boxShadow = "0 0 40px var(--c-green)";
-                targetDOM.style.borderColor = "var(--c-green)";
-                playSfxAudio('correct');
-            }, 700);
-        } else {
-            // 場上已無該字，向隨機方向飛散
-            fly.style.top = "-200px";
-            fly.style.left = (Math.random() * window.innerWidth) + "px";
+            fly.style.top = endRect.top + 'px';
+            fly.style.left = endRect.left + 'px';
+            fly.style.transform = `scale(0.5)`;
             fly.style.opacity = "0";
-            fly.style.transform = `rotate(${Math.random() * 360}deg) scale(1.2)`;
+        } else {
+            fly.style.top = "-200px";
+            fly.style.opacity = "0";
         }
 
-        // 動畫結束後移除幻影
-        setTimeout(() => fly.remove(), 1000);
-        
-        // 控制每張牌飛出的間隔感
-        await new Promise(r => setTimeout(r, 350)); 
+        setTimeout(() => fly.remove(), 800);
+        await new Promise(r => setTimeout(r, 200)); // 縮短間隔，讓歸位更流暢
     }
 
-    // 3. 全部飛完後重啟遊戲
-    setTimeout(() => {
-        location.reload();
-    }, 1000);
+    // 動畫結束後自動重啟
+    setTimeout(() => location.reload(), 500);
 }
-    
-// 監聽全局點擊：玩家在動畫中點擊兩下就直接退出
+
+// 修改全局點擊監聽：處理「點擊兩次停止」
 document.addEventListener('mousedown', () => {
     if (isReviewing) {
         clickCount++;
         if (clickCount >= 2) {
-            location.reload(); // 強制結束動畫並重載
+            location.reload(); // 第二次點擊直接重洗
         }
     }
 });
-
 function playSfxAudio(type) { if(audio.enabled && audio[type]) audio[type].play().catch(()=>{}); }
 
 // 初始化大廳
