@@ -1645,49 +1645,56 @@ async function startReviewAnimation() {
     
     // 1. 立即隱藏結算界面
     const resultModal = document.getElementById('result-modal');
-    if (resultModal) {
-        resultModal.style.display = 'none';
-    }
+    if (resultModal) resultModal.style.display = 'none';
 
     isReviewing = true;
     clickCount = 0; 
 
-    // 獲取目前手牌區域的所有卡片 DOM
-    const handCards = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
+    // 2. 【核心修復】一次性獲取所有手牌的 DOM 和它們的原始尺寸（防止佈局抖動導致縮小）
+    const handElements = document.querySelectorAll('#hand-area .play-card:not(.static-char-card)');
+    const cardRects = Array.from(handElements).map(el => el.getBoundingClientRect());
     
-    // 2. 遍歷手牌執行歸位
-    for (let i = 0; i < playerHand.length; i++) {
+    // 3. 準備需要動畫的數據清單
+    const taskList = [];
+    playerHand.forEach((card, i) => {
+        if (card && card.type === 'meaning' && handElements[i]) {
+            taskList.push({
+                data: card,
+                element: handElements[i],
+                rect: cardRects[i] // 使用預先存好的尺寸
+            });
+        }
+    });
+
+    // 4. 依序執行歸位動畫
+    for (const task of taskList) {
         if (clickCount >= 2) { location.reload(); return; }
 
-        const cardData = playerHand[i];
-        if (!cardData || cardData.type !== 'meaning') continue;
+        const { data, element, rect } = task;
 
-        const sourceDOM = handCards[i];
-        if (!sourceDOM) continue;
-
-        // 獲取起始位置並隱藏原手牌
-        const startRect = sourceDOM.getBoundingClientRect();
-        sourceDOM.style.visibility = "hidden";
+        // 隱藏原始手牌，但因為我們已經有 rect 了，所以不怕佈局改變
+        element.style.visibility = "hidden";
 
         // 創建飛行幻影
         const fly = document.createElement('div');
         fly.className = 'flying-card';
-        // 【修改】使用與手牌相同的 HTML 結構
-        fly.innerHTML = `<div class="c-tag">字義</div><div class="c-text" style="font-weight:900;">${cardData.text}</div>`;
+        // 確保繼承手牌的 HTML 結構與文字
+        fly.innerHTML = `<div class="c-tag">字義</div><div class="c-text" style="font-weight:900;">${data.text}</div>`;
         
-        // 設定與原始手牌完全相同的尺寸
-        fly.style.width = startRect.width + 'px';
-        fly.style.height = startRect.height + 'px';
-        fly.style.top = startRect.top + 'px';
-        fly.style.left = startRect.left + 'px';
+        // 【修復】強制設定寬高為「拍照」時的大小，並鎖定比例
+        fly.style.width = rect.width + 'px';
+        fly.style.height = rect.height + 'px';
+        fly.style.top = rect.top + 'px';
+        fly.style.left = rect.left + 'px';
+        fly.style.aspectRatio = "auto"; // 防止 CSS 的 aspect-ratio 覆蓋 JS 設定的尺寸
         document.body.appendChild(fly);
 
         // 尋找場上目標
-        const targetIdx = activeField.findIndex(t => t.word === cardData.parentWord);
+        const targetIdx = activeField.findIndex(t => t.word === data.parentWord);
         const targetCards = document.querySelectorAll('.target-card');
         const targetDOM = targetCards[targetIdx];
 
-        // 第一階段：彈起（移除 scale）
+        // 第一階段：彈起
         requestAnimationFrame(() => {
             fly.style.transform = "translateY(-60px) rotate(-5deg)"; 
         });
@@ -1696,13 +1703,15 @@ async function startReviewAnimation() {
 
         if (targetDOM) {
             const endRect = targetDOM.getBoundingClientRect();
-            // 移動到目標位置（移除 scale）
-            // 計算位移，讓卡片中心對準目標中心
-            fly.style.top = (endRect.top + endRect.height/2 - startRect.height/2) + 'px';
-            fly.style.left = (endRect.left + endRect.width/2 - startRect.width/2) + 'px';
+            // 移動到目標位置中心（計算位移使其居中）
+            const targetCenterX = endRect.left + endRect.width / 2;
+            const targetCenterY = endRect.top + endRect.height / 2;
+            
+            fly.style.top = (targetCenterY - rect.height / 2) + 'px';
+            fly.style.left = (targetCenterX - rect.width / 2) + 'px';
             fly.style.transform = "translateY(0) rotate(0deg)"; 
 
-            // 抵達時亮起綠光
+            // 抵達時反饋
             setTimeout(() => {
                 targetDOM.style.transition = "0.3s";
                 targetDOM.style.boxShadow = "0 0 30px 10px var(--c-green)";
@@ -1715,14 +1724,17 @@ async function startReviewAnimation() {
                 }, 1000);
             }, 700); 
         } else {
+            // 無目標則飛出屏幕
             fly.style.top = "-200px";
             fly.style.opacity = "0"; 
         }
 
+        // 移除幻影並等待下一張
         setTimeout(() => fly.remove(), 1000);
-        await new Promise(r => setTimeout(r, 250)); 
+        await new Promise(r => setTimeout(r, 300)); 
     }
 
+    // 全部完成後自動重新開始
     setTimeout(() => { if (isReviewing) location.reload(); }, 1500);
 }
 // 修改全局點擊監聽：處理「點擊兩次停止」
