@@ -198,15 +198,6 @@
         .btn-cyan { background: var(--c-cyan); }
         .btn-purple { background: var(--c-purple); color: white; }
         .btn-orange { background: var(--c-orange); color: white; }
-        .btn:disabled, .btn-orange:disabled, .btn-purple:disabled {
-    background: #cccccc !important; 
-    color: #888888 !important;     
-    border-color: #999999 !important;
-    cursor: not-allowed !important;           
-    box-shadow: none !important;    
-    transform: none !important;     
-    filter: grayscale(1); /* 增加濾鏡確保徹底變灰 */
-}
 
 /* 提示界面專用樣式 */
 #hint-modal { 
@@ -241,7 +232,8 @@
 
         .hand-area { height: 25vh; background: rgba(238, 238, 238, 0.8); border-top: var(--stroke); display: flex; justify-content: center; align-items: flex-end; padding: 10px; gap: 12px; overflow-x: auto; }
         .play-card { height: 90%; aspect-ratio: 2/2.8; background: var(--c-white); border: var(--stroke); padding: 10px; cursor: pointer; display: flex; flex-direction: column; flex-shrink: 0; }
-        
+        .play-card.selected { transform: translateY(-20px); border-color: var(--c-cyan); box-shadow: 0 0 15px var(--c-cyan); }
+        .play-card.is-func { background-color: var(--c-purple); color: white; }
         .card-hint-line {
     border-bottom-width: 8px !important; /* 加粗底部邊框作為顏色提示 */
 }
@@ -297,7 +289,7 @@
             display: flex; flex-direction: column; flex-shrink: 0; position: relative;
         }
         .play-card:hover { transform: translateY(-15px); z-index: 20; box-shadow: 8px 8px 0 var(--c-black); }
-        
+        .play-card.selected { transform: translateY(-30px); border-color: var(--c-cyan); box-shadow: 0 0 0 4px var(--c-cyan), 8px 8px 0 var(--c-black); z-index: 30; }
         
         .play-card.is-func { 
             background-color: var(--c-purple); 
@@ -502,6 +494,7 @@
             display: flex; flex-direction: column; flex-shrink: 0; position: relative;
         }
         .play-card:hover { transform: translateY(-15px); z-index: 20; box-shadow: 8px 8px 0 var(--c-black); }
+        .play-card.selected { transform: translateY(-30px); border-color: var(--c-cyan); box-shadow: 0 0 0 4px var(--c-cyan), 8px 8px 0 var(--c-black); z-index: 30; }
         
         .play-card.is-func { 
             background-color: var(--c-purple); 
@@ -581,7 +574,6 @@
             border-color: var(--c-black);
         }
         
-
         .diff-stars { display: flex; justify-content: center; gap: 4px; margin-bottom: 8px;}
         .skill-desc { font-size: 0.75rem; font-weight: normal; margin-top: 5px; border-top: 1px dotted #000; padding-top: 5px; width: 100%;}
         
@@ -647,7 +639,6 @@
     transform: scale(1.05);
 }
 
-            
 /* 響應式優化：手機端縮小立繪，避免擋住動作按鈕 */
 @media (max-width: 768px) {
     #char-cutin {
@@ -655,56 +646,7 @@
         right: -10px;
         opacity: 0.6; /* 手機端增加透明度，避免遮擋文字 */
     }
-}
-.hand-area {
-    height: 30vh !important;       /* 稍微增加容器高度 */
-    min-height: 220px !important;
-    overflow-y: visible !important; /* 核心：允許垂直方向溢出 */
-    overflow-x: auto;               /* 橫向依然可以滾動 */
-    padding-top: 80px !important;   /* 關鍵：預留 80px 給卡片彈起和發光 */
-    display: flex;
-    align-items: flex-end;
-    position: relative;
-    z-index: 100;
-}
-
-/* 2. 選中狀態的極致視覺：彈起、縮放、藍光圈 */
-body .hand-area .play-card.selected {
-    /* 向上彈起並稍微放大，增加存在感 */
-    transform: translateY(-75px) scale(1.08) !important; 
-    z-index: 9999 !important;
-
-    /* 藍色光包圍：使用多重陰影實現「藍色光圈 + 外散發光」 */
-    /* 參數說明：X, Y, 模糊, 擴散(光圈厚度), 顏色 */
-    box-shadow: 
-        0 0 0 6px var(--c-cyan),            /* 第一層：緊貼卡片的藍色硬邊圈 */
-        0 0 30px 10px rgba(0, 229, 255, 0.7),/* 第二層：向外擴散的柔和藍光 */
-        15px 15px 0 0 rgba(0,0,0,0.3) !important; /* 第三層：保留原本的漫畫黑陰影 */
-
-    /* 保持黑色邊框，確保卡片底部的「同組顏色提示線」依然清晰可見 */
-    border: 3px solid var(--c-black) !important;
-}
-
-/* 3. 當選中卡片且具有「同組字詞」提示時，強化底部色線 */
-body .hand-area .play-card.selected.card-hint-line {
-    border-bottom-width: 12px !important;
-}
-
-/* 4. 紫色言靈牌選中時的同步強化 */
-body .hand-area .play-card.is-func.selected {
-    box-shadow: 
-        0 0 0 6px var(--c-cyan), 
-        0 0 30px 10px rgba(0, 229, 255, 0.7),
-        15px 15px 0 0 rgba(0,0,0,0.3) !important;
-}
-
-/* 5. 行動端適配：稍微減少彈起高度防止超出頂部 */
-@media (max-width: 768px) {
-    .hand-area { padding-top: 60px !important; }
-    body .hand-area .play-card.selected {
-        transform: translateY(-55px) scale(1.05) !important;
-    }
-}
+}        
     </style>
 </head>
 <body>
@@ -1358,21 +1300,7 @@ function updateUI() {
     document.getElementById('pass-btn').disabled = (turn !== 'player');
     
     const hintBtn = document.getElementById('hint-btn');
-    if (hintBtn) {
-        const selectedCard = selectedIndex !== null ? playerHand[selectedIndex] : null;
-        
-        // 判斷禁用條件：
-        // 1. 不是玩家回合 OR 
-        // 2. 未選牌 OR 
-        // 3. 選中的是言靈牌 (selectedCard.type !== 'meaning') OR 
-        // 4. 次數用完 (hintsRemaining <= 0)
-        const isMeaningCard = selectedCard && selectedCard.type === 'meaning';
-        const canUseHint = (turn === 'player' && isMeaningCard && hintsRemaining > 0);
-
-        hintBtn.disabled = !canUseHint;
-        hintBtn.innerText = `💡 提示(${hintsRemaining}/3)`;
-    }
-   
+    const selectedCard = playerHand[selectedIndex];
     // 只有在選中「字義牌」且還有次數時才可用
     hintBtn.disabled = (turn !== 'player' || selectedIndex === null || !selectedCard || selectedCard.type !== 'meaning' || hintsRemaining <= 0);
     hintBtn.innerText = `💡 提示(${hintsRemaining}/3)`;
@@ -1429,21 +1357,22 @@ function updateUI() {
     const handDOM = document.getElementById('hand-area');
     handDOM.innerHTML = '';
 
-    // A. 固定職階卡
+    // 固定職階卡
     const charCard = document.createElement('div');
     charCard.className = 'play-card static-char-card';
     charCard.style.backgroundImage = `url('${IMG_BASE_URL + encodeURIComponent(charImgMap[playerChar])}')`;
     charCard.innerHTML = `<div class="c-tag">職階</div><div class="c-text">${charMap[playerChar]}</div>`;
     handDOM.appendChild(charCard);
 
-    // B. 計算字詞關聯顏色 (wordCounts 邏輯保持不變)
+    // 實際玩家手牌
     const wordCounts = {};
     playerHand.forEach(card => {
-        if (card && card.type === 'meaning' && card.parentWord) {
+        if (card.type === 'meaning' && card.parentWord) {
             wordCounts[card.parentWord] = (wordCounts[card.parentWord] || 0) + 1;
         }
     });
 
+    // 2. 為出現兩次以上的字詞分配顏色
     const hintColors = ['#e6203a', '#00b35a', '#00e5ff', '#ffdb00', '#ff6600', '#7a1fd1', '#ff00ff'];
     const wordToColor = {};
     let colorIndex = 0;
@@ -1454,18 +1383,15 @@ function updateUI() {
         }
     });
 
-    // C. 渲染玩家手牌 (唯一循環)
+    // 3. 渲染實際玩家手牌
     playerHand.forEach((card, idx) => {
         if(!card) return;
         const cDiv = document.createElement('div');
         
-        // 判斷狀態
-        const isSelected = (idx === selectedIndex); // 這裡是關鍵
-        const isFunc = (card.type === 'func');
+        // 基礎 Class
+        cDiv.className = `play-card ${card.type === 'func' ? 'is-func' : ''} ${idx === selectedIndex ? 'selected' : ''}`;
         
-        cDiv.className = `play-card ${isFunc ? 'is-func' : ''} ${isSelected ? 'selected' : ''}`;
-        
-        // 字詞關聯提示顏色
+        // 如果屬於同一個字詞且有重複，加上顏色提示
         if (card.type === 'meaning' && wordToColor[card.parentWord]) {
             cDiv.classList.add('card-hint-line');
             cDiv.style.borderBottomColor = wordToColor[card.parentWord];
@@ -1473,6 +1399,7 @@ function updateUI() {
 
         cDiv.innerHTML = `<div class="c-tag">${card.type === 'meaning' ? '字義' : '言靈'}</div><div class="c-text" style="font-weight:900;">${card.text}</div>`;
         
+        // 綁定點擊事件
         cDiv.onclick = () => { 
             if(turn === 'player') { 
                 selectedIndex = (selectedIndex === idx) ? null : idx; 
@@ -1481,7 +1408,7 @@ function updateUI() {
         };
         handDOM.appendChild(cDiv);
     });
-    
+
     // 6. 檢查勝負
     checkWin();
 }
@@ -1501,26 +1428,28 @@ function hideModal() {
 }
 
 function useHint() {
-    // 嚴格檢查：必須有剩餘次數、必須選中牌、必須是字義牌
     if (hintsRemaining <= 0 || selectedIndex === null) return;
-    
     const card = playerHand[selectedIndex];
-    if (!card || card.type !== 'meaning') return;
+    if (card.type !== 'meaning') return;
 
+    // 從數據庫中尋找對應的字詞資料
     const scopeData = fullWordDatabase[selectedScope];
     const wordData = scopeData.find(w => w.字詞 === card.parentWord);
     
     if (wordData) {
+        // 尋找對應字義的例句
         const exampleObj = wordData.用例 ? wordData.用例.find(e => e.用例字義.includes(card.text) || card.text.includes(e.用例字義)) : null;
         const sentence = exampleObj ? `例句：${exampleObj.句子}` : "此字義在典籍中暫無對應例句。";
 
+        // 填入內容並顯示界面
         document.getElementById('hint-word-display').innerText = `【${card.parentWord}】`;
         document.getElementById('hint-example-display').innerText = sentence;
         document.getElementById('hint-modal').style.display = 'flex';
 
-        hintsRemaining--; // 扣除次數
-        updateUI();       // 更新按鈕狀態（變灰）
-        playSfxAudio('draw'); 
+        // 扣除次數
+        hintsRemaining--;
+        updateUI();
+        playSfxAudio('draw'); // 播放一個輕微音效
     }
 }
 
