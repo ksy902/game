@@ -868,6 +868,10 @@
         <button class="btn btn-red" style="font-size: 1.5rem; justify-content: center; padding: 15px; margin-top: 20px;" onclick="startGame()">
             確認出戰
         </button>
+
+        <button class="btn btn-purple" style="font-size: 1.2rem; justify-content: center; padding: 10px; margin-top: 10px; background: var(--c-purple);" onclick="openManualReview()">
+    📖 溫習當前範圍
+</button>
     </div>
 </div>
 
@@ -3393,6 +3397,54 @@ function initGame() {
     playSfx(`範圍：${selectedScope}。戰鬥開始！`, "player");
 }
 
+    function openManualReview() {
+    // 1. 取得目前在大廳選中的範圍
+    const dataToReview = fullWordDatabase[selectedScope];
+    
+    if (!dataToReview) {
+        alert("請先選擇一個範圍");
+        return;
+    }
+
+    // 2. 填充溫習界面 (study-grid)
+    const studyGrid = document.getElementById('study-grid');
+    studyGrid.innerHTML = '';
+
+    dataToReview.forEach(wordObj => {
+        const card = document.createElement('div');
+        card.className = 'study-card';
+        
+        let meaningsHTML = wordObj.字義.map(m => {
+            const example = wordObj.用例 ? wordObj.用例.find(e => 
+                m.includes(e.用例字義) || e.用例字義.includes(m)
+            ) : null;
+            
+            return `
+                <div class="study-m-item">
+                    <b>${m}</b>
+                    ${example ? `<div class="study-example">${example.句子}</div>` : '<div class="study-example" style="color:#bbb;">(暫無典籍用例)</div>'}
+                </div>
+            `;
+        }).join('');
+
+        card.innerHTML = `
+            <div class="study-word">${wordObj.字詞}</div>
+            <div class="study-meanings">${meaningsHTML}</div>
+        `;
+        studyGrid.appendChild(card);
+    });
+
+    // 3. 顯示 Modal
+    document.getElementById('study-modal').style.display = 'flex';
+    
+    // 4. 這裡微調一下底部的按鈕功能，讓它不要刷新頁面而是直接關閉
+    const footerBtn = document.querySelector('#study-modal .study-footer button');
+    footerBtn.innerText = "返回大廳";
+    footerBtn.onclick = () => {
+        document.getElementById('study-modal').style.display = 'none';
+    };
+}
+    
 function buildDeck() {
     deck = [];
     gameDataPool.forEach(item => {
@@ -3984,6 +4036,10 @@ function showStudyScreen() {
     });
 
     studyModal.style.display = 'flex';
+
+    const footerBtn = document.querySelector('#study-modal .study-footer button');
+    footerBtn.innerText = "歸還卷軸 (重啟遊戲)";
+    footerBtn.onclick = () => { location.reload(); }; 
 }
     
 // 修改全局點擊監聽：雙擊立即跳過動畫
