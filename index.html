@@ -3296,7 +3296,7 @@ let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
 let isGameOver = false;     
 let playerHand = [], aiHand = [], activeField = []; 
 let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
-let playerChar = 'seer', aiDifficulty = 'normal', selectedScope = "手";
+let playerChar = 'seer', aiDifficulty = 'normal', selectedScopes = "手";
 let pressTimer = null, pressStartTime = 0;
 let hintsRemaining = 3;    
 
@@ -3308,21 +3308,32 @@ function initLobby() {
     if(!scopeGroup) return;
     scopeGroup.innerHTML = '';
     
-    // 直接遍歷 Database 的所有 Key，現在 Key 已經是純名字了
     Object.keys(fullWordDatabase).forEach(scope => {
         const card = document.createElement('div');
-        
-        card.className = `select-card ${scope === selectedScope ? 'active' : ''}`;
-        card.innerHTML = `<b>${scope}</b>`; // 顯示純主題名稱
+        // 關鍵：檢查數組內是否包含此範圍
+        card.className = `select-card ${selectedScopes.includes(scope) ? 'active' : ''}`;
+        card.innerHTML = `<b>${scope}</b>`; 
         
         card.onclick = () => {
-            selectedScope = scope; 
-            document.querySelectorAll('#scope-select-group .select-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
+            const index = selectedScopes.indexOf(scope);
+            if (index > -1) {
+                // 如果已經選了，且不是最後一個，就移除（防止一個都沒選）
+                if (selectedScopes.length > 1) {
+                    selectedScopes.splice(index, 1);
+                    card.classList.remove('active');
+                } else {
+                    playSfx("至少需保留一個範圍", "player");
+                }
+            } else {
+                // 如果沒選，就加入
+                selectedScopes.push(scope);
+                card.classList.add('active');
+            }
         };
         scopeGroup.appendChild(card);
     });
 }
+    
 // 選擇職階與難度
 function selectChar(c, el) {
     playerChar = c;
@@ -3368,24 +3379,35 @@ function startGame() {
 }
 
 function initGame() {
-    // 1. 根據所選範圍篩選數據
-    let rawList = [...fullWordDatabase[selectedScope]];
+    gameDataPool = [];
     
-    // 2. 隨機選取最多 20 個字詞
-    if (rawList.length > 20) {
-        rawList.sort(() => 0.5 - Math.random());
-        gameDataPool = rawList.slice(0, 20);
-    } else {
-        gameDataPool = rawList;
-    }
+    // 1. 決定總上限 (單選 20，多選 25)
+    const totalLimit = selectedScopes.length > 1 ? 25 : 20;
     
-    // 3. 初始化數據 (修復：這些現在都在 initGame 裡面運行)
+    // 2. 計算平均數與餘數
+    const perScopeBase = Math.floor(totalLimit / selectedScopes.length);
+    let remainder = totalLimit % selectedScopes.length;
+
+    // 3. 從各個範圍抽取
+    selectedScopes.forEach(scopeName => {
+        let pool = [...fullWordDatabase[scopeName]];
+        shuffle(pool); // 打亂該範圍
+        
+        let countToPick = perScopeBase + (remainder > 0 ? 1 : 0);
+        if (remainder > 0) remainder--;
+        
+        gameDataPool.push(...pool.slice(0, countToPick));
+    });
+
+    // 4. 全局打亂抽取後的遊戲池
+    shuffle(gameDataPool);
+
+    // 5. 初始化後續數據
     unspawnedWords = [...gameDataPool];
     buildDeck();
     activeField = [];
     spawnFieldTargets(3); 
     
-    // 4. 起始手牌
     playerHand = []; aiHand = [];
     hintsRemaining = 3;
     let pCount = (playerChar === 'seer') ? 4 : 5;
@@ -3394,55 +3416,36 @@ function initGame() {
     for(let i=0; i<aCount; i++) aiHand.push(drawCard());
     
     updateUI();
-    playSfx(`範圍：${selectedScope}。戰鬥開始！`, "player");
+    playSfx(`已合流 ${selectedScopes.length} 個範圍，共 ${gameDataPool.length} 字。開始！`, "player");
 }
 
-    function openManualReview() {
-    // 1. 取得目前在大廳選中的範圍
-    const dataToReview = fullWordDatabase[selectedScope];
-    
-    if (!dataToReview) {
-        alert("請先選擇一個範圍");
-        return;
-    }
-
-    // 2. 填充溫習界面 (study-grid)
+function openManualReview() {
     const studyGrid = document.getElementById('study-grid');
     studyGrid.innerHTML = '';
 
-    dataToReview.forEach(wordObj => {
+    // 合併所有選中範圍的全部單詞
+    let combinedWords = [];
+    selectedScopes.forEach(s => {
+        combinedWords.push(...fullWordDatabase[s]);
+    });
+
+    combinedWords.forEach(wordObj => {
         const card = document.createElement('div');
         card.className = 'study-card';
-        
         let meaningsHTML = wordObj.字義.map(m => {
             const example = wordObj.用例 ? wordObj.用例.find(e => 
                 m.includes(e.用例字義) || e.用例字義.includes(m)
             ) : null;
-            
-            return `
-                <div class="study-m-item">
-                    <b>${m}</b>
-                    ${example ? `<div class="study-example">${example.句子}</div>` : '<div class="study-example" style="color:#bbb;">(暫無典籍用例)</div>'}
-                </div>
-            `;
+            return `<div class="study-m-item"><b>${m}</b>${example ? `<div class="study-example">${example.句子}</div>` : '<div class="study-example" style="color:#bbb;">(暫無典籍用例)</div>'}</div>`;
         }).join('');
-
-        card.innerHTML = `
-            <div class="study-word">${wordObj.字詞}</div>
-            <div class="study-meanings">${meaningsHTML}</div>
-        `;
+        card.innerHTML = `<div class="study-word">${wordObj.字詞}</div><div class="study-meanings">${meaningsHTML}</div>`;
         studyGrid.appendChild(card);
     });
 
-    // 3. 顯示 Modal
     document.getElementById('study-modal').style.display = 'flex';
-    
-    // 4. 這裡微調一下底部的按鈕功能，讓它不要刷新頁面而是直接關閉
     const footerBtn = document.querySelector('#study-modal .study-footer button');
     footerBtn.innerText = "返回大廳";
-    footerBtn.onclick = () => {
-        document.getElementById('study-modal').style.display = 'none';
-    };
+    footerBtn.onclick = () => { document.getElementById('study-modal').style.display = 'none'; };
 }
     
 function buildDeck() {
@@ -3696,8 +3699,11 @@ function useHint() {
     if (card.type !== 'meaning') return;
 
     // 從數據庫中尋找對應的字詞資料
-    const scopeData = fullWordDatabase[selectedScope];
-    const wordData = scopeData.find(w => w.字詞 === card.parentWord);
+    let wordData = null;
+for (let s of selectedScopes) {
+    wordData = fullWordDatabase[s].find(w => w.字詞 === card.parentWord);
+    if (wordData) break; // 找到了就跳出
+}
     
     if (wordData) {
         // 尋找對應字義的例句
