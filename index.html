@@ -431,12 +431,47 @@
 #scope-select-group .select-card {
     background: #fff;
     border: 2px solid #000;
-    padding: 10px 5px;
+    padding: 15px 5px; /* 增加一點高度 */
     font-size: 0.9rem;
     font-weight: 700;
     width: 100%;
+    position: relative; /* 【關鍵】讓右上角的小按鈕能對齊 */
+    cursor: pointer;
+    transition: 0.2s;
 }
 
+/* --- 新增：多選小按鈕樣式 --- */
+.multi-add-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: #eee;
+    border-left: 2px solid #000;
+    border-bottom: 2px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 900;
+    z-index: 5;
+    transition: 0.2s;
+}
+
+/* 當卡片被選中(active)時，小按鈕變色 */
+.select-card.active .multi-add-btn {
+    background: var(--c-green);
+    color: white;
+}
+
+/* 滑鼠指到小按鈕時稍微放大 */
+.multi-add-btn:hover {
+    background: var(--c-yellow) !important;
+    color: black !important;
+    transform: scale(1.1);
+}
+        
 #scope-select-group .select-card.active {
     background: #ffdb00;
     transform: translateY(-2px);
@@ -3312,26 +3347,43 @@ function initLobby() {
     
     Object.keys(fullWordDatabase).forEach(scope => {
         const card = document.createElement('div');
-        // 檢查數組內是否包含此範圍，決定是否變黃色(active)
-        card.className = `select-card ${selectedScopes.includes(scope) ? 'active' : ''}`;
-        card.innerHTML = `<b>${scope}</b>`; 
+        const isActive = selectedScopes.includes(scope);
         
+        card.className = `select-card ${isActive ? 'active' : ''}`;
+        
+        // 核心 HTML：包含名稱和一個專門用來「累加」的小按鈕
+        card.innerHTML = `
+            <b>${scope}</b>
+            <div class="multi-add-btn" title="加入多選">${isActive ? '✓' : '+'}</div>
+        `; 
+
+        // 邏輯 A：點擊卡片主體 -> 切換模式 (只選這一個)
         card.onclick = () => {
+            selectedScopes = [scope]; // 直接覆蓋數組，只留這一個
+            initLobby(); // 刷新大廳 UI
+            playSfx(`已切換至：${scope}`, "player");
+        };
+
+        // 邏輯 B：點擊小按鈕 [+] -> 多選模式 (累加或剔除)
+        const addBtn = card.querySelector('.multi-add-btn');
+        addBtn.onclick = (e) => {
+            e.stopPropagation(); // 【關鍵】防止觸發卡片的切換邏輯
+            
             const index = selectedScopes.indexOf(scope);
             if (index > -1) {
-                // 如果已選中，則取消選擇（但至少保留一個）
+                // 如果已經選了，且不是最後一個，就移除
                 if (selectedScopes.length > 1) {
                     selectedScopes.splice(index, 1);
-                    card.classList.remove('active');
                 } else {
                     playSfx("至少需保留一個範圍", "player");
                 }
             } else {
-                // 如果未選中，則加入數組
+                // 如果沒選，就加入
                 selectedScopes.push(scope);
-                card.classList.add('active');
             }
+            initLobby(); // 刷新大廳 UI
         };
+
         scopeGroup.appendChild(card);
     });
 }
@@ -3423,7 +3475,7 @@ function initGame() {
     for(let i=0; i<aCount; i++) { let c = drawCard(); if(c) aiHand.push(c); }
     
     updateUI();
-    playSfx(`範圍：${selectedScopes.length}項，共${gameDataPool.length}言靈。開戰！`, "player");
+    playSfx(`範圍：${selectedScopes.length}項，共${gameDataPool.length}字詞。言靈開戰！`, "player");
 }
 
 function openManualReview() {
