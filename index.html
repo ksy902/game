@@ -3296,9 +3296,11 @@ let gameDataPool = [], unspawnedWords = [], deck = [], discardPile = [];
 let isGameOver = false;     
 let playerHand = [], aiHand = [], activeField = []; 
 let turn = 'player', selectedIndex = null, skipNextAi = false, gameStarted = false;
-let playerChar = 'seer', aiDifficulty = 'normal', selectedScopes = "手";
+let playerChar = 'seer', aiDifficulty = 'normal';
+// 修正：初始值改為數組，且名稱必須與 fullWordDatabase 的 Key 完全一致
+let selectedScopes = ["第一節：手"]; 
 let pressTimer = null, pressStartTime = 0;
-let hintsRemaining = 3;    
+let hintsRemaining = 3;
 
 const charMap = { 'seer':'天機', 'knight':'墨俠', 'trickster':'詭道', 'rock':'磐石', 'berserker':'狂草' };
 
@@ -3310,14 +3312,14 @@ function initLobby() {
     
     Object.keys(fullWordDatabase).forEach(scope => {
         const card = document.createElement('div');
-        // 關鍵：檢查數組內是否包含此範圍
+        // 檢查數組內是否包含此範圍，決定是否變黃色(active)
         card.className = `select-card ${selectedScopes.includes(scope) ? 'active' : ''}`;
         card.innerHTML = `<b>${scope}</b>`; 
         
         card.onclick = () => {
             const index = selectedScopes.indexOf(scope);
             if (index > -1) {
-                // 如果已經選了，且不是最後一個，就移除（防止一個都沒選）
+                // 如果已選中，則取消選擇（但至少保留一個）
                 if (selectedScopes.length > 1) {
                     selectedScopes.splice(index, 1);
                     card.classList.remove('active');
@@ -3325,7 +3327,7 @@ function initLobby() {
                     playSfx("至少需保留一個範圍", "player");
                 }
             } else {
-                // 如果沒選，就加入
+                // 如果未選中，則加入數組
                 selectedScopes.push(scope);
                 card.classList.add('active');
             }
@@ -3388,18 +3390,22 @@ function initGame() {
     const perScopeBase = Math.floor(totalLimit / selectedScopes.length);
     let remainder = totalLimit % selectedScopes.length;
 
-    // 3. 從各個範圍抽取
+    // 3. 從各個選中範圍抽取
     selectedScopes.forEach(scopeName => {
-        let pool = [...fullWordDatabase[scopeName]];
-        shuffle(pool); // 打亂該範圍
-        
-        let countToPick = perScopeBase + (remainder > 0 ? 1 : 0);
-        if (remainder > 0) remainder--;
-        
-        gameDataPool.push(...pool.slice(0, countToPick));
+        if (fullWordDatabase[scopeName]) {
+            let pool = [...fullWordDatabase[scopeName]];
+            shuffle(pool); // 打亂該範圍
+            
+            // 計算這一個範圍要抽多少張
+            let countToPick = perScopeBase + (remainder > 0 ? 1 : 0);
+            if (remainder > 0) remainder--;
+            
+            // 加入全局池
+            gameDataPool.push(...pool.slice(0, countToPick));
+        }
     });
 
-    // 4. 全局打亂抽取後的遊戲池
+    // 4. 全局打亂抽取後的遊戲池，混淆不同範圍的單詞
     shuffle(gameDataPool);
 
     // 5. 初始化後續數據
@@ -3412,21 +3418,29 @@ function initGame() {
     hintsRemaining = 3;
     let pCount = (playerChar === 'seer') ? 4 : 5;
     let aCount = (aiDifficulty === 'hard') ? 3 : 5;
-    for(let i=0; i<pCount; i++) playerHand.push(drawCard());
-    for(let i=0; i<aCount; i++) aiHand.push(drawCard());
+    
+    for(let i=0; i<pCount; i++) { let c = drawCard(); if(c) playerHand.push(c); }
+    for(let i=0; i<aCount; i++) { let c = drawCard(); if(c) aiHand.push(c); }
     
     updateUI();
-    playSfx(`已合流 ${selectedScopes.length} 個範圍，共 ${gameDataPool.length} 字。開始！`, "player");
+    playSfx(`範圍：${selectedScopes.length}項，共${gameDataPool.length}言靈。開戰！`, "player");
 }
 
 function openManualReview() {
+    if (!selectedScopes || selectedScopes.length === 0) {
+        alert("請先選擇至少一個範圍");
+        return;
+    }
+
     const studyGrid = document.getElementById('study-grid');
     studyGrid.innerHTML = '';
 
-    // 合併所有選中範圍的全部單詞
+    // 合併所有選中範圍的全部單詞進行展示
     let combinedWords = [];
     selectedScopes.forEach(s => {
-        combinedWords.push(...fullWordDatabase[s]);
+        if (fullWordDatabase[s]) {
+            combinedWords.push(...fullWordDatabase[s]);
+        }
     });
 
     combinedWords.forEach(wordObj => {
@@ -3442,9 +3456,12 @@ function openManualReview() {
         studyGrid.appendChild(card);
     });
 
+    // 顯示界面
     document.getElementById('study-modal').style.display = 'flex';
+    
+    // 修改底部按鈕功能：僅關閉界面不刷新
     const footerBtn = document.querySelector('#study-modal .study-footer button');
-    footerBtn.innerText = "返回大廳";
+    footerBtn.innerText = "歸還卷軸 (回到大廳)";
     footerBtn.onclick = () => { document.getElementById('study-modal').style.display = 'none'; };
 }
     
